@@ -1073,6 +1073,95 @@ function generateMap() {
 
   clusterTerrain();
 
+  // ============================================================
+  // Mountain Range Consolidation: one range per quadrant, no isolated peaks
+  // ============================================================
+  {
+    const DIRS8 = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
+    const inB = (x, y) => x >= 0 && x < MAP_W && y >= 0 && y < MAP_H;
+    const isMountainType = (t) => t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id;
+
+    for (const q of quadrants) {
+      // Find all mountain/snow tiles in this quadrant
+      const mtnTiles = [];
+      for (let y = q.y0; y < q.y1; y++) {
+        for (let x = q.x0; x < q.x1; x++) {
+          if (isMountainType(terrain[y][x])) mtnTiles.push({ x, y });
+        }
+      }
+      if (mtnTiles.length < 3) {
+        // Too few to form a range — convert all to hills
+        for (const t of mtnTiles) terrain[t.y][t.x] = TERRAIN.HILLS.id;
+        continue;
+      }
+
+      // Flood fill to find connected components
+      const visited = new Set();
+      const components = [];
+      for (const t of mtnTiles) {
+        const key = `${t.x},${t.y}`;
+        if (visited.has(key)) continue;
+        const comp = [];
+        const stack = [t];
+        while (stack.length) {
+          const cur = stack.pop();
+          const ck = `${cur.x},${cur.y}`;
+          if (visited.has(ck)) continue;
+          visited.add(ck);
+          comp.push(cur);
+          for (const [dx, dy] of DIRS8) {
+            const nx = cur.x + dx, ny = cur.y + dy;
+            if (nx >= q.x0 && nx < q.x1 && ny >= q.y0 && ny < q.y1 && !visited.has(`${nx},${ny}`) && isMountainType(terrain[ny][nx])) {
+              stack.push({ x: nx, y: ny });
+            }
+          }
+        }
+        components.push(comp);
+      }
+
+      // Keep only the largest component — merge all others into it
+      components.sort((a, b) => b.length - a.length);
+      const mainCluster = components[0];
+      const mainSet = new Set(mainCluster.map(t => `${t.x},${t.y}`));
+
+      // Collect all tiles from smaller components — these need to move to the main cluster
+      const scattered = [];
+      for (let i = 1; i < components.length; i++) {
+        for (const t of components[i]) scattered.push(t);
+      }
+
+      // Move scattered mountain tiles to be adjacent to the main cluster
+      for (const tile of scattered) {
+        // Find the nearest plains/hills tile adjacent to the main cluster
+        let bestDist = Infinity, bestTile = null;
+        // Search frontier of main cluster
+        for (const mt of mainCluster) {
+          for (const [dx, dy] of DIRS8) {
+            const nx = mt.x + dx, ny = mt.y + dy;
+            const nk = `${nx},${ny}`;
+            if (nx >= q.x0 && nx < q.x1 && ny >= q.y0 && ny < q.y1 && !mainSet.has(nk)) {
+              const nt = terrain[ny][nx];
+              if (nt === TERRAIN.PLAINS.id || nt === TERRAIN.HILLS.id) {
+                const dist = Math.abs(nx - tile.x) + Math.abs(ny - tile.y);
+                if (dist < bestDist) { bestDist = dist; bestTile = { x: nx, y: ny, key: nk }; }
+              }
+            }
+          }
+        }
+        if (bestTile) {
+          // Swap: old location becomes hills (foothills remnant), new location becomes mountain
+          terrain[tile.y][tile.x] = TERRAIN.HILLS.id;
+          terrain[bestTile.y][bestTile.x] = TERRAIN.MOUNTAINS.id;
+          mainCluster.push({ x: bestTile.x, y: bestTile.y });
+          mainSet.add(bestTile.key);
+        } else {
+          // No room to grow — just convert to hills
+          terrain[tile.y][tile.x] = TERRAIN.HILLS.id;
+        }
+      }
+    }
+  }
+
   // Hard rule: volcanic tiles must be adjacent to at least one mountain/snow tile
   // (volcanos sit inside or on top of mountain ranges)
   for (let y = 0; y < MAP_H; y++) {
@@ -1091,7 +1180,7 @@ function generateMap() {
         }
       }
       if (!adjacentToMountain) {
-        terrain[y][x] = TERRAIN.MOUNTAINS.id; // convert isolated volcanic back to mountain
+        terrain[y][x] = TERRAIN.MOUNTAINS.id;
       }
     }
   }
