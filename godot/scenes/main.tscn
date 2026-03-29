@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/game_world.gd" id="1_gw"]
+[ext_resource type="Script" path="res://scripts/world/tile_map_iso.gd" id="2_tm"]
+[ext_resource type="Script" path="res://scripts/world/camera_controller.gd" id="3_cc"]
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="4_hud"]
+[ext_resource type="Script" path="res://scripts/ui/tile_info_panel.gd" id="5_tip"]
+
+[node name="Main" type="Node2D"]
+
+[node name="GameWorld" type="Node2D" parent="." groups=["game_world"]]
+script = ExtResource("1_gw")
+
+[node name="TileMapIso" type="Node2D" parent="GameWorld"]
+script = ExtResource("2_tm")
+
+[node name="Camera2D" type="Camera2D" parent="GameWorld"]
+zoom = Vector2(0.7, 0.7)
+script = ExtResource("3_cc")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("4_hud")
+
+[node name="TileInfoPanel" type="PanelContainer" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -292.0
+offset_top = 60.0
+offset_right = -12.0
+offset_bottom = 500.0
+script = ExtResource("5_tip")
