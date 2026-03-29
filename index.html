@@ -198,6 +198,184 @@
     font-weight: 600;
     margin: 2px 4px 2px 0;
   }
+  /* Build Menu */
+  #buildMenu {
+    position: fixed;
+    top: 60px; left: 12px;
+    width: 280px;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 12px;
+    padding: 0;
+    z-index: 110;
+    backdrop-filter: blur(14px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #buildMenu.hidden { opacity: 0; pointer-events: none; transform: translateX(-20px); }
+  #buildMenu h3 {
+    font-size: 13px;
+    color: #F7931A;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 14px 16px 10px;
+    margin: 0;
+    border-bottom: 1px solid rgba(247,147,26,0.15);
+    position: sticky;
+    top: 0;
+    background: rgba(18,18,28,0.98);
+    border-radius: 12px 12px 0 0;
+    z-index: 1;
+  }
+  .build-category {
+    font-size: 10px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 10px 16px 4px;
+  }
+  .build-entry {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border-left: 3px solid transparent;
+    gap: 10px;
+  }
+  .build-entry:hover { background: rgba(247,147,26,0.08); border-left-color: rgba(247,147,26,0.4); }
+  .build-entry.selected { background: rgba(247,147,26,0.15); border-left-color: #F7931A; }
+  .build-entry.disabled { opacity: 0.35; cursor: not-allowed; }
+  .build-entry.disabled:hover { background: transparent; border-left-color: transparent; }
+  .build-icon { font-size: 20px; width: 28px; text-align: center; flex-shrink: 0; }
+  .build-info { flex: 1; min-width: 0; }
+  .build-name { font-size: 12px; font-weight: 600; color: #ddd; }
+  .build-stats { font-size: 10px; color: #888; margin-top: 2px; }
+  .build-stats span { margin-right: 6px; white-space: nowrap; }
+  .build-terrain-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    color: #777;
+    margin-top: 3px;
+  }
+  .build-cost {
+    font-size: 12px;
+    font-weight: 700;
+    color: #F7931A;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .build-entry.disabled .build-cost { color: #555; }
+  .build-shortcut {
+    font-size: 9px;
+    color: #555;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 3px;
+    padding: 0 4px;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+
+  /* Build mode cursor */
+  #gameCanvas.build-mode { cursor: crosshair; }
+
+  /* Build mode HUD indicator */
+  #buildModeIndicator {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(247,147,26,0.9);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 0 0 8px 8px;
+    z-index: 150;
+    letter-spacing: 0.5px;
+    display: none;
+    box-shadow: 0 4px 16px rgba(247,147,26,0.3);
+  }
+  #buildModeIndicator.visible { display: block; }
+
+  /* Toast notifications */
+  #toastContainer {
+    position: fixed;
+    top: 90px;
+    right: 16px;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 12px;
+    color: #ddd;
+    backdrop-filter: blur(10px);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+    max-width: 280px;
+  }
+  .toast.success { border-color: rgba(68,221,102,0.5); }
+  .toast.error { border-color: rgba(255,68,68,0.5); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* Demolish context menu */
+  #demolishMenu {
+    position: fixed;
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(255,68,68,0.4);
+    border-radius: 8px;
+    padding: 4px 0;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    display: none;
+    min-width: 180px;
+  }
+  .demolish-option {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #ddd;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .demolish-option:hover { background: rgba(255,68,68,0.15); }
+  .demolish-refund { color: #888; font-size: 11px; }
+
+  /* HUD build button */
+  .hud-btn {
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    color: #e0e0e0;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .hud-btn:hover { border-color: rgba(247,147,26,0.7); background: linear-gradient(135deg, #444 0%, #333 100%); }
+  .hud-btn.active { border-color: #F7931A; background: linear-gradient(135deg, #553311 0%, #442200 100%); color: #F7931A; }
+
+  /* Treasury flash */
+  @keyframes treasuryFlash {
+    0% { color: #ff4444; transform: scale(1.15); }
+    100% { color: #F7931A; transform: scale(1); }
+  }
+  .hud-val.sats.flash { animation: treasuryFlash 0.5s ease; }
+
   .building-info {
     margin-top: 10px;
     padding: 10px;
@@ -368,6 +546,12 @@
     👥 <span class="hud-val pop" id="hudPop">0/0</span>
   </div>
   <div class="hud-sep"></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    🏗 <span class="hud-val" id="hudBuildings" style="color:#aaa">0</span>
+  </div>
+  <div class="hud-sep"></div>
+  <button id="buildBtn" class="hud-btn" title="Open Build Menu (B)">⚒ Build</button>
   <button id="newMapBtn" style="background:linear-gradient(135deg,#444 0%,#333 100%);color:#e0e0e0;font-size:12px;font-weight:600;border:1px solid rgba(247,147,26,0.4);border-radius:6px;padding:4px 12px;cursor:pointer;white-space:nowrap;letter-spacing:0.5px;transition:background 0.15s;">🗺 New Map</button>
   <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
@@ -397,10 +581,24 @@
   <canvas id="minimapCanvas" width="200" height="200"></canvas>
 </div>
 
+<div id="buildMenu" class="hidden">
+  <h3>⚒ Build Menu <span style="float:right;font-size:10px;color:#666;font-weight:400">Press B or Esc to close</span></h3>
+  <div id="buildMenuContent"></div>
+</div>
+
+<div id="buildModeIndicator">Building: <span id="buildModeName">—</span> · <span style="font-weight:400;font-size:11px">Click to place · Esc/Right-click to cancel</span></div>
+
+<div id="toastContainer"></div>
+
+<div id="demolishMenu">
+  <div class="demolish-option" id="demolishBtn">🗑️ Demolish Building</div>
+  <div class="demolish-refund" id="demolishRefund" style="padding:2px 16px 8px;"></div>
+</div>
+
 <button id="nextTurnBtn">⏭ NEXT TURN <kbd style="background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.2);color:#fff;margin-left:6px">Space</kbd></button>
 
 <div id="controls">
-  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>C</kbd> civ panel
+  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
 </div>
 
 <script>
@@ -483,15 +681,27 @@ const DEPOSITS = {
 // Building Types
 // ============================================================
 const BUILDING_TYPES = {
-  citadel:          { name: 'Citadel',            energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  description: 'Central hub of your civilization' },
-  house:            { name: 'House',              energy: 0,  hashPower: 0, popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0,  description: 'Provides housing for 2 workers' },
-  farm:             { name: 'Farm',               energy: 0,  hashPower: 0, popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0,  description: 'Feeds your population' },
-  solar_panel:      { name: 'Solar Panel Array',  energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 8,  description: 'Generates 8 energy (10 in desert)' },
-  hydro_dam:        { name: 'Hydro Dam',          energy: 0,  hashPower: 0, popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 15, description: 'Generates 15 energy on river (18 in river quadrant). Needs 2 workers' },
-  wind_turbine:     { name: 'Wind Turbine',       energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 6,  description: 'Generates 6 energy on hills (8 in mountain quadrant)' },
-  geothermal_plant: { name: 'Geothermal Plant',   energy: 0,  hashPower: 0, popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 12, description: 'Generates 12 energy on volcanic (15 with bonus). Needs 2 workers' },
-  home_miner:       { name: 'Home Miner',         energy: 2,  hashPower: 3, popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  description: 'Basic Bitcoin miner: 3 H/s, uses 2⚡ + 1 worker' },
+  citadel:          { name: 'Citadel',            energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 0,   icon: '🏰', description: 'Central hub of your civilization' },
+  house:            { name: 'House',              energy: 0,  hashPower: 0,  popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 80,  icon: '🏠', description: 'Provides housing for 2 workers' },
+  farm:             { name: 'Farm',               energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0,  cost: 60,  icon: '🌾', description: 'Feeds your population' },
+  solar_panel:      { name: 'Solar Panel Array',  energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 8,  cost: 100, icon: '☀️', description: 'Generates 8 energy (10 in desert)', validTerrain: [2,5,8,3] },
+  wind_turbine:     { name: 'Wind Turbine',       energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 6,  cost: 150, icon: '💨', description: 'Generates 6 energy on hills (8 in mountain quadrant)', validTerrain: [3] },
+  hydro_dam:        { name: 'Hydro Dam',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 15, cost: 300, icon: '🌊', description: 'Generates 15 energy on river (18-20 with bonus). Needs 2 workers', validTerrain: [6,10] },
+  geothermal_plant: { name: 'Geothermal Plant',   energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 12, cost: 400, icon: '🌋', description: 'Generates 12 energy on volcanic (15 with bonus). Needs 2 workers', validTerrain: [7] },
+  home_miner:       { name: 'Home Miner',         energy: 2,  hashPower: 1,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 50,  icon: '⛏️', description: 'Basic Bitcoin miner: 1 H/s, uses 2⚡ + 1 worker' },
+  mining_shed:      { name: 'Mining Shed',         energy: 8,  hashPower: 5,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 200, icon: '🏗️', description: 'Mid-tier miner: 5 H/s, uses 8⚡ + 1 worker' },
+  mining_warehouse: { name: 'Mining Warehouse',    energy: 20, hashPower: 15, popCapacity: 0, popCost: 3, foodOutput: 0, energyOutput: 0,  cost: 500, icon: '🏭', description: 'Industrial miner: 15 H/s, uses 20⚡ + 3 workers' },
 };
+
+// Building categories for the build menu
+const BUILD_MENU_CATEGORIES = [
+  { label: '⚡ Energy', types: ['solar_panel', 'wind_turbine', 'hydro_dam', 'geothermal_plant'] },
+  { label: '⛏ Mining', types: ['home_miner', 'mining_shed', 'mining_warehouse'] },
+  { label: '🏘 Infrastructure', types: ['house', 'farm'] },
+];
+
+// Default valid terrain for buildings without special requirements
+const DEFAULT_BUILDABLE = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.DESERT.id, TERRAIN.HILLS.id];
 
 // ============================================================
 // Civilizations
@@ -2166,6 +2376,12 @@ function drawBuilding(building) {
     case 'geothermal_plant':
       drawGeothermalPlant(screenX, screenY, z, color);
       break;
+    case 'mining_shed':
+      drawMiningShed(screenX, screenY, z, color);
+      break;
+    case 'mining_warehouse':
+      drawMiningWarehouse(screenX, screenY, z, color);
+      break;
   }
 
   ctx.restore();
@@ -2505,6 +2721,120 @@ function drawGeothermalPlant(sx, sy, z, color) {
   ctx.globalAlpha = 1;
 }
 
+function drawMiningShed(sx, sy, z, color) {
+  const s = z * 6;
+
+  // Dark building body
+  ctx.fillStyle = '#2a2a2a';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.5, s * 1.4, s * 1.1);
+
+  // Slanted roof
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.9, sy - s * 0.5);
+  ctx.lineTo(sx, sy - s * 1.2);
+  ctx.lineTo(sx + s * 0.9, sy - s * 0.5);
+  ctx.closePath();
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fill();
+
+  // Gear icon on front
+  ctx.font = `bold ${Math.round(8 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#888';
+  ctx.globalAlpha = 0.8;
+  ctx.fillText('⚙', sx, sy);
+
+  // Blinking LED
+  const blink = Math.sin(Date.now() * 0.004 + sx * 0.15) > 0;
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.4, sy - s * 0.3, z * 1.8, 0, Math.PI * 2);
+  ctx.fillStyle = blink ? '#F7931A' : '#553300';
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+
+  if (blink) {
+    ctx.beginPath();
+    ctx.arc(sx + s * 0.4, sy - s * 0.3, z * 4, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(sx + s * 0.4, sy - s * 0.3, 0, sx + s * 0.4, sy - s * 0.3, z * 4);
+    grad.addColorStop(0, 'rgba(247,147,26,0.25)');
+    grad.addColorStop(1, 'rgba(247,147,26,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+
+  // Color accent stripe
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.7, sy + s * 0.4, s * 1.4, z * 2);
+
+  ctx.globalAlpha = 1;
+}
+
+function drawMiningWarehouse(sx, sy, z, color) {
+  const s = z * 8;
+
+  // Larger dark body
+  ctx.fillStyle = '#222';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.6, s * 1.6, s * 1.3);
+
+  // Flat industrial roof
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(sx - s * 0.9, sy - s * 0.7, s * 1.8, s * 0.15);
+
+  // Side extension
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(sx + s * 0.5, sy - s * 0.3, s * 0.5, s * 0.8);
+
+  // Hash indicators (3 LEDs)
+  for (let i = -1; i <= 1; i++) {
+    const ledPhase = Math.sin(Date.now() * 0.005 + i * 1.2 + sx * 0.1);
+    const on = ledPhase > -0.3;
+    ctx.beginPath();
+    ctx.arc(sx + i * s * 0.3, sy - s * 0.3, z * 2, 0, Math.PI * 2);
+    ctx.fillStyle = on ? '#F7931A' : '#442200';
+    ctx.globalAlpha = 0.9;
+    ctx.fill();
+    if (on) {
+      ctx.beginPath();
+      ctx.arc(sx + i * s * 0.3, sy - s * 0.3, z * 5, 0, Math.PI * 2);
+      const grad = ctx.createRadialGradient(sx + i * s * 0.3, sy - s * 0.3, 0, sx + i * s * 0.3, sy - s * 0.3, z * 5);
+      grad.addColorStop(0, 'rgba(247,147,26,0.2)');
+      grad.addColorStop(1, 'rgba(247,147,26,0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+  }
+
+  // Ventilation grilles
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = z * 0.5;
+  ctx.globalAlpha = 0.7;
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx - s * 0.6, sy + i * s * 0.15);
+    ctx.lineTo(sx + s * 0.4, sy + i * s * 0.15);
+    ctx.stroke();
+  }
+
+  // Factory symbol
+  ctx.font = `bold ${Math.round(10 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#666';
+  ctx.globalAlpha = 0.6;
+  ctx.fillText('🏭', sx, sy + s * 0.15);
+
+  // Color accent stripe
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.8, sy + s * 0.55, s * 1.6, z * 2.5);
+
+  ctx.globalAlpha = 1;
+}
+
 // ============================================================
 // Main render
 // ============================================================
@@ -2518,10 +2848,73 @@ function render() {
     buildingMap[`${b.x},${b.y}`] = b;
   }
 
+  // Get territory for overlay
+  const territory = buildState.buildMode ? playerTerritory() : null;
+
+  // Clean up expired flash tiles
+  const now = Date.now();
+  _flashTiles = _flashTiles.filter(f => now - f.start < f.duration);
+
   // Draw tiles and buildings back to front for correct depth
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       drawTile(x, y);
+
+      // Territory tint (only in build mode)
+      if (territory && territory.has(y * MAP_W + x)) {
+        const { x: sx, y: sy } = tileToScreen(x, y);
+        const w = HALF_W * camera.zoom;
+        const h = HALF_H * camera.zoom;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - h);
+        ctx.lineTo(sx + w, sy);
+        ctx.lineTo(sx, sy + h);
+        ctx.lineTo(sx - w, sy);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(247,147,26,0.06)';
+        ctx.fill();
+      }
+
+      // Build mode hover: green/red highlight
+      if (buildState.buildMode && hoveredTile && hoveredTile.x === x && hoveredTile.y === y) {
+        const { x: sx, y: sy } = tileToScreen(x, y);
+        const w = HALF_W * camera.zoom;
+        const h = HALF_H * camera.zoom;
+        const valid = buildState.hoveredValid;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - h);
+        ctx.lineTo(sx + w, sy);
+        ctx.lineTo(sx, sy + h);
+        ctx.lineTo(sx - w, sy);
+        ctx.closePath();
+        ctx.fillStyle = valid ? 'rgba(68,221,102,0.25)' : 'rgba(255,68,68,0.25)';
+        ctx.fill();
+        ctx.strokeStyle = valid ? 'rgba(68,221,102,0.7)' : 'rgba(255,68,68,0.7)';
+        ctx.lineWidth = 2 * camera.zoom;
+        ctx.stroke();
+      }
+
+      // Flash tiles
+      for (const flash of _flashTiles) {
+        if (flash.x === x && flash.y === y) {
+          const { x: sx, y: sy } = tileToScreen(x, y);
+          const w = HALF_W * camera.zoom;
+          const h = HALF_H * camera.zoom;
+          const elapsed = now - flash.start;
+          const alpha = 1 - (elapsed / flash.duration);
+          ctx.beginPath();
+          ctx.moveTo(sx, sy - h);
+          ctx.lineTo(sx + w, sy);
+          ctx.lineTo(sx, sy + h);
+          ctx.lineTo(sx - w, sy);
+          ctx.closePath();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = flash.color;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
       const b = buildingMap[`${x},${y}`];
       if (b) drawBuilding(b);
     }
@@ -2735,13 +3128,282 @@ function buildLegend() {
 }
 
 // ============================================================
+// Build System — Phase 3
+// ============================================================
+let buildState = {
+  menuOpen: false,
+  buildMode: false,
+  selectedType: null,    // key into BUILDING_TYPES
+  hoveredValid: false,   // whether hovered tile is valid for placement
+};
+
+// Territory: tiles within 5 of any player building
+function getPlayerTerritory() {
+  const territory = new Set();
+  const RANGE = 5;
+  for (const b of gameState.buildings) {
+    if (b.owner !== 0) continue;
+    for (let dy = -RANGE; dy <= RANGE; dy++) {
+      for (let dx = -RANGE; dx <= RANGE; dx++) {
+        const nx = b.x + dx, ny = b.y + dy;
+        if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+          if (Math.abs(dx) + Math.abs(dy) <= RANGE) {
+            territory.add(ny * MAP_W + nx);
+          }
+        }
+      }
+    }
+  }
+  return territory;
+}
+
+// Cached territory — recalc on build/demolish
+let _playerTerritory = null;
+function playerTerritory() {
+  if (!_playerTerritory) _playerTerritory = getPlayerTerritory();
+  return _playerTerritory;
+}
+function invalidateTerritory() { _playerTerritory = null; }
+
+function getValidTerrain(typeKey) {
+  const bt = BUILDING_TYPES[typeKey];
+  if (bt.validTerrain) return bt.validTerrain;
+  return DEFAULT_BUILDABLE;
+}
+
+function isTileValidForBuilding(tx, ty, typeKey) {
+  if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H) return false;
+  const t = map.terrain[ty][tx];
+  const validTerrain = getValidTerrain(typeKey);
+  if (!validTerrain.includes(t)) return false;
+  if (tileHasBuilding(tx, ty)) return false;
+  const player = gameState.civs[0];
+  if (player.treasury < BUILDING_TYPES[typeKey].cost) return false;
+  // Must be within player territory
+  if (!playerTerritory().has(ty * MAP_W + tx)) return false;
+  return true;
+}
+
+function getTerrainRequirementLabel(typeKey) {
+  const bt = BUILDING_TYPES[typeKey];
+  const valid = bt.validTerrain || DEFAULT_BUILDABLE;
+  const names = valid.map(id => TERRAIN_BY_ID[id]?.name || '?');
+  return names.join(', ');
+}
+
+function toggleBuildMenu() {
+  buildState.menuOpen = !buildState.menuOpen;
+  const menu = document.getElementById('buildMenu');
+  const btn = document.getElementById('buildBtn');
+  const legend = document.getElementById('legend');
+  const civPanel = document.getElementById('civPanel');
+
+  menu.classList.toggle('hidden', !buildState.menuOpen);
+  btn.classList.toggle('active', buildState.menuOpen);
+
+  // Hide legend when build menu is open
+  if (buildState.menuOpen) {
+    legend.style.display = 'none';
+    if (gameState.civPanelVisible) {
+      civPanel.classList.add('hidden');
+      gameState.civPanelVisible = false;
+    }
+    updateBuildMenu();
+  } else {
+    legend.style.display = '';
+    cancelBuildMode();
+  }
+}
+
+function updateBuildMenu() {
+  const content = document.getElementById('buildMenuContent');
+  const player = gameState.civs[0];
+  let html = '';
+  let shortcutIdx = 1;
+
+  for (const cat of BUILD_MENU_CATEGORIES) {
+    html += `<div class="build-category">${cat.label}</div>`;
+    for (const typeKey of cat.types) {
+      const bt = BUILDING_TYPES[typeKey];
+      const canAfford = player.treasury >= bt.cost;
+      const isSelected = buildState.selectedType === typeKey;
+      const disabledClass = canAfford ? '' : ' disabled';
+      const selectedClass = isSelected ? ' selected' : '';
+
+      let statsHtml = '';
+      if (bt.energyOutput > 0) statsHtml += `<span style="color:#44dd66">⚡${bt.energyOutput}</span>`;
+      if (bt.hashPower > 0) statsHtml += `<span style="color:#00A8FF">⛏${bt.hashPower} H/s</span>`;
+      if (bt.energy > 0) statsHtml += `<span style="color:#ff8844">⚡-${bt.energy}</span>`;
+      if (bt.popCost > 0) statsHtml += `<span style="color:#cc88ff">👷${bt.popCost}</span>`;
+      if (bt.popCapacity > 0) statsHtml += `<span style="color:#cc88ff">👥+${bt.popCapacity}</span>`;
+      if (bt.foodOutput > 0) statsHtml += `<span style="color:#88cc44">🌾${bt.foodOutput}</span>`;
+
+      const terrainLabel = getTerrainRequirementLabel(typeKey);
+
+      html += `
+        <div class="build-entry${disabledClass}${selectedClass}" data-type="${typeKey}" ${!canAfford ? '' : `onclick="selectBuildType('${typeKey}')"`}>
+          <div class="build-icon">${bt.icon}</div>
+          <div class="build-info">
+            <div class="build-name">${bt.name}</div>
+            <div class="build-stats">${statsHtml}</div>
+            <div class="build-terrain-tag">📍 ${terrainLabel}</div>
+          </div>
+          <div class="build-cost">${bt.cost}₿</div>
+          <div class="build-shortcut">${shortcutIdx <= 9 ? shortcutIdx : ''}</div>
+        </div>
+      `;
+      shortcutIdx++;
+    }
+  }
+  content.innerHTML = html;
+}
+
+function selectBuildType(typeKey) {
+  const player = gameState.civs[0];
+  const bt = BUILDING_TYPES[typeKey];
+  if (player.treasury < bt.cost) return;
+
+  buildState.buildMode = true;
+  buildState.selectedType = typeKey;
+  canvas.classList.add('build-mode');
+
+  const indicator = document.getElementById('buildModeIndicator');
+  document.getElementById('buildModeName').textContent = `${bt.icon} ${bt.name} (${bt.cost}₿)`;
+  indicator.classList.add('visible');
+
+  updateBuildMenu();
+}
+
+function cancelBuildMode() {
+  buildState.buildMode = false;
+  buildState.selectedType = null;
+  buildState.hoveredValid = false;
+  canvas.classList.remove('build-mode');
+  document.getElementById('buildModeIndicator').classList.remove('visible');
+  updateBuildMenu();
+}
+
+function placePlayerBuilding(tx, ty, typeKey) {
+  if (!isTileValidForBuilding(tx, ty, typeKey)) return false;
+  const bt = BUILDING_TYPES[typeKey];
+  const player = gameState.civs[0];
+
+  // Deduct cost
+  player.treasury -= bt.cost;
+  player.treasury = Math.round(player.treasury * 100) / 100;
+
+  // Place building
+  gameState.buildings.push({ type: typeKey, owner: 0, x: tx, y: ty, active: true });
+
+  // Recalculate
+  invalidateTerritory();
+  recalculateCivStats();
+  updateHUD();
+  updateBuildMenu();
+  updateInfoPanel();
+
+  // Flash treasury
+  const satsEl = document.getElementById('hudSats');
+  satsEl.classList.remove('flash');
+  void satsEl.offsetWidth; // reflow
+  satsEl.classList.add('flash');
+  setTimeout(() => satsEl.classList.remove('flash'), 600);
+
+  // Flash the placed tile
+  flashTile(tx, ty, 'rgba(68,221,102,0.5)');
+
+  // Toast
+  showToast(`${bt.icon} ${bt.name} placed! -${bt.cost}₿`, 'success');
+
+  // Stay in build mode if can still afford
+  if (player.treasury < bt.cost) {
+    cancelBuildMode();
+  }
+
+  return true;
+}
+
+function demolishBuilding(tx, ty) {
+  const idx = gameState.buildings.findIndex(b => b.x === tx && b.y === ty && b.owner === 0);
+  if (idx < 0) return;
+  const b = gameState.buildings[idx];
+  if (b.type === 'citadel') {
+    showToast('Cannot demolish the Citadel!', 'error');
+    return;
+  }
+  const bt = BUILDING_TYPES[b.type];
+  const refund = Math.floor((bt.cost || 0) * 0.5);
+
+  gameState.buildings.splice(idx, 1);
+  gameState.civs[0].treasury += refund;
+  invalidateTerritory();
+  recalculateCivStats();
+  updateHUD();
+  updateBuildMenu();
+  updateInfoPanel();
+
+  showToast(`🗑️ ${bt.name} demolished. +${refund}₿ refund`, 'success');
+}
+
+// Tile flash effect
+let _flashTiles = [];
+function flashTile(tx, ty, color) {
+  _flashTiles.push({ x: tx, y: ty, color, start: Date.now(), duration: 500 });
+}
+
+// Toast system
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 2600);
+}
+
+// Demolish context menu
+let _demolishTarget = null;
+function showDemolishMenu(x, y, screenX, screenY) {
+  const building = getBuildingAt(x, y);
+  if (!building || building.owner !== 0 || building.type === 'citadel') return;
+  const bt = BUILDING_TYPES[building.type];
+  const refund = Math.floor((bt.cost || 0) * 0.5);
+  _demolishTarget = { x, y };
+
+  const menu = document.getElementById('demolishMenu');
+  menu.style.left = screenX + 'px';
+  menu.style.top = screenY + 'px';
+  menu.style.display = 'block';
+  document.getElementById('demolishRefund').textContent = `Refund: +${refund}₿ (50%)`;
+}
+
+function hideDemolishMenu() {
+  document.getElementById('demolishMenu').style.display = 'none';
+  _demolishTarget = null;
+}
+
+document.getElementById('demolishBtn').addEventListener('click', () => {
+  if (_demolishTarget) {
+    demolishBuilding(_demolishTarget.x, _demolishTarget.y);
+    hideDemolishMenu();
+  }
+});
+
+// Build button
+document.getElementById('buildBtn').addEventListener('click', () => {
+  toggleBuildMenu();
+});
+
+// ============================================================
 // Input handling
 // ============================================================
 canvas.addEventListener('mousedown', e => {
-  isDragging = true;
-  dragStart = { x: e.clientX, y: e.clientY };
-  cameraStart = { x: camera.x, y: camera.y };
-  canvas.classList.add('dragging');
+  if (e.button === 0) {
+    isDragging = true;
+    dragStart = { x: e.clientX, y: e.clientY };
+    cameraStart = { x: camera.x, y: camera.y };
+    canvas.classList.add('dragging');
+  }
 });
 
 canvas.addEventListener('mousemove', e => {
@@ -2754,25 +3416,60 @@ canvas.addEventListener('mousemove', e => {
   if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
     hoveredTile = tile;
     document.getElementById('hoverCoords').textContent = `(${tile.x}, ${tile.y}) — ${TERRAIN_BY_ID[map.terrain[tile.y][tile.x]].name}`;
+    if (buildState.buildMode) {
+      buildState.hoveredValid = isTileValidForBuilding(tile.x, tile.y, buildState.selectedType);
+    }
   } else {
     hoveredTile = null;
+    buildState.hoveredValid = false;
     document.getElementById('hoverCoords').textContent = '—';
   }
 });
 
 canvas.addEventListener('mouseup', e => {
   const dist = Math.abs(e.clientX - dragStart.x) + Math.abs(e.clientY - dragStart.y);
-  if (dist < 5) {
+  const wasDrag = dist >= 5;
+
+  if (e.button === 0 && !wasDrag) {
+    hideDemolishMenu();
     const tile = fromIso(e.clientX, e.clientY);
     if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
-      selectedTile = { x: tile.x, y: tile.y };
+      if (buildState.buildMode) {
+        if (isTileValidForBuilding(tile.x, tile.y, buildState.selectedType)) {
+          placePlayerBuilding(tile.x, tile.y, buildState.selectedType);
+        } else {
+          flashTile(tile.x, tile.y, 'rgba(255,68,68,0.5)');
+        }
+      } else {
+        selectedTile = { x: tile.x, y: tile.y };
+        updateInfoPanel();
+      }
     } else {
       selectedTile = null;
+      updateInfoPanel();
     }
-    updateInfoPanel();
   }
+
   isDragging = false;
   canvas.classList.remove('dragging');
+});
+
+// Right-click for demolish
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (buildState.buildMode) {
+    cancelBuildMode();
+    return;
+  }
+  const tile = fromIso(e.clientX, e.clientY);
+  if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
+    const building = getBuildingAt(tile.x, tile.y);
+    if (building && building.owner === 0 && building.type !== 'citadel') {
+      showDemolishMenu(tile.x, tile.y, e.clientX, e.clientY);
+    } else {
+      hideDemolishMenu();
+    }
+  }
 });
 
 canvas.addEventListener('wheel', e => {
@@ -2802,18 +3499,51 @@ minimapCanvas.addEventListener('click', e => {
   camera.y = iso.y * camera.zoom;
 });
 
+// Click outside demolish menu to close it
+document.addEventListener('click', e => {
+  if (!e.target.closest('#demolishMenu')) {
+    hideDemolishMenu();
+  }
+});
+
 document.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
 
-  // Spacebar = next turn
+  // Escape: cancel build mode or close menu
+  if (e.key === 'Escape') {
+    if (buildState.buildMode) {
+      cancelBuildMode();
+    } else if (buildState.menuOpen) {
+      toggleBuildMenu();
+    }
+    hideDemolishMenu();
+    return;
+  }
+
+  // Spacebar = next turn (only if not in build mode)
   if (e.code === 'Space' && !e.repeat) {
     e.preventDefault();
-    processTurn();
+    if (!buildState.buildMode) processTurn();
+  }
+
+  // B = toggle build menu
+  if (e.key.toLowerCase() === 'b' && !e.repeat) {
+    toggleBuildMenu();
   }
 
   // C = toggle civ panel
   if (e.key.toLowerCase() === 'c' && !e.repeat) {
-    toggleCivPanel();
+    if (!buildState.menuOpen) toggleCivPanel();
+  }
+
+  // Number keys 1-9 for quick-selecting building types
+  if (e.key >= '1' && e.key <= '9' && !e.repeat) {
+    const allTypes = BUILD_MENU_CATEGORIES.flatMap(c => c.types);
+    const idx = parseInt(e.key) - 1;
+    if (idx < allTypes.length) {
+      if (!buildState.menuOpen) toggleBuildMenu();
+      selectBuildType(allTypes[idx]);
+    }
   }
 });
 document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
@@ -2874,6 +3604,12 @@ function regenerateMap() {
 
   selectedTile = null;
   hoveredTile = null;
+  cancelBuildMode();
+  buildState.menuOpen = false;
+  document.getElementById('buildMenu').classList.add('hidden');
+  document.getElementById('buildBtn').classList.remove('active');
+  document.getElementById('legend').style.display = '';
+  invalidateTerritory();
 
   initCivilizations();
   initCamera();
