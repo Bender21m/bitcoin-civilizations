@@ -662,8 +662,8 @@ function generateMap() {
       [TERRAIN.FOREST.id]:     [25, 30],
       [TERRAIN.HILLS.id]:      [10, 15],
       [TERRAIN.MOUNTAINS.id]:  [5, 8],
-      [TERRAIN.DESERT.id]:     [0, 5],
-      [TERRAIN.VOLCANIC.id]:   [0, 2],
+      [TERRAIN.DESERT.id]:     [0, 0],
+      [TERRAIN.VOLCANIC.id]:   [0, 0],
     },
     NE: {
       [TERRAIN.DESERT.id]:     [30, 45],
@@ -671,15 +671,15 @@ function generateMap() {
       [TERRAIN.HILLS.id]:      [8, 12],
       [TERRAIN.MOUNTAINS.id]:  [5, 10],
       [TERRAIN.FOREST.id]:     [3, 8],
-      [TERRAIN.VOLCANIC.id]:   [1, 3],
+      [TERRAIN.VOLCANIC.id]:   [0, 0],
     },
     SW: {
       [TERRAIN.FOREST.id]:     [30, 40],
       [TERRAIN.PLAINS.id]:     [15, 25],
       [TERRAIN.HILLS.id]:      [8, 12],
       [TERRAIN.MOUNTAINS.id]:  [3, 6],
-      [TERRAIN.VOLCANIC.id]:   [2, 5],
-      [TERRAIN.DESERT.id]:     [0, 3],
+      [TERRAIN.VOLCANIC.id]:   [0, 0],
+      [TERRAIN.DESERT.id]:     [0, 0],
     },
     SE: {
       [TERRAIN.HILLS.id]:      [15, 20],
@@ -687,7 +687,7 @@ function generateMap() {
       [TERRAIN.VOLCANIC.id]:   [8, 12],
       [TERRAIN.PLAINS.id]:     [15, 25],
       [TERRAIN.FOREST.id]:     [5, 10],
-      [TERRAIN.DESERT.id]:     [5, 10],
+      [TERRAIN.DESERT.id]:     [0, 0],
     },
   };
 
@@ -839,6 +839,20 @@ function generateMap() {
 
   for (const q of quadrants) {
     enforceQuadrantDistribution(q);
+  }
+
+  // Hard rule: Desert ONLY in NE, Volcanic ONLY in SE
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const inNE = x >= halfW && y < halfH;
+      const inSE = x >= halfW && y >= halfH;
+      if (terrain[y][x] === TERRAIN.DESERT.id && !inNE) {
+        terrain[y][x] = TERRAIN.PLAINS.id;
+      }
+      if (terrain[y][x] === TERRAIN.VOLCANIC.id && !inSE) {
+        terrain[y][x] = TERRAIN.MOUNTAINS.id;
+      }
+    }
   }
 
   // ============================================================
