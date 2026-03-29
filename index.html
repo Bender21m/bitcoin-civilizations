@@ -1162,6 +1162,35 @@ function generateMap() {
     }
   }
 
+  // Fill holes inside mountain ranges: any non-mountain tile surrounded mostly by mountains becomes mountain
+  // A "hole" is a non-mountain/non-volcanic tile where 5+ of its 8 neighbors are mountain/snow/volcanic
+  {
+    const DIRS8 = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
+    const isMtnOrVolc = (t) => t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id || t === TERRAIN.VOLCANIC.id;
+    let changed = true;
+    let passes = 0;
+    while (changed && passes < 10) {
+      changed = false;
+      passes++;
+      for (let y = 1; y < MAP_H - 1; y++) {
+        for (let x = 1; x < MAP_W - 1; x++) {
+          const t = terrain[y][x];
+          if (isMtnOrVolc(t)) continue;
+          // Don't fill water or river tiles
+          if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id || t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER?.id) continue;
+          let mtnNeighbors = 0;
+          for (const [dx, dy] of DIRS8) {
+            if (isMtnOrVolc(terrain[y + dy][x + dx])) mtnNeighbors++;
+          }
+          if (mtnNeighbors >= 5) {
+            terrain[y][x] = TERRAIN.MOUNTAINS.id;
+            changed = true;
+          }
+        }
+      }
+    }
+  }
+
   // Hard rule: volcanic tiles must be adjacent to at least one mountain/snow tile
   // (volcanos sit inside or on top of mountain ranges)
   for (let y = 0; y < MAP_H; y++) {
