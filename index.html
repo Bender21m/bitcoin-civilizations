@@ -842,6 +842,224 @@ function generateMap() {
   }
 
   // ============================================================
+  // Terrain Clustering: group scattered terrain into coherent regions
+  // ============================================================
+  function clusterTerrain() {
+    // Terrain types to cluster, in priority order
+    const CLUSTER_ORDER = [
+      TERRAIN.MOUNTAINS.id,  // + SNOW — form mountain ranges
+      TERRAIN.VOLCANIC.id,   // cluster near mountains
+      TERRAIN.DESERT.id,     // large continuous regions
+      TERRAIN.FOREST.id,     // continuous woodland
+      TERRAIN.HILLS.id,      // transition zones / foothills
+    ];
+
+    const PROTECTED = new Set([
+      TERRAIN.DEEP_WATER.id, TERRAIN.COAST.id,
+      TERRAIN.RIVER.id, TERRAIN.MAJOR_RIVER.id
+    ]);
+
+    // 4-connected neighbors
+    const DIRS = [[-1,0],[1,0],[0,-1],[0,1]];
+    // 8-connected for adjacency checks
+    const DIRS8 = [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1]];
+
+    function inBounds(x, y) {
+      return x >= 0 && x < MAP_W && y >= 0 && y < MAP_H;
+    }
+
+    function isProtected(x, y) {
+      return PROTECTED.has(terrain[y][x]);
+    }
+
+    // Flood fill to find connected component of given terrain type(s) starting from (sx, sy)
+    function floodFill(sx, sy, matchSet, q) {
+      const component = [];
+      const visited = new Set();
+      const stack = [{x: sx, y: sy}];
+      while (stack.length > 0) {
+        const {x, y} = stack.pop();
+        const key = y * MAP_W + x;
+        if (visited.has(key)) continue;
+        if (x < q.x0 || x >= q.x1 || y < q.y0 || y >= q.y1) continue;
+        if (!matchSet.has(terrain[y][x])) continue;
+        visited.add(key);
+        component.push({x, y});
+        for (const [dx, dy] of DIRS) {
+          const nx = x + dx, ny = y + dy;
+          if (inBounds(nx, ny)) stack.push({x: nx, y: ny});
+        }
+      }
+      return component;
+    }
+
+    // Find all connected components of given terrain types within quadrant
+    function findComponents(terrainIds, q) {
+      const matchSet = new Set(terrainIds);
+      const visited = new Set();
+      const components = [];
+      for (let y = q.y0; y < q.y1; y++) {
+        for (let x = q.x0; x < q.x1; x++) {
+          const key = y * MAP_W + x;
+          if (visited.has(key)) continue;
+          if (!matchSet.has(terrain[y][x])) continue;
+          const comp = floodFill(x, y, matchSet, q);
+          for (const t of comp) visited.add(t.y * MAP_W + t.x);
+          if (comp.length > 0) components.push(comp);
+        }
+      }
+      return components;
+    }
+
+    // Get tiles adjacent to a set of tiles that are plains (swappable filler)
+    function getGrowthFrontier(clusterSet, q, avoidRiverAdjacent) {
+      const frontier = [];
+      const seen = new Set();
+      for (const key of clusterSet) {
+        const cx = key % MAP_W;
+        const cy = (key - cx) / MAP_W;
+        for (const [dx, dy] of DIRS) {
+          const nx = cx + dx, ny = cy + dy;
+          if (!inBounds(nx, ny)) continue;
+          if (nx < q.x0 || nx >= q.x1 || ny < q.y0 || ny >= q.y1) continue;
+          const nkey = ny * MAP_W + nx;
+          if (clusterSet.has(nkey)) continue;
+          if (seen.has(nkey)) continue;
+          seen.add(nkey);
+          const t = terrain[ny][nx];
+          if (t !== TERRAIN.PLAINS.id) continue; // only swap with plains
+          if (isProtected(nx, ny)) continue;
+          // For desert: avoid tiles adjacent to rivers
+          if (avoidRiverAdjacent) {
+            let nearRiver = false;
+            for (const [rdx, rdy] of DIRS8) {
+              const rx = nx + rdx, ry = ny + rdy;
+              if (inBounds(rx, ry)) {
+                const rt = terrain[ry][rx];
+                if (rt === TERRAIN.RIVER.id || rt === TERRAIN.MAJOR_RIVER.id) {
+                  nearRiver = true; break;
+                }
+              }
+            }
+            if (nearRiver) continue;
+          }
+          frontier.push({x: nx, y: ny, key: nkey});
+        }
+      }
+      return frontier;
+    }
+
+    // Score a frontier tile for organic growth (higher = better fit)
+    function growthScore(fx, fy, targetTerrainId, clusterSet) {
+      let score = 0;
+      // Prefer tiles with more cluster neighbors (organic growth)
+      for (const [dx, dy] of DIRS8) {
+        const nx = fx + dx, ny = fy + dy;
+        if (inBounds(nx, ny) && clusterSet.has(ny * MAP_W + nx)) {
+          score += 2;
+        }
+      }
+      // Slight randomness for organic shapes
+      score += rng() * 1.5;
+
+      // Terrain affinity based on elevation/moisture/heat
+      if (targetTerrainId === TERRAIN.MOUNTAINS.id) {
+        score += elevation[fy][fx] * 3; // prefer higher elevation
+      } else if (targetTerrainId === TERRAIN.DESERT.id) {
+        score += heat[fy][fx] * 2; // prefer hotter
+        score += (1 - moisture[fy][fx]) * 2; // prefer drier
+      } else if (targetTerrainId === TERRAIN.FOREST.id) {
+        score += moisture[fy][fx] * 2; // prefer wetter
+      } else if (targetTerrainId === TERRAIN.HILLS.id) {
+        score += elevation[fy][fx] * 2; // prefer moderate-high elevation
+        // Bonus for being near mountains
+        for (const [dx, dy] of DIRS8) {
+          const nx = fx + dx, ny = fy + dy;
+          if (inBounds(nx, ny)) {
+            const nt = terrain[ny][nx];
+            if (nt === TERRAIN.MOUNTAINS.id || nt === TERRAIN.SNOW.id) score += 3;
+          }
+        }
+      } else if (targetTerrainId === TERRAIN.VOLCANIC.id) {
+        // Prefer near mountains
+        for (const [dx, dy] of DIRS8) {
+          const nx = fx + dx, ny = fy + dy;
+          if (inBounds(nx, ny)) {
+            const nt = terrain[ny][nx];
+            if (nt === TERRAIN.MOUNTAINS.id || nt === TERRAIN.SNOW.id) score += 4;
+          }
+        }
+      }
+      return score;
+    }
+
+    for (const q of quadrants) {
+      for (const targetId of CLUSTER_ORDER) {
+        // For mountains, also include snow peaks in the same cluster
+        const matchIds = (targetId === TERRAIN.MOUNTAINS.id)
+          ? [TERRAIN.MOUNTAINS.id, TERRAIN.SNOW.id]
+          : [targetId];
+
+        const components = findComponents(matchIds, q);
+        if (components.length <= 1) continue; // already clustered or empty
+
+        // Find the largest component — this is our anchor
+        let mainComp = components[0];
+        for (const c of components) {
+          if (c.length > mainComp.length) mainComp = c;
+        }
+
+        // Build a set of main cluster tile keys
+        const clusterSet = new Set();
+        for (const t of mainComp) clusterSet.add(t.y * MAP_W + t.x);
+
+        // Collect scattered tiles (not in main cluster)
+        const scattered = [];
+        for (const comp of components) {
+          for (const t of comp) {
+            const key = t.y * MAP_W + t.x;
+            if (!clusterSet.has(key)) scattered.push(t);
+          }
+        }
+
+        if (scattered.length === 0) continue;
+
+        // Sort scattered by distance to cluster centroid (process nearest first)
+        const centX = mainComp.reduce((s, t) => s + t.x, 0) / mainComp.length;
+        const centY = mainComp.reduce((s, t) => s + t.y, 0) / mainComp.length;
+        scattered.sort((a, b) => {
+          const da = (a.x - centX) ** 2 + (a.y - centY) ** 2;
+          const db = (b.x - centX) ** 2 + (b.y - centY) ** 2;
+          return da - db;
+        });
+
+        const avoidRiver = (targetId === TERRAIN.DESERT.id);
+
+        // Move each scattered tile: free its old spot (→ plains), place it on best frontier tile
+        for (const tile of scattered) {
+          const frontier = getGrowthFrontier(clusterSet, q, avoidRiver);
+          if (frontier.length === 0) break; // no room to grow
+
+          // Score frontier tiles and pick best
+          let bestF = frontier[0], bestScore = -Infinity;
+          for (const f of frontier) {
+            const s = growthScore(f.x, f.y, targetId, clusterSet);
+            if (s > bestScore) { bestScore = s; bestF = f; }
+          }
+
+          // Swap: old location becomes plains, new location gets terrain
+          const oldTerrain = terrain[tile.y][tile.x]; // preserve actual type (could be SNOW)
+          terrain[tile.y][tile.x] = TERRAIN.PLAINS.id;
+          terrain[bestF.y][bestF.x] = oldTerrain;
+          clusterSet.add(bestF.key);
+        }
+      }
+    }
+  }
+
+  clusterTerrain();
+
+  // ============================================================
   // Major River: "The Great Channel" — flows through NW and SW quadrants
   // ============================================================
   const majorRiverNoise = new Noise(seed + 500);
