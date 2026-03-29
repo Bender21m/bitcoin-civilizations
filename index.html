@@ -1073,6 +1073,29 @@ function generateMap() {
 
   clusterTerrain();
 
+  // Hard rule: volcanic tiles must be adjacent to at least one mountain/snow tile
+  // (volcanos sit inside or on top of mountain ranges)
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (terrain[y][x] !== TERRAIN.VOLCANIC.id) continue;
+      let adjacentToMountain = false;
+      const dirs = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
+      for (const [dx, dy] of dirs) {
+        const nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+          const nt = terrain[ny][nx];
+          if (nt === TERRAIN.MOUNTAINS.id || nt === TERRAIN.SNOW.id || nt === TERRAIN.VOLCANIC.id) {
+            adjacentToMountain = true;
+            break;
+          }
+        }
+      }
+      if (!adjacentToMountain) {
+        terrain[y][x] = TERRAIN.MOUNTAINS.id; // convert isolated volcanic back to mountain
+      }
+    }
+  }
+
   // ============================================================
   // Major River: "The Great Channel" — flows through NW and SW quadrants
   // ============================================================
