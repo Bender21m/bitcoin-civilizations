@@ -633,7 +633,7 @@ function generateMap() {
     for (let x = 0; x < MAP_W; x++) {
       if (terrain[y][x] === TERRAIN.MOUNTAINS.id) {
         const vQuad = getQuadrantName(x, y);
-        const volcanicChance = (vQuad === 'SE') ? 0.20 : 0.12;
+        const volcanicChance = (vQuad === 'SE') ? 0.10 : 0.12;
         if (rng() < volcanicChance) {
           terrain[y][x] = TERRAIN.VOLCANIC.id;
         }
@@ -684,7 +684,7 @@ function generateMap() {
     SE: {
       [TERRAIN.HILLS.id]:      [15, 20],
       [TERRAIN.MOUNTAINS.id]:  [12, 18],
-      [TERRAIN.VOLCANIC.id]:   [8, 12],
+      [TERRAIN.VOLCANIC.id]:   [3, 5],
       [TERRAIN.PLAINS.id]:     [15, 25],
       [TERRAIN.FOREST.id]:     [5, 10],
       [TERRAIN.DESERT.id]:     [0, 0],
