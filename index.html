@@ -368,6 +368,8 @@
     👥 <span class="hud-val pop" id="hudPop">0/0</span>
   </div>
   <div class="hud-sep"></div>
+  <button id="newMapBtn" style="background:linear-gradient(135deg,#444 0%,#333 100%);color:#e0e0e0;font-size:12px;font-weight:600;border:1px solid rgba(247,147,26,0.4);border-radius:6px;padding:4px 12px;cursor:pointer;white-space:nowrap;letter-spacing:0.5px;transition:background 0.15s;">🗺 New Map</button>
+  <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
 </div>
 
@@ -410,6 +412,41 @@ const MAP_W = 80, MAP_H = 80;
 const TILE_W = 64, TILE_H = 32;
 const HALF_W = TILE_W / 2, HALF_H = TILE_H / 2;
 const BTC_ORANGE = '#F7931A';
+
+// ============================================================
+// Seeded PRNG (mulberry32)
+// ============================================================
+const DEFAULT_SEED = 12345;
+let currentSeed = DEFAULT_SEED;
+
+function mulberry32(seed) {
+  let s = seed | 0;
+  return function() {
+    s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+let seededRng = mulberry32(DEFAULT_SEED);
+
+function loadSeed() {
+  const saved = localStorage.getItem('btcCivMapSeed');
+  if (saved !== null) {
+    currentSeed = parseInt(saved, 10);
+    if (isNaN(currentSeed)) currentSeed = DEFAULT_SEED;
+  } else {
+    currentSeed = DEFAULT_SEED;
+  }
+  seededRng = mulberry32(currentSeed);
+}
+
+function saveSeed(seed) {
+  currentSeed = seed;
+  localStorage.setItem('btcCivMapSeed', seed.toString());
+  seededRng = mulberry32(seed);
+}
 
 // --- Terrain definitions ---
 const TERRAIN = {
@@ -526,7 +563,8 @@ function getQuadrantName(x, y) {
 }
 
 function generateMap() {
-  const seed = Math.floor(Math.random() * 100000);
+  const seed = currentSeed;
+  const rng = seededRng; // use the global seeded RNG
   const noise1 = new Noise(seed);
   const noise2 = new Noise(seed + 100);
   const noiseHeat = new Noise(seed + 200);
@@ -560,17 +598,13 @@ function generateMap() {
       // --- Quadrant biome biases ---
       const quad = getQuadrantName(x, y);
       if (quad === 'NE') {
-        // Desert-dominated: increase heat, decrease moisture
         h = Math.min(1, h + 0.25);
         m = Math.max(0, m - 0.25);
       } else if (quad === 'SW') {
-        // River-rich / Lush: increase moisture
         m = Math.min(1, m + 0.2);
       } else if (quad === 'SE') {
-        // Mountainous/Volcanic: boost elevation
         if (e > 0.22) e = Math.min(1, e + 0.12);
       }
-      // NW: keep as-is (balanced)
 
       elevation[y][x] = e;
       moisture[y][x] = m;
@@ -590,18 +624,7 @@ function generateMap() {
 
       terrain[y][x] = t;
       deposits[y][x] = null;
-
-      let solar = Math.round(Math.max(0, Math.min(100, (h * 80 + (1 - m) * 40) - 10)));
-      let wind = Math.round(Math.max(0, Math.min(100, (e > 0.5 ? 60 + e * 40 : 20 + Math.abs(noise1.get(x * 0.3, y * 0.3)) * 50))));
-      let hydro = (t === TERRAIN.RIVER.id || t === TERRAIN.COAST.id) ? Math.round(50 + m * 50) : Math.round(m * 30);
-      let geothermal = (t === TERRAIN.VOLCANIC.id) ? Math.round(70 + Math.random() * 30) : (e > 0.7 ? Math.round(Math.random() * 30) : 0);
-
-      // Quadrant energy potential bonuses
-      if (quad === 'NE') solar = Math.min(100, Math.round(solar * 1.2));
-      if (quad === 'SW') hydro = Math.min(100, Math.round(hydro * 1.2));
-      if (quad === 'SE') wind = Math.min(100, Math.round(wind * 1.2));
-
-      resourceData[y][x] = { solar, wind, hydro, geothermal };
+      resourceData[y][x] = { solar: 0, wind: 0, hydro: 0, geothermal: 0 };
     }
   }
 
@@ -611,81 +634,16 @@ function generateMap() {
       if (terrain[y][x] === TERRAIN.MOUNTAINS.id) {
         const vQuad = getQuadrantName(x, y);
         const volcanicChance = (vQuad === 'SE') ? 0.20 : 0.12;
-        if (Math.random() < volcanicChance) {
+        if (rng() < volcanicChance) {
           terrain[y][x] = TERRAIN.VOLCANIC.id;
-          resourceData[y][x].geothermal = Math.round(70 + Math.random() * 30);
         }
       }
     }
   }
 
   // ============================================================
-  // Major River: "The Great Channel" — flows through NW and SW quadrants
+  // Quadrant Terrain Distribution Validation (Post-processing)
   // ============================================================
-  const majorRiverNoise = new Noise(seed + 500);
-  const majorRiverTiles = new Set(); // track for majorRiver property
-
-  {
-    // River flows from the north edge (in NW quadrant) down through to the south edge (in SW quadrant)
-    // Start: find a coast/water tile on the north edge in the western half
-    let startX = Math.floor(MAP_W * 0.25); // roughly 1/4 from left
-    // End: exit on the south edge or southwest coast
-    let endX = Math.floor(MAP_W * 0.3);
-
-    // Generate path points with natural meandering
-    const pathPoints = [];
-    const totalSteps = MAP_H; // one point per row
-
-    for (let row = 0; row < MAP_H; row++) {
-      // Base x position: interpolate from startX to endX with meander
-      const t = row / (MAP_H - 1);
-      const baseX = startX + (endX - startX) * t;
-      // Add noise-based meandering
-      const meander = majorRiverNoise.fbm(row * 0.08, 0.5, 3) * 10;
-      const px = Math.round(Math.max(2, Math.min(MAP_W / 2 - 3, baseX + meander)));
-      pathPoints.push({ x: px, y: row });
-    }
-
-    // Carve the major river — 2-3 tiles wide
-    for (const pt of pathPoints) {
-      const { x, y } = pt;
-      // Width varies: 2-3 tiles based on noise
-      const widthNoise = majorRiverNoise.get(x * 0.2, y * 0.2);
-      const halfWidth = widthNoise > 0 ? 1 : 0; // 0 = center+1 side (2 tiles), 1 = center+both sides (3 tiles)
-
-      for (let dx = -halfWidth; dx <= halfWidth + 1; dx++) {
-        const nx = x + dx;
-        if (nx < 0 || nx >= MAP_W) continue;
-
-        const currentTerrain = terrain[y][nx];
-        // Skip mountains/snow/volcanic — river flows around them
-        if (currentTerrain === TERRAIN.MOUNTAINS.id ||
-            currentTerrain === TERRAIN.SNOW.id ||
-            currentTerrain === TERRAIN.VOLCANIC.id) continue;
-
-        terrain[y][nx] = TERRAIN.MAJOR_RIVER.id;
-        majorRiverTiles.add(`${nx},${y}`);
-        resourceData[y][nx].hydro = Math.round(80 + Math.random() * 20);
-      }
-    }
-
-    // Boost hydro potential for tiles within 2 tiles of the major river
-    for (const key of majorRiverTiles) {
-      const [rx, ry] = key.split(',').map(Number);
-      for (let dy = -2; dy <= 2; dy++) {
-        for (let dx = -2; dx <= 2; dx++) {
-          const nx = rx + dx, ny = ry + dy;
-          if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
-            if (!majorRiverTiles.has(`${nx},${ny}`)) {
-              resourceData[ny][nx].hydro = Math.max(resourceData[ny][nx].hydro, Math.round(50 + Math.random() * 30));
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Rivers per quadrant (tributaries / smaller rivers)
   const halfW = Math.floor(MAP_W / 2), halfH = Math.floor(MAP_H / 2);
   const quadrants = [
     { name: 'NW', x0: 0, y0: 0, x1: halfW, y1: halfH },
@@ -694,6 +652,243 @@ function generateMap() {
     { name: 'SE', x0: halfW, y0: halfH, x1: MAP_W, y1: MAP_H },
   ];
 
+  // Terrain distribution targets per quadrant (min%, max%)
+  // Keys: terrain ids. "water" = DEEP_WATER + COAST combined
+  const QUAD_TARGETS = {
+    NW: {
+      // Plains + Forest: 50-65% (split roughly), Hills: 10-15%, River: 5-10%, Mountains: 5-8%, Desert: 0-5%, Volcanic: 0-2%, Water: 10-20%
+      [TERRAIN.PLAINS.id]:     [25, 35],
+      [TERRAIN.FOREST.id]:     [25, 30],
+      [TERRAIN.HILLS.id]:      [10, 15],
+      [TERRAIN.MOUNTAINS.id]:  [5, 8],
+      [TERRAIN.DESERT.id]:     [0, 5],
+      [TERRAIN.VOLCANIC.id]:   [0, 2],
+      water:                   [10, 20],
+    },
+    NE: {
+      [TERRAIN.DESERT.id]:     [30, 45],
+      [TERRAIN.PLAINS.id]:     [15, 25],
+      [TERRAIN.HILLS.id]:      [8, 12],
+      [TERRAIN.MOUNTAINS.id]:  [5, 10],
+      [TERRAIN.FOREST.id]:     [3, 8],
+      [TERRAIN.VOLCANIC.id]:   [1, 3],
+      water:                   [10, 20],
+    },
+    SW: {
+      [TERRAIN.FOREST.id]:     [30, 40],
+      [TERRAIN.PLAINS.id]:     [15, 25],
+      [TERRAIN.HILLS.id]:      [8, 12],
+      [TERRAIN.MOUNTAINS.id]:  [3, 6],
+      [TERRAIN.VOLCANIC.id]:   [2, 5],
+      [TERRAIN.DESERT.id]:     [0, 3],
+      water:                   [10, 20],
+    },
+    SE: {
+      [TERRAIN.HILLS.id]:      [15, 20],
+      [TERRAIN.MOUNTAINS.id]:  [12, 18],
+      [TERRAIN.VOLCANIC.id]:   [8, 12],
+      [TERRAIN.PLAINS.id]:     [15, 25],
+      [TERRAIN.FOREST.id]:     [5, 10],
+      [TERRAIN.DESERT.id]:     [5, 10],
+      water:                   [10, 20],
+    },
+  };
+
+  // River targets are enforced separately via river carving later
+  // Snow is counted as mountains for distribution purposes
+
+  function enforceQuadrantDistribution(q) {
+    const targets = QUAD_TARGETS[q.name];
+    if (!targets) return;
+
+    const totalTiles = (q.x1 - q.x0) * (q.y1 - q.y0);
+
+    // Collect all tiles in quadrant (excluding rivers/major rivers which we handle separately)
+    const tiles = [];
+    for (let y = q.y0; y < q.y1; y++) {
+      for (let x = q.x0; x < q.x1; x++) {
+        tiles.push({ x, y, terrain: terrain[y][x], elev: elevation[y][x], moist: moisture[y][x], heat: heat[y][x] });
+      }
+    }
+
+    // Count current distribution
+    function countTerrain() {
+      const counts = {};
+      let waterCount = 0;
+      for (const tile of tiles) {
+        const t = terrain[tile.y][tile.x];
+        if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) {
+          waterCount++;
+        } else if (t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id) {
+          // skip rivers
+        } else if (t === TERRAIN.SNOW.id) {
+          counts[TERRAIN.MOUNTAINS.id] = (counts[TERRAIN.MOUNTAINS.id] || 0) + 1;
+        } else {
+          counts[t] = (counts[t] || 0) + 1;
+        }
+      }
+      counts.water = waterCount;
+      return counts;
+    }
+
+    // Multiple passes to converge
+    for (let pass = 0; pass < 5; pass++) {
+      const counts = countTerrain();
+
+      for (const [targetKey, [minPct, maxPct]] of Object.entries(targets)) {
+        const isWater = targetKey === 'water';
+        const terrainId = isWater ? null : parseInt(targetKey);
+        const currentCount = counts[isWater ? 'water' : terrainId] || 0;
+        const currentPct = (currentCount / totalTiles) * 100;
+        const minCount = Math.floor(totalTiles * minPct / 100);
+        const maxCount = Math.ceil(totalTiles * maxPct / 100);
+
+        if (currentCount < minCount) {
+          // Need more of this type — find most over-represented type to convert from
+          let mostOverKey = null, mostOverAmount = 0;
+          for (const [oKey, [oMin, oMax]] of Object.entries(targets)) {
+            if (oKey === targetKey) continue;
+            const oIsWater = oKey === 'water';
+            const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
+            const oMaxCount = Math.ceil(totalTiles * oMax / 100);
+            const overAmount = oCount - oMaxCount;
+            if (overAmount > mostOverAmount) {
+              mostOverAmount = overAmount;
+              mostOverKey = oKey;
+            }
+          }
+
+          // If no over-represented type, take from the most abundant
+          if (!mostOverKey) {
+            let maxC = 0;
+            for (const [oKey] of Object.entries(targets)) {
+              if (oKey === targetKey) continue;
+              const oIsWater = oKey === 'water';
+              const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
+              if (oCount > maxC) { maxC = oCount; mostOverKey = oKey; }
+            }
+          }
+
+          if (!mostOverKey) continue;
+
+          const sourceIsWater = mostOverKey === 'water';
+          const sourceId = sourceIsWater ? null : parseInt(mostOverKey);
+          const needed = minCount - currentCount;
+
+          // Find candidate tiles to convert (from source type)
+          let candidates = [];
+          for (const tile of tiles) {
+            const t = terrain[tile.y][tile.x];
+            if (sourceIsWater) {
+              if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) candidates.push(tile);
+            } else {
+              if (t === sourceId || (sourceId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
+            }
+          }
+
+          // Sort candidates by noise proximity to target terrain thresholds
+          candidates.sort(() => rng() - 0.5);
+
+          const toConvert = Math.min(needed, candidates.length);
+          for (let i = 0; i < toConvert; i++) {
+            const tile = candidates[i];
+            if (isWater) {
+              terrain[tile.y][tile.x] = rng() < 0.5 ? TERRAIN.DEEP_WATER.id : TERRAIN.COAST.id;
+            } else {
+              terrain[tile.y][tile.x] = terrainId;
+            }
+          }
+        } else if (currentCount > maxCount) {
+          // Too many — convert excess to the quadrant's dominant type (first entry)
+          const excess = currentCount - maxCount;
+          let candidates = [];
+          for (const tile of tiles) {
+            const t = terrain[tile.y][tile.x];
+            if (isWater) {
+              if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) candidates.push(tile);
+            } else {
+              if (t === terrainId || (terrainId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
+            }
+          }
+          candidates.sort(() => rng() - 0.5);
+
+          // Find the most under-represented type to convert to
+          let bestUnderKey = null, bestUnderAmount = Infinity;
+          for (const [oKey, [oMin]] of Object.entries(targets)) {
+            if (oKey === targetKey) continue;
+            const oIsWater = oKey === 'water';
+            const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
+            const oMinCount = Math.floor(totalTiles * oMin / 100);
+            if (oCount < oMinCount && oCount < bestUnderAmount) {
+              bestUnderAmount = oCount;
+              bestUnderKey = oKey;
+            }
+          }
+
+          // Fallback: convert to dominant type (first key in targets)
+          const firstKey = Object.keys(targets)[0];
+          if (!bestUnderKey || bestUnderKey === targetKey) bestUnderKey = firstKey;
+
+          const destIsWater = bestUnderKey === 'water';
+          const destId = destIsWater ? null : parseInt(bestUnderKey);
+
+          const toConvert = Math.min(excess, candidates.length);
+          for (let i = 0; i < toConvert; i++) {
+            const tile = candidates[i];
+            if (destIsWater) {
+              terrain[tile.y][tile.x] = rng() < 0.5 ? TERRAIN.DEEP_WATER.id : TERRAIN.COAST.id;
+            } else {
+              terrain[tile.y][tile.x] = destId;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (const q of quadrants) {
+    enforceQuadrantDistribution(q);
+  }
+
+  // ============================================================
+  // Major River: "The Great Channel" — flows through NW and SW quadrants
+  // ============================================================
+  const majorRiverNoise = new Noise(seed + 500);
+  const majorRiverTiles = new Set();
+
+  {
+    let startX = Math.floor(MAP_W * 0.25);
+    let endX = Math.floor(MAP_W * 0.3);
+
+    const pathPoints = [];
+    for (let row = 0; row < MAP_H; row++) {
+      const t = row / (MAP_H - 1);
+      const baseX = startX + (endX - startX) * t;
+      const meander = majorRiverNoise.fbm(row * 0.08, 0.5, 3) * 10;
+      const px = Math.round(Math.max(2, Math.min(MAP_W / 2 - 3, baseX + meander)));
+      pathPoints.push({ x: px, y: row });
+    }
+
+    for (const pt of pathPoints) {
+      const { x, y } = pt;
+      const widthNoise = majorRiverNoise.get(x * 0.2, y * 0.2);
+      const hw = widthNoise > 0 ? 1 : 0;
+
+      for (let dx = -hw; dx <= hw + 1; dx++) {
+        const nx = x + dx;
+        if (nx < 0 || nx >= MAP_W) continue;
+        const currentTerrain = terrain[y][nx];
+        if (currentTerrain === TERRAIN.MOUNTAINS.id ||
+            currentTerrain === TERRAIN.SNOW.id ||
+            currentTerrain === TERRAIN.VOLCANIC.id) continue;
+
+        terrain[y][nx] = TERRAIN.MAJOR_RIVER.id;
+        majorRiverTiles.add(`${nx},${y}`);
+      }
+    }
+  }
+
+  // Rivers per quadrant (tributaries / smaller rivers)
   function carveRiver(sx, sy) {
     let cx = sx, cy = sy;
     const visited = new Set();
@@ -702,19 +897,19 @@ function generateMap() {
       if (visited.has(key)) break;
       visited.add(key);
       if (terrain[cy][cx] === TERRAIN.DEEP_WATER.id || terrain[cy][cx] === TERRAIN.COAST.id) break;
-      if (terrain[cy][cx] === TERRAIN.MAJOR_RIVER.id) break; // tributaries merge into major river
+      if (terrain[cy][cx] === TERRAIN.MAJOR_RIVER.id) break;
       if (terrain[cy][cx] !== TERRAIN.MOUNTAINS.id && terrain[cy][cx] !== TERRAIN.SNOW.id && terrain[cy][cx] !== TERRAIN.VOLCANIC.id) {
         terrain[cy][cx] = TERRAIN.RIVER.id;
-        resourceData[cy][cx].hydro = Math.round(60 + Math.random() * 40);
       }
       let bestE = elevation[cy][cx];
       let bestX = cx, bestY = cy;
       const dirs = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]];
-      const shuffled = dirs.sort(() => Math.random() - 0.5);
+      // Seeded shuffle
+      const shuffled = dirs.slice().sort(() => rng() - 0.5);
       for (const [ddx, ddy] of shuffled) {
         const nx = cx + ddx, ny = cy + ddy;
         if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
-          const ne = elevation[ny][nx] + (Math.random() * 0.03 - 0.015);
+          const ne = elevation[ny][nx] + (rng() * 0.03 - 0.015);
           if (ne < bestE) { bestE = ne; bestX = nx; bestY = ny; }
         }
       }
@@ -732,22 +927,21 @@ function generateMap() {
   }
 
   for (const q of quadrants) {
-    // Quadrant-specific river counts
     let riversPerQuad;
     let minElevation = 0.5;
     if (q.name === 'NE') {
-      riversPerQuad = 1; // Desert: just 1 short river
+      riversPerQuad = 1;
     } else if (q.name === 'SW') {
-      riversPerQuad = 3 + Math.floor(Math.random() * 2); // Lush: 3-4 rivers
-      minElevation = 0.35; // Start rivers from lower elevations for longer paths
+      riversPerQuad = 3 + Math.floor(rng() * 2);
+      minElevation = 0.35;
     } else {
-      riversPerQuad = 1 + Math.floor(Math.random() * 2); // Normal: 1-2
+      riversPerQuad = 1 + Math.floor(rng() * 2);
     }
     for (let r = 0; r < riversPerQuad; r++) {
       let sx, sy, attempts = 0;
       do {
-        sx = q.x0 + Math.floor(Math.random() * (q.x1 - q.x0));
-        sy = q.y0 + Math.floor(Math.random() * (q.y1 - q.y0));
+        sx = q.x0 + Math.floor(rng() * (q.x1 - q.x0));
+        sy = q.y0 + Math.floor(rng() * (q.y1 - q.y0));
         attempts++;
       } while (attempts < 500 && elevation[sy][sx] < minElevation);
       if (attempts < 500) carveRiver(sx, sy);
@@ -759,22 +953,21 @@ function generateMap() {
     for (let x = 0; x < MAP_W; x++) {
       const t = terrain[y][x];
       if (t === TERRAIN.HILLS.id || t === TERRAIN.MOUNTAINS.id) {
-        if (Math.random() < 0.1) deposits[y][x] = DEPOSITS.COAL;
-        else if (Math.random() < 0.06) deposits[y][x] = DEPOSITS.IRON;
-        else if (Math.random() < 0.03) deposits[y][x] = DEPOSITS.URANIUM;
+        if (rng() < 0.1) deposits[y][x] = DEPOSITS.COAL;
+        else if (rng() < 0.06) deposits[y][x] = DEPOSITS.IRON;
+        else if (rng() < 0.03) deposits[y][x] = DEPOSITS.URANIUM;
       }
       if (t === TERRAIN.PLAINS.id || t === TERRAIN.DESERT.id) {
-        if (Math.random() < 0.05) deposits[y][x] = DEPOSITS.GAS;
+        if (rng() < 0.05) deposits[y][x] = DEPOSITS.GAS;
       }
-      if (t === TERRAIN.VOLCANIC.id && Math.random() < 0.15) {
+      if (t === TERRAIN.VOLCANIC.id && rng() < 0.15) {
         deposits[y][x] = DEPOSITS.URANIUM;
       }
     }
   }
 
-  // Quadrant validation
+  // Quadrant deposit validation
   const minReqs = { COAL: 2, GAS: 2, URANIUM: 1, IRON: 1 };
-  const landTerrains = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.HILLS.id, TERRAIN.DESERT.id];
 
   for (const q of quadrants) {
     const depCounts = { COAL: 0, GAS: 0, URANIUM: 0, IRON: 0 };
@@ -793,8 +986,8 @@ function generateMap() {
     function findAndPlace(q, depositType, validTerrains, count) {
       let placed = 0;
       for (let attempt = 0; attempt < 2000 && placed < count; attempt++) {
-        const x = q.x0 + Math.floor(Math.random() * (q.x1 - q.x0));
-        const y = q.y0 + Math.floor(Math.random() * (q.y1 - q.y0));
+        const x = q.x0 + Math.floor(rng() * (q.x1 - q.x0));
+        const y = q.y0 + Math.floor(rng() * (q.y1 - q.y0));
         if (validTerrains.includes(terrain[y][x]) && !deposits[y][x]) {
           deposits[y][x] = depositType;
           placed++;
@@ -817,8 +1010,8 @@ function generateMap() {
     if (riverCount === 0) {
       let sx, sy, att = 0;
       do {
-        sx = q.x0 + Math.floor(Math.random() * (q.x1 - q.x0));
-        sy = q.y0 + Math.floor(Math.random() * (q.y1 - q.y0));
+        sx = q.x0 + Math.floor(rng() * (q.x1 - q.x0));
+        sy = q.y0 + Math.floor(rng() * (q.y1 - q.y0));
         att++;
       } while (att < 500 && elevation[sy][sx] < 0.35);
       if (att < 500) carveRiver(sx, sy);
@@ -836,13 +1029,106 @@ function generateMap() {
       for (let y = q.y0; y < q.y1; y++) {
         for (let x = q.x0; x < q.x1; x++) {
           const t = terrain[y][x];
-          if ((t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id) && Math.random() < 0.4) {
-            terrain[y][x] = Math.random() < 0.5 ? TERRAIN.HILLS.id : TERRAIN.FOREST.id;
-          } else if (t === TERRAIN.DEEP_WATER.id && elevation[y][x] > 0.12 && Math.random() < 0.3) {
+          if ((t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id) && rng() < 0.4) {
+            terrain[y][x] = rng() < 0.5 ? TERRAIN.HILLS.id : TERRAIN.FOREST.id;
+          } else if (t === TERRAIN.DEEP_WATER.id && elevation[y][x] > 0.12 && rng() < 0.3) {
             terrain[y][x] = TERRAIN.PLAINS.id;
           }
         }
       }
+    }
+  }
+
+  // ============================================================
+  // Energy Potential Calculations (Issue 3)
+  // ============================================================
+  // First, build a set of all river tiles for proximity checks
+  const allRiverTiles = new Set();
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const t = terrain[y][x];
+      if (t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id) {
+        allRiverTiles.add(`${x},${y}`);
+      }
+    }
+  }
+
+  // Build a set of all volcanic tiles for proximity checks
+  const allVolcanicTiles = new Set();
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (terrain[y][x] === TERRAIN.VOLCANIC.id) {
+        allVolcanicTiles.add(`${x},${y}`);
+      }
+    }
+  }
+
+  function distToNearestInSet(x, y, tileSet, maxRange) {
+    for (let r = 0; r <= maxRange; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue; // only check perimeter
+          if (tileSet.has(`${x+dx},${y+dy}`)) return r;
+        }
+      }
+    }
+    return maxRange + 1;
+  }
+
+  function rngRange(lo, hi) {
+    return Math.round(lo + rng() * (hi - lo));
+  }
+
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      const t = terrain[y][x];
+      const isMajorRiver = t === TERRAIN.MAJOR_RIVER.id;
+      const isRiver = t === TERRAIN.RIVER.id;
+      const distRiver = distToNearestInSet(x, y, allRiverTiles, 3);
+      const distVolcanic = distToNearestInSet(x, y, allVolcanicTiles, 3);
+      const isNearRiver = distRiver <= 2;
+
+      // Solar Potential
+      let solar = 0;
+      if (t === TERRAIN.DESERT.id) solar = rngRange(80, 100);
+      else if (t === TERRAIN.PLAINS.id) solar = rngRange(40, 60);
+      else if (t === TERRAIN.HILLS.id) solar = rngRange(35, 55);
+      else if (t === TERRAIN.FOREST.id) solar = rngRange(15, 30);
+      else if (t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id) solar = rngRange(20, 40);
+      else if (isRiver || isMajorRiver || t === TERRAIN.COAST.id || t === TERRAIN.DEEP_WATER.id) solar = rngRange(30, 50);
+      else if (t === TERRAIN.VOLCANIC.id) solar = rngRange(25, 45);
+      if (t === TERRAIN.SNOW.id) solar = rngRange(30, 50);
+
+      // Wind Potential
+      let wind = 0;
+      if (t === TERRAIN.HILLS.id) wind = rngRange(60, 85);
+      else if (t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id) wind = rngRange(70, 90);
+      else if (t === TERRAIN.COAST.id) wind = rngRange(55, 75);
+      else if (t === TERRAIN.PLAINS.id) wind = rngRange(30, 50);
+      else if (t === TERRAIN.DESERT.id) wind = rngRange(40, 60);
+      else if (t === TERRAIN.FOREST.id) wind = rngRange(10, 25);
+      else if (isRiver || isMajorRiver) wind = rngRange(25, 40);
+      else if (t === TERRAIN.VOLCANIC.id) wind = rngRange(40, 60);
+      else if (t === TERRAIN.DEEP_WATER.id) wind = rngRange(40, 60);
+
+      // Hydro Potential
+      let hydro = 0;
+      if (isMajorRiver) hydro = rngRange(85, 100);
+      else if (isRiver) hydro = rngRange(65, 85);
+      else if (t === TERRAIN.COAST.id && distRiver <= 1) hydro = rngRange(30, 50);
+      else if (isNearRiver) hydro = rngRange(20, 40);
+      else if (t === TERRAIN.DESERT.id) hydro = 0;
+      else if (t === TERRAIN.MOUNTAINS.id || t === TERRAIN.HILLS.id) hydro = rngRange(0, 5);
+      else hydro = rngRange(0, 5);
+
+      // Geothermal Potential
+      let geothermal = 0;
+      if (t === TERRAIN.VOLCANIC.id) geothermal = rngRange(75, 100);
+      else if (distVolcanic <= 2) geothermal = rngRange(20, 40);
+      else if (t === TERRAIN.MOUNTAINS.id) geothermal = rngRange(5, 15);
+      else geothermal = 0;
+
+      resourceData[y][x] = { solar, wind, hydro, geothermal };
     }
   }
 
@@ -852,7 +1138,8 @@ function generateMap() {
 // ============================================================
 // Game state
 // ============================================================
-const map = generateMap();
+loadSeed();
+let map = generateMap();
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const minimapCanvas = document.getElementById('minimapCanvas');
@@ -2050,12 +2337,10 @@ function updateInfoPanel() {
   ];
 
   for (const r of resources) {
-    if (r.val > 0) {
-      html += `
-        <div class="info-row"><span class="label">${r.name}</span><span class="value">${r.val}%</span></div>
-        <div class="resource-bar"><div class="fill" style="width:${r.val}%;background:${r.color}"></div></div>
-      `;
-    }
+    html += `
+      <div class="info-row"><span class="label">${r.name}</span><span class="value">${r.val}%</span></div>
+      <div class="resource-bar"><div class="fill" style="width:${r.val}%;background:${r.color}"></div></div>
+    `;
   }
   html += '</div>';
 
@@ -2191,6 +2476,50 @@ function gameLoop(time) {
   renderMinimap();
   requestAnimationFrame(gameLoop);
 }
+
+// ============================================================
+// New Map Button
+// ============================================================
+function regenerateMap() {
+  const newSeed = Math.floor(Math.random() * 1000000);
+  saveSeed(newSeed);
+  // Reset map data
+  const newMap = generateMap();
+  map.terrain = newMap.terrain;
+  map.elevation = newMap.elevation;
+  map.deposits = newMap.deposits;
+  map.resourceData = newMap.resourceData;
+  map.majorRiverTiles = newMap.majorRiverTiles;
+
+  // Reset game state
+  gameState.turn = 0;
+  gameState.blockReward = 50;
+  gameState.buildings = [];
+  gameState.civs = CIVILIZATIONS.map(c => ({
+    ...c,
+    treasury: 1000,
+    hashPower: 0,
+    energyProduced: 0,
+    energyConsumed: 0,
+    population: 0,
+    maxPopulation: 0,
+    foodProduced: 0,
+  }));
+  gameState.civPanelVisible = false;
+
+  selectedTile = null;
+  hoveredTile = null;
+
+  initCivilizations();
+  initCamera();
+  updateHUD();
+  updateInfoPanel();
+  renderMinimap();
+}
+
+document.getElementById('newMapBtn').addEventListener('click', () => {
+  regenerateMap();
+});
 
 // ============================================================
 // Init
