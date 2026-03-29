@@ -443,11 +443,14 @@ const DEPOSITS = {
 // Building Types
 // ============================================================
 const BUILDING_TYPES = {
-  citadel:     { name: 'Citadel',            energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0, description: 'Central hub of your civilization' },
-  house:       { name: 'House',              energy: 0,  hashPower: 0, popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0, description: 'Provides housing for 2 workers' },
-  farm:        { name: 'Farm',               energy: 0,  hashPower: 0, popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0, description: 'Feeds your population' },
-  solar_panel: { name: 'Solar Panel Array',  energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 5, description: 'Generates 5 energy from sunlight' },
-  home_miner:  { name: 'Home Miner',         energy: 2,  hashPower: 3, popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0, description: 'Basic Bitcoin miner: 3 H/s, uses 2⚡ + 1 worker' },
+  citadel:          { name: 'Citadel',            energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  description: 'Central hub of your civilization' },
+  house:            { name: 'House',              energy: 0,  hashPower: 0, popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0,  description: 'Provides housing for 2 workers' },
+  farm:             { name: 'Farm',               energy: 0,  hashPower: 0, popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0,  description: 'Feeds your population' },
+  solar_panel:      { name: 'Solar Panel Array',  energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 8,  description: 'Generates 8 energy (10 in desert)' },
+  hydro_dam:        { name: 'Hydro Dam',          energy: 0,  hashPower: 0, popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 15, description: 'Generates 15 energy on river (18 in river quadrant). Needs 2 workers' },
+  wind_turbine:     { name: 'Wind Turbine',       energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 6,  description: 'Generates 6 energy on hills (8 in mountain quadrant)' },
+  geothermal_plant: { name: 'Geothermal Plant',   energy: 0,  hashPower: 0, popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 12, description: 'Generates 12 energy on volcanic (15 with bonus). Needs 2 workers' },
+  home_miner:       { name: 'Home Miner',         energy: 2,  hashPower: 3, popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  description: 'Basic Bitcoin miner: 3 H/s, uses 2⚡ + 1 worker' },
 };
 
 // ============================================================
@@ -510,6 +513,15 @@ class Noise {
 // ============================================================
 // Procedural map generation
 // ============================================================
+// Helper: determine which quadrant a tile is in
+function getQuadrantName(x, y) {
+  const halfW = Math.floor(MAP_W / 2), halfH = Math.floor(MAP_H / 2);
+  if (x < halfW && y < halfH) return 'NW';
+  if (x >= halfW && y < halfH) return 'NE';
+  if (x < halfW && y >= halfH) return 'SW';
+  return 'SE';
+}
+
 function generateMap() {
   const seed = Math.floor(Math.random() * 100000);
   const noise1 = new Noise(seed);
@@ -538,17 +550,35 @@ function generateMap() {
 
       let e = noise1.fbm(x * 0.06, y * 0.06, 5) * 0.5 + 0.5;
       e = e * falloff;
-      elevation[y][x] = e;
 
-      moisture[y][x] = noise2.fbm(x * 0.08, y * 0.08, 4) * 0.5 + 0.5;
-      heat[y][x] = noiseHeat.fbm(x * 0.05, y * 0.05, 3) * 0.5 + 0.5;
+      let m = noise2.fbm(x * 0.08, y * 0.08, 4) * 0.5 + 0.5;
+      let h = noiseHeat.fbm(x * 0.05, y * 0.05, 3) * 0.5 + 0.5;
+
+      // --- Quadrant biome biases ---
+      const quad = getQuadrantName(x, y);
+      if (quad === 'NE') {
+        // Desert-dominated: increase heat, decrease moisture
+        h = Math.min(1, h + 0.25);
+        m = Math.max(0, m - 0.25);
+      } else if (quad === 'SW') {
+        // River-rich / Lush: increase moisture
+        m = Math.min(1, m + 0.2);
+      } else if (quad === 'SE') {
+        // Mountainous/Volcanic: boost elevation
+        if (e > 0.22) e = Math.min(1, e + 0.12);
+      }
+      // NW: keep as-is (balanced)
+
+      elevation[y][x] = e;
+      moisture[y][x] = m;
+      heat[y][x] = h;
 
       let t;
       if (e < 0.18) t = TERRAIN.DEEP_WATER.id;
       else if (e < 0.28) t = TERRAIN.COAST.id;
       else if (e < 0.55) {
-        if (heat[y][x] > 0.65 && moisture[y][x] < 0.35) t = TERRAIN.DESERT.id;
-        else if (moisture[y][x] > 0.55) t = TERRAIN.FOREST.id;
+        if (h > 0.65 && m < 0.35) t = TERRAIN.DESERT.id;
+        else if (m > 0.55) t = TERRAIN.FOREST.id;
         else t = TERRAIN.PLAINS.id;
       }
       else if (e < 0.7) t = TERRAIN.HILLS.id;
@@ -558,21 +588,30 @@ function generateMap() {
       terrain[y][x] = t;
       deposits[y][x] = null;
 
-      const solar = Math.round(Math.max(0, Math.min(100, (heat[y][x] * 80 + (1 - moisture[y][x]) * 40) - 10)));
-      const wind = Math.round(Math.max(0, Math.min(100, (e > 0.5 ? 60 + e * 40 : 20 + Math.abs(noise1.get(x * 0.3, y * 0.3)) * 50))));
-      const hydro = (t === TERRAIN.RIVER.id || t === TERRAIN.COAST.id) ? Math.round(50 + moisture[y][x] * 50) : Math.round(moisture[y][x] * 30);
-      const geothermal = (t === TERRAIN.VOLCANIC.id) ? Math.round(70 + Math.random() * 30) : (e > 0.7 ? Math.round(Math.random() * 30) : 0);
+      let solar = Math.round(Math.max(0, Math.min(100, (h * 80 + (1 - m) * 40) - 10)));
+      let wind = Math.round(Math.max(0, Math.min(100, (e > 0.5 ? 60 + e * 40 : 20 + Math.abs(noise1.get(x * 0.3, y * 0.3)) * 50))));
+      let hydro = (t === TERRAIN.RIVER.id || t === TERRAIN.COAST.id) ? Math.round(50 + m * 50) : Math.round(m * 30);
+      let geothermal = (t === TERRAIN.VOLCANIC.id) ? Math.round(70 + Math.random() * 30) : (e > 0.7 ? Math.round(Math.random() * 30) : 0);
+
+      // Quadrant energy potential bonuses
+      if (quad === 'NE') solar = Math.min(100, Math.round(solar * 1.2));
+      if (quad === 'SW') hydro = Math.min(100, Math.round(hydro * 1.2));
+      if (quad === 'SE') wind = Math.min(100, Math.round(wind * 1.2));
 
       resourceData[y][x] = { solar, wind, hydro, geothermal };
     }
   }
 
-  // Volcanic areas
+  // Volcanic areas (SE quadrant gets more volcanic conversion)
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
-      if (terrain[y][x] === TERRAIN.MOUNTAINS.id && Math.random() < 0.12) {
-        terrain[y][x] = TERRAIN.VOLCANIC.id;
-        resourceData[y][x].geothermal = Math.round(70 + Math.random() * 30);
+      if (terrain[y][x] === TERRAIN.MOUNTAINS.id) {
+        const vQuad = getQuadrantName(x, y);
+        const volcanicChance = (vQuad === 'SE') ? 0.20 : 0.12;
+        if (Math.random() < volcanicChance) {
+          terrain[y][x] = TERRAIN.VOLCANIC.id;
+          resourceData[y][x].geothermal = Math.round(70 + Math.random() * 30);
+        }
       }
     }
   }
@@ -623,14 +662,24 @@ function generateMap() {
   }
 
   for (const q of quadrants) {
-    const riversPerQuad = 1 + Math.floor(Math.random() * 2);
+    // Quadrant-specific river counts
+    let riversPerQuad;
+    let minElevation = 0.5;
+    if (q.name === 'NE') {
+      riversPerQuad = 1; // Desert: just 1 short river
+    } else if (q.name === 'SW') {
+      riversPerQuad = 3 + Math.floor(Math.random() * 2); // Lush: 3-4 rivers
+      minElevation = 0.35; // Start rivers from lower elevations for longer paths
+    } else {
+      riversPerQuad = 1 + Math.floor(Math.random() * 2); // Normal: 1-2
+    }
     for (let r = 0; r < riversPerQuad; r++) {
       let sx, sy, attempts = 0;
       do {
         sx = q.x0 + Math.floor(Math.random() * (q.x1 - q.x0));
         sy = q.y0 + Math.floor(Math.random() * (q.y1 - q.y0));
         attempts++;
-      } while (attempts < 500 && elevation[sy][sx] < 0.5);
+      } while (attempts < 500 && elevation[sy][sx] < minElevation);
       if (attempts < 500) carveRiver(sx, sy);
     }
   }
@@ -783,7 +832,14 @@ function getQuadrantBounds(quadrant) {
 function isBuildable(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = map.terrain[y][x];
-  return t === TERRAIN.PLAINS.id || t === TERRAIN.FOREST.id;
+  return BUILDABLE_TERRAIN.includes(t);
+}
+
+// Extended buildable check that includes special terrain for energy buildings
+function isBuildableOrSpecial(x, y) {
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
+  const t = map.terrain[y][x];
+  return BUILDABLE_TERRAIN.includes(t) || t === TERRAIN.RIVER.id || t === TERRAIN.VOLCANIC.id;
 }
 
 function distToNearestRiver(x, y) {
@@ -862,18 +918,54 @@ function getBuildingAt(x, y) {
   return gameState.buildings.find(b => b.x === x && b.y === y) || null;
 }
 
+function findNearestTileOfType(cx, cy, terrainId, range) {
+  let bestDist = Infinity, bestX = -1, bestY = -1;
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const nx = cx + dx, ny = cy + dy;
+      if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+        if (map.terrain[ny][nx] === terrainId && !tileHasBuilding(nx, ny)) {
+          const d = Math.abs(dx) + Math.abs(dy);
+          if (d < bestDist) { bestDist = d; bestX = nx; bestY = ny; }
+        }
+      }
+    }
+  }
+  return bestX >= 0 ? { x: bestX, y: bestY } : null;
+}
+
 function placeStartingBuildings(civId, cx, cy) {
+  const civ = gameState.civs[civId];
+  const quad = civ.quadrant;
+
   // Place citadel at center
   gameState.buildings.push({ type: 'citadel', owner: civId, x: cx, y: cy, active: true });
 
-  // Find adjacent buildable tiles for the rest
+  // Base buildings every civ gets
   const needed = [
     { type: 'house' },
     { type: 'house' },
     { type: 'farm' },
-    { type: 'solar_panel' },
     { type: 'home_miner' },
   ];
+
+  // Quadrant-specific energy buildings
+  if (quad === 'NE') {
+    // Desert: 2 Solar Panel Arrays
+    needed.push({ type: 'solar_panel' });
+    needed.push({ type: 'solar_panel' });
+  } else if (quad === 'SW') {
+    // Rivers: 1 Solar + 1 Hydro Dam (on nearest river)
+    needed.push({ type: 'solar_panel' });
+    // Hydro dam placed separately on river tile
+  } else if (quad === 'SE') {
+    // Mountains: 1 Solar + 1 Wind Turbine (on nearest hill)
+    needed.push({ type: 'solar_panel' });
+    // Wind turbine placed separately on hill tile
+  } else {
+    // NW: balanced, 1 Solar Panel
+    needed.push({ type: 'solar_panel' });
+  }
 
   // Spiral outward from citadel to find placement spots
   const offsets = [
@@ -882,6 +974,7 @@ function placeStartingBuildings(civId, cx, cy) {
     {dx:2,dy:0}, {dx:-2,dy:0}, {dx:0,dy:2}, {dx:0,dy:-2},
     {dx:2,dy:1}, {dx:2,dy:-1}, {dx:-2,dy:1}, {dx:-2,dy:-1},
     {dx:1,dy:2}, {dx:-1,dy:2}, {dx:1,dy:-2}, {dx:-1,dy:-2},
+    {dx:3,dy:0}, {dx:-3,dy:0}, {dx:0,dy:3}, {dx:0,dy:-3},
   ];
 
   let placed = 0;
@@ -891,6 +984,19 @@ function placeStartingBuildings(civId, cx, cy) {
     if (isBuildable(nx, ny) && !tileHasBuilding(nx, ny)) {
       gameState.buildings.push({ type: needed[placed].type, owner: civId, x: nx, y: ny, active: true });
       placed++;
+    }
+  }
+
+  // Place special quadrant buildings on appropriate terrain
+  if (quad === 'SW') {
+    const riverTile = findNearestTileOfType(cx, cy, TERRAIN.RIVER.id, 12);
+    if (riverTile) {
+      gameState.buildings.push({ type: 'hydro_dam', owner: civId, x: riverTile.x, y: riverTile.y, active: true });
+    }
+  } else if (quad === 'SE') {
+    const hillTile = findNearestTileOfType(cx, cy, TERRAIN.HILLS.id, 12);
+    if (hillTile) {
+      gameState.buildings.push({ type: 'wind_turbine', owner: civId, x: hillTile.x, y: hillTile.y, active: true });
     }
   }
 }
@@ -924,7 +1030,24 @@ function recalculateCivStats() {
     const bt = BUILDING_TYPES[b.type];
     const civ = gameState.civs[b.owner];
 
-    civ.energyProduced += bt.energyOutput;
+    // Calculate energy output with terrain bonuses
+    let energyOut = bt.energyOutput;
+    if (energyOut > 0 && b.x >= 0 && b.y >= 0) {
+      const tileTerrain = map.terrain[b.y][b.x];
+      const tileQuad = getQuadrantName(b.x, b.y);
+
+      if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) {
+        energyOut = 10; // Desert solar bonus
+      } else if (b.type === 'hydro_dam' && tileQuad === 'SW') {
+        energyOut = 18; // River quadrant hydro bonus
+      } else if (b.type === 'wind_turbine' && tileQuad === 'SE') {
+        energyOut = 8; // Mountain quadrant wind bonus
+      } else if (b.type === 'geothermal_plant' && tileTerrain === TERRAIN.VOLCANIC.id) {
+        energyOut = 15; // Volcanic geothermal bonus
+      }
+    }
+
+    civ.energyProduced += energyOut;
     civ.maxPopulation += bt.popCapacity;
     civ.foodProduced += bt.foodOutput;
   }
@@ -1292,6 +1415,15 @@ function drawBuilding(building) {
     case 'home_miner':
       drawHomeMiner(screenX, screenY, z, color);
       break;
+    case 'hydro_dam':
+      drawHydroDam(screenX, screenY, z, color);
+      break;
+    case 'wind_turbine':
+      drawWindTurbine(screenX, screenY, z, color);
+      break;
+    case 'geothermal_plant':
+      drawGeothermalPlant(screenX, screenY, z, color);
+      break;
   }
 
   ctx.restore();
@@ -1497,6 +1629,140 @@ function drawHomeMiner(sx, sy, z, color) {
   ctx.globalAlpha = 1;
 }
 
+function drawHydroDam(sx, sy, z, color) {
+  const s = z * 8;
+
+  // Dam wall (curved arc shape)
+  ctx.beginPath();
+  ctx.moveTo(sx - s, sy + s * 0.3);
+  ctx.quadraticCurveTo(sx, sy - s * 0.6, sx + s, sy + s * 0.3);
+  ctx.lineTo(sx + s, sy + s * 0.7);
+  ctx.quadraticCurveTo(sx, sy - s * 0.1, sx - s, sy + s * 0.7);
+  ctx.closePath();
+  ctx.fillStyle = '#888';
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = z;
+  ctx.stroke();
+
+  // Water behind dam
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.3, s * 0.4, 0, Math.PI * 2);
+  ctx.fillStyle = '#3488b8';
+  ctx.globalAlpha = 0.6;
+  ctx.fill();
+
+  // Water flow below
+  const shimmer = Math.sin(Date.now() * 0.004) * 2 * z;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.2, sy + s * 0.7);
+  ctx.quadraticCurveTo(sx, sy + s + shimmer, sx + s * 0.2, sy + s * 0.7);
+  ctx.strokeStyle = '#5ac8ff';
+  ctx.lineWidth = 2 * z;
+  ctx.globalAlpha = 0.7;
+  ctx.stroke();
+
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.15, sy - s * 0.1, s * 0.3, s * 0.2);
+
+  ctx.globalAlpha = 1;
+}
+
+function drawWindTurbine(sx, sy, z, color) {
+  const s = z * 7;
+
+  // Tower pole
+  ctx.fillStyle = '#ccc';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - z, sy - s * 1.5, z * 2, s * 2);
+
+  // Hub
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.5, z * 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#ddd';
+  ctx.fill();
+
+  // Blades (rotating)
+  const angle = (Date.now() * 0.002) % (Math.PI * 2);
+  ctx.strokeStyle = '#eee';
+  ctx.lineWidth = z * 1.5;
+  for (let i = 0; i < 3; i++) {
+    const a = angle + (i * Math.PI * 2 / 3);
+    ctx.beginPath();
+    ctx.moveTo(sx, sy - s * 1.5);
+    ctx.lineTo(sx + Math.cos(a) * s * 0.9, sy - s * 1.5 + Math.sin(a) * s * 0.9);
+    ctx.stroke();
+  }
+
+  // Base
+  ctx.fillStyle = '#999';
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.4, sy + s * 0.5);
+  ctx.lineTo(sx, sy + s * 0.2);
+  ctx.lineTo(sx + s * 0.4, sy + s * 0.5);
+  ctx.closePath();
+  ctx.fill();
+
+  // Color accent on hub
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.5, z * 1.5, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+
+  ctx.globalAlpha = 1;
+}
+
+function drawGeothermalPlant(sx, sy, z, color) {
+  const s = z * 7;
+
+  // Main building
+  ctx.fillStyle = '#555';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.6, sy - s * 0.4, s * 1.2, s * 0.9);
+
+  // Pipes
+  ctx.fillStyle = '#777';
+  ctx.fillRect(sx - s * 0.8, sy + s * 0.1, s * 0.3, s * 0.3);
+  ctx.fillRect(sx + s * 0.5, sy + s * 0.1, s * 0.3, s * 0.3);
+
+  // Chimney / vent
+  ctx.fillStyle = '#666';
+  ctx.fillRect(sx - s * 0.15, sy - s * 1, s * 0.3, s * 0.6);
+
+  // Steam (animated)
+  const steamPhase = Date.now() * 0.003;
+  ctx.globalAlpha = 0.3 + Math.sin(steamPhase) * 0.1;
+  ctx.fillStyle = '#ddd';
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.2 - Math.sin(steamPhase) * s * 0.2, s * 0.25, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.15, sy - s * 1.5 - Math.sin(steamPhase + 1) * s * 0.15, s * 0.18, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Glow from below (geothermal heat)
+  ctx.beginPath();
+  ctx.arc(sx, sy + s * 0.3, s * 0.4, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(sx, sy + s * 0.3, 0, sx, sy + s * 0.3, s * 0.4);
+  grad.addColorStop(0, 'rgba(255,80,20,0.4)');
+  grad.addColorStop(1, 'rgba(255,80,20,0)');
+  ctx.fillStyle = grad;
+  ctx.globalAlpha = 0.6 + Math.sin(steamPhase * 0.5) * 0.2;
+  ctx.fill();
+
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.4, sy - s * 0.3, s * 0.8, s * 0.15);
+
+  ctx.globalAlpha = 1;
+}
+
 // ============================================================
 // Main render
 // ============================================================
@@ -1624,11 +1890,26 @@ function updateInfoPanel() {
   const dep = map.deposits[y][x];
   const building = getBuildingAt(x, y);
 
+  const tileQuad = getQuadrantName(x, y);
+
   let html = `
     <div class="info-row"><span class="label">Coordinates</span><span class="value">(${x}, ${y})</span></div>
     <div class="info-row"><span class="label">Terrain</span><span class="value highlight">${t.name}</span></div>
     <div class="info-row"><span class="label">Elevation</span><span class="value">${(elev * 100).toFixed(0)}m</span></div>
   `;
+
+  // Terrain bonuses
+  const bonuses = [];
+  if (t.id === TERRAIN.DESERT.id) bonuses.push({ text: 'Desert Solar Bonus: +25%', color: '#f0c040' });
+  if (t.id === TERRAIN.RIVER.id && tileQuad === 'SW') bonuses.push({ text: 'River Hydro Bonus: +20%', color: '#4090d0' });
+  if (t.id === TERRAIN.RIVER.id) bonuses.push({ text: 'River: Hydro Dam buildable', color: '#3488b8' });
+  if (t.id === TERRAIN.HILLS.id && tileQuad === 'SE') bonuses.push({ text: 'Mountain Wind Bonus: +33%', color: '#80c8ff' });
+  if (t.id === TERRAIN.HILLS.id) bonuses.push({ text: 'Hills: Wind Turbine buildable', color: '#6a8f4e' });
+  if (t.id === TERRAIN.VOLCANIC.id) bonuses.push({ text: 'Volcanic Geothermal Bonus: +25%', color: '#ff6644' });
+
+  for (const bonus of bonuses) {
+    html += `<div class="info-row"><span class="label" style="color:${bonus.color};font-size:11px">🏷 ${bonus.text}</span></div>`;
+  }
 
   if (dep) {
     html += `<div class="info-row"><span class="label">Deposit</span><span class="deposit-badge" style="background:${dep.color};color:#fff">${dep.symbol} ${dep.name}</span></div>`;
@@ -1638,12 +1919,23 @@ function updateInfoPanel() {
   if (building) {
     const bt = BUILDING_TYPES[building.type];
     const civ = gameState.civs[building.owner];
+
+    // Calculate actual energy output with bonuses
+    let actualEnergy = bt.energyOutput;
+    if (building.type === 'solar_panel' && t.id === TERRAIN.DESERT.id) actualEnergy = 10;
+    else if (building.type === 'hydro_dam' && tileQuad === 'SW') actualEnergy = 18;
+    else if (building.type === 'wind_turbine' && tileQuad === 'SE') actualEnergy = 8;
+    else if (building.type === 'geothermal_plant' && t.id === TERRAIN.VOLCANIC.id) actualEnergy = 15;
+
     html += `
       <div class="building-info">
         <div class="bi-name" style="color:${civ.color}">${bt.name}</div>
         <div class="bi-owner">Owner: <span style="color:${civ.color}">■</span> ${civ.name}</div>
     `;
-    if (bt.energyOutput > 0) html += `<div class="bi-stat">⚡ Energy output: <strong>${bt.energyOutput}</strong></div>`;
+    if (bt.energyOutput > 0) {
+      const bonusText = actualEnergy > bt.energyOutput ? ` <span style="color:#44dd66">(+${actualEnergy - bt.energyOutput} bonus)</span>` : '';
+      html += `<div class="bi-stat">⚡ Energy output: <strong>${actualEnergy}</strong>${bonusText}</div>`;
+    }
     if (bt.hashPower > 0) html += `<div class="bi-stat">⛏ Hash power: <strong>${bt.hashPower} H/s</strong></div>`;
     if (bt.energy > 0) html += `<div class="bi-stat">⚡ Energy cost: <strong>${bt.energy}</strong></div>`;
     if (bt.popCapacity > 0) html += `<div class="bi-stat">👥 Housing: <strong>+${bt.popCapacity}</strong></div>`;
