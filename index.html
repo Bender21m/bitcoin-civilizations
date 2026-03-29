@@ -21,7 +21,7 @@
   }
   #gameCanvas.dragging { cursor: grabbing; }
 
-  /* Top bar */
+  /* Top bar / HUD */
   #topBar {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -30,22 +30,112 @@
     border-bottom: 1px solid rgba(247,147,26,0.3);
     display: flex;
     align-items: center;
-    padding: 0 20px;
+    padding: 0 16px;
     z-index: 100;
     backdrop-filter: blur(10px);
+    gap: 6px;
   }
   #topBar .logo {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #F7931A;
     letter-spacing: 1px;
+    white-space: nowrap;
   }
   #topBar .logo span { color: #e0e0e0; font-weight: 400; }
+  .hud-sep {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.1);
+    margin: 0 6px;
+  }
+  .hud-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: #aaa;
+    white-space: nowrap;
+  }
+  .hud-item .hud-val {
+    color: #e0e0e0;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+  }
+  .hud-item .hud-val.sats { color: #F7931A; }
+  .hud-item .hud-val.hash { color: #00A8FF; }
+  .hud-item .hud-val.energy { color: #44dd66; }
+  .hud-item .hud-val.pop { color: #cc88ff; }
+  .civ-indicator {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
   #topBar .coords {
     margin-left: auto;
     font-size: 13px;
     color: #888;
     font-family: 'Courier New', monospace;
+  }
+
+  /* Next Turn Button */
+  #nextTurnBtn {
+    position: fixed;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #F7931A 0%, #e07800 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 32px;
+    cursor: pointer;
+    z-index: 100;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 20px rgba(247,147,26,0.35);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  #nextTurnBtn:hover {
+    transform: translateX(-50%) scale(1.05);
+    box-shadow: 0 6px 28px rgba(247,147,26,0.5);
+  }
+  #nextTurnBtn:active {
+    transform: translateX(-50%) scale(0.97);
+  }
+
+  /* Turn Summary Toast */
+  #turnSummary {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 10px;
+    padding: 14px 24px;
+    z-index: 200;
+    backdrop-filter: blur(12px);
+    font-size: 13px;
+    color: #ddd;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    max-width: 360px;
+    text-align: center;
+  }
+  #turnSummary.visible { opacity: 1; }
+  #turnSummary .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #F7931A;
+    margin-bottom: 6px;
+  }
+  #turnSummary .summary-line {
+    padding: 2px 0;
+    font-size: 12px;
   }
 
   /* Info Panel */
@@ -108,6 +198,77 @@
     font-weight: 600;
     margin: 2px 4px 2px 0;
   }
+  .building-info {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .building-info .bi-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .building-info .bi-owner {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 6px;
+  }
+  .building-info .bi-stat {
+    font-size: 12px;
+    padding: 2px 0;
+  }
+
+  /* Civilization Panel */
+  #civPanel {
+    position: fixed;
+    top: 60px; left: 12px;
+    width: 260px;
+    background: rgba(18,18,28,0.92);
+    border: 1px solid rgba(247,147,26,0.25);
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #civPanel.hidden { opacity: 0; pointer-events: none; transform: translateX(-20px); }
+  #civPanel h3 {
+    font-size: 14px;
+    color: #F7931A;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(247,147,26,0.2);
+    padding-bottom: 8px;
+  }
+  .civ-entry {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .civ-entry:last-child { border-bottom: none; }
+  .civ-entry .civ-name {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .civ-entry .civ-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .civ-entry .civ-stats {
+    font-size: 11px;
+    color: #999;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .civ-entry .civ-stats span { white-space: nowrap; }
 
   /* Legend */
   #legend {
@@ -181,12 +342,48 @@
 
 <div id="topBar">
   <div class="logo">₿ITCOIN <span>CIVILIZATIONS</span></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    Turn <span class="hud-val" id="hudTurn">0</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    <span class="civ-indicator" id="hudCivColor"></span>
+    <span id="hudCivName">—</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    ₿ <span class="hud-val sats" id="hudSats">0</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    ⛏ <span class="hud-val hash" id="hudHash">0</span> <span style="color:#666">H/s</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    ⚡ <span class="hud-val energy" id="hudEnergy">0/0</span>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    👥 <span class="hud-val pop" id="hudPop">0/0</span>
+  </div>
+  <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
+</div>
+
+<div id="turnSummary">
+  <div class="summary-title"></div>
+  <div class="summary-body"></div>
 </div>
 
 <div id="infoPanel" class="hidden">
   <h3>Tile Info</h3>
   <div id="infoPanelContent"></div>
+</div>
+
+<div id="civPanel" class="hidden">
+  <h3>Civilizations</h3>
+  <div id="civPanelContent"></div>
 </div>
 
 <div id="legend">
@@ -198,13 +395,15 @@
   <canvas id="minimapCanvas" width="200" height="200"></canvas>
 </div>
 
+<button id="nextTurnBtn">⏭ NEXT TURN <kbd style="background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.2);color:#fff;margin-left:6px">Space</kbd></button>
+
 <div id="controls">
-  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Drag</kbd> pan
+  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>C</kbd> civ panel
 </div>
 
 <script>
 // ============================================================
-// BITCOIN CIVILIZATIONS — Phase 1
+// BITCOIN CIVILIZATIONS — Phase 1 + Phase 2
 // ============================================================
 
 const MAP_W = 80, MAP_H = 80;
@@ -229,6 +428,9 @@ const TERRAIN = {
 const TERRAIN_BY_ID = {};
 for (const k in TERRAIN) TERRAIN_BY_ID[TERRAIN[k].id] = TERRAIN[k];
 
+// Buildable terrain IDs
+const BUILDABLE_TERRAIN = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.DESERT.id, TERRAIN.HILLS.id];
+
 // Resource deposits
 const DEPOSITS = {
   COAL:    { name: 'Coal',    color: '#444',    symbol: '◆' },
@@ -238,16 +440,34 @@ const DEPOSITS = {
 };
 
 // ============================================================
-// Procedural map generation
+// Building Types
 // ============================================================
+const BUILDING_TYPES = {
+  citadel:     { name: 'Citadel',            energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0, description: 'Central hub of your civilization' },
+  house:       { name: 'House',              energy: 0,  hashPower: 0, popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0, description: 'Provides housing for 2 workers' },
+  farm:        { name: 'Farm',               energy: 0,  hashPower: 0, popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0, description: 'Feeds your population' },
+  solar_panel: { name: 'Solar Panel Array',  energy: 0,  hashPower: 0, popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 5, description: 'Generates 5 energy from sunlight' },
+  home_miner:  { name: 'Home Miner',         energy: 2,  hashPower: 3, popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0, description: 'Basic Bitcoin miner: 3 H/s, uses 2⚡ + 1 worker' },
+};
 
-// Simplex-like noise using permutation
+// ============================================================
+// Civilizations
+// ============================================================
+const CIVILIZATIONS = [
+  { id: 0, name: "Satoshi's Legacy",    color: '#F7931A', quadrant: 'NW', isPlayer: true },
+  { id: 1, name: 'The Hash Collective', color: '#00A8FF', quadrant: 'NE', isPlayer: false },
+  { id: 2, name: 'Nakamoto Republic',   color: '#00CC66', quadrant: 'SW', isPlayer: false },
+  { id: 3, name: 'Block Frontier',      color: '#AA44FF', quadrant: 'SE', isPlayer: false },
+];
+
+// ============================================================
+// Simplex-like noise
+// ============================================================
 class Noise {
   constructor(seed) {
     this.p = new Uint8Array(512);
     const base = new Uint8Array(256);
     for (let i = 0; i < 256; i++) base[i] = i;
-    // Fisher-Yates with seeded random
     let s = seed || 42;
     const rng = () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 4294967296; };
     for (let i = 255; i > 0; i--) {
@@ -287,6 +507,9 @@ class Noise {
   }
 }
 
+// ============================================================
+// Procedural map generation
+// ============================================================
 function generateMap() {
   const seed = Math.floor(Math.random() * 100000);
   const noise1 = new Noise(seed);
@@ -308,7 +531,6 @@ function generateMap() {
     deposits[y] = [];
     resourceData[y] = [];
     for (let x = 0; x < MAP_W; x++) {
-      // Distance from center for island shape
       const dx = (x - MAP_W / 2) / (MAP_W / 2);
       const dy = (y - MAP_H / 2) / (MAP_H / 2);
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -321,7 +543,6 @@ function generateMap() {
       moisture[y][x] = noise2.fbm(x * 0.08, y * 0.08, 4) * 0.5 + 0.5;
       heat[y][x] = noiseHeat.fbm(x * 0.05, y * 0.05, 3) * 0.5 + 0.5;
 
-      // Base terrain from elevation
       let t;
       if (e < 0.18) t = TERRAIN.DEEP_WATER.id;
       else if (e < 0.28) t = TERRAIN.COAST.id;
@@ -337,7 +558,6 @@ function generateMap() {
       terrain[y][x] = t;
       deposits[y][x] = null;
 
-      // Resource potential
       const solar = Math.round(Math.max(0, Math.min(100, (heat[y][x] * 80 + (1 - moisture[y][x]) * 40) - 10)));
       const wind = Math.round(Math.max(0, Math.min(100, (e > 0.5 ? 60 + e * 40 : 20 + Math.abs(noise1.get(x * 0.3, y * 0.3)) * 50))));
       const hydro = (t === TERRAIN.RIVER.id || t === TERRAIN.COAST.id) ? Math.round(50 + moisture[y][x] * 50) : Math.round(moisture[y][x] * 30);
@@ -347,7 +567,7 @@ function generateMap() {
     }
   }
 
-  // Add volcanic areas near mountains
+  // Volcanic areas
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       if (terrain[y][x] === TERRAIN.MOUNTAINS.id && Math.random() < 0.12) {
@@ -357,7 +577,7 @@ function generateMap() {
     }
   }
 
-  // Generate rivers per quadrant — ensure 1-2 rivers start in each quadrant
+  // Rivers per quadrant
   const halfW = Math.floor(MAP_W / 2), halfH = Math.floor(MAP_H / 2);
   const quadrants = [
     { name: 'NW', x0: 0, y0: 0, x1: halfW, y1: halfH },
@@ -403,7 +623,7 @@ function generateMap() {
   }
 
   for (const q of quadrants) {
-    const riversPerQuad = 1 + Math.floor(Math.random() * 2); // 1-2 rivers
+    const riversPerQuad = 1 + Math.floor(Math.random() * 2);
     for (let r = 0; r < riversPerQuad; r++) {
       let sx, sy, attempts = 0;
       do {
@@ -415,7 +635,7 @@ function generateMap() {
     }
   }
 
-  // Place resource deposits
+  // Resource deposits
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       const t = terrain[y][x];
@@ -433,13 +653,11 @@ function generateMap() {
     }
   }
 
-  // === Quadrant validation pass ===
-  // Ensure each quadrant has minimum resources and terrain variety
+  // Quadrant validation
   const minReqs = { COAL: 2, GAS: 2, URANIUM: 1, IRON: 1 };
   const landTerrains = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.HILLS.id, TERRAIN.DESERT.id];
 
   for (const q of quadrants) {
-    // Count deposits in this quadrant
     const depCounts = { COAL: 0, GAS: 0, URANIUM: 0, IRON: 0 };
     let riverCount = 0;
     for (let y = q.y0; y < q.y1; y++) {
@@ -453,7 +671,6 @@ function generateMap() {
       }
     }
 
-    // Fill missing deposits by placing on suitable land tiles
     function findAndPlace(q, depositType, validTerrains, count) {
       let placed = 0;
       for (let attempt = 0; attempt < 2000 && placed < count; attempt++) {
@@ -478,7 +695,6 @@ function generateMap() {
       }
     }
 
-    // If quadrant has no river tiles, force-carve one
     if (riverCount === 0) {
       let sx, sy, att = 0;
       do {
@@ -489,7 +705,6 @@ function generateMap() {
       if (att < 500) carveRiver(sx, sy);
     }
 
-    // Ensure terrain variety — if quadrant is >70% water or mountains, convert some to plains/forest
     let waterMountain = 0, total = 0;
     for (let y = q.y0; y < q.y1; y++) {
       for (let x = q.x0; x < q.x1; x++) {
@@ -533,12 +748,325 @@ let cameraStart = { x: 0, y: 0 };
 let keys = {};
 let lastTime = 0;
 
-// Center camera on map
+// --- Game state: Civs, Buildings, Economy ---
+let gameState = {
+  turn: 0,
+  blockReward: 50,
+  halvingInterval: 100, // halve every 100 turns
+  buildings: [],        // { type, owner, x, y, active }
+  civs: CIVILIZATIONS.map(c => ({
+    ...c,
+    treasury: 1000,
+    hashPower: 0,
+    energyProduced: 0,
+    energyConsumed: 0,
+    population: 0,
+    maxPopulation: 0,
+    foodProduced: 0,
+  })),
+  civPanelVisible: false,
+};
+
+// ============================================================
+// Starting Position Selection & Building Placement
+// ============================================================
+function getQuadrantBounds(quadrant) {
+  const halfW = Math.floor(MAP_W / 2), halfH = Math.floor(MAP_H / 2);
+  switch (quadrant) {
+    case 'NW': return { x0: 2, y0: 2, x1: halfW - 2, y1: halfH - 2 };
+    case 'NE': return { x0: halfW + 2, y0: 2, x1: MAP_W - 2, y1: halfH - 2 };
+    case 'SW': return { x0: 2, y0: halfH + 2, x1: halfW - 2, y1: MAP_H - 2 };
+    case 'SE': return { x0: halfW + 2, y0: halfH + 2, x1: MAP_W - 2, y1: MAP_H - 2 };
+  }
+}
+
+function isBuildable(x, y) {
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
+  const t = map.terrain[y][x];
+  return t === TERRAIN.PLAINS.id || t === TERRAIN.FOREST.id;
+}
+
+function distToNearestRiver(x, y) {
+  let minDist = Infinity;
+  const range = 8;
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+        if (map.terrain[ny][nx] === TERRAIN.RIVER.id) {
+          const d = Math.abs(dx) + Math.abs(dy);
+          if (d < minDist) minDist = d;
+        }
+      }
+    }
+  }
+  return minDist;
+}
+
+function findStartingPosition(quadrant) {
+  const bounds = getQuadrantBounds(quadrant);
+  let bestScore = -Infinity;
+  let bestX = -1, bestY = -1;
+
+  // Score every buildable tile in the quadrant
+  for (let y = bounds.y0; y < bounds.y1; y++) {
+    for (let x = bounds.x0; x < bounds.x1; x++) {
+      if (!isBuildable(x, y)) continue;
+
+      // Count adjacent buildable tiles (need at least 5 for starting buildings)
+      let adjBuildable = 0;
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          if (dx === 0 && dy === 0) continue;
+          if (isBuildable(x + dx, y + dy)) adjBuildable++;
+        }
+      }
+      if (adjBuildable < 5) continue;
+
+      const riverDist = distToNearestRiver(x, y);
+      const res = map.resourceData[y][x];
+
+      let score = 0;
+      // Prefer near river (within 5 tiles)
+      if (riverDist <= 5) score += (6 - riverDist) * 10;
+      else score -= riverDist * 2;
+
+      // Solar and wind potential
+      score += res.solar * 0.3 + res.wind * 0.2;
+
+      // Prefer more adjacent buildable
+      score += adjBuildable * 3;
+
+      // Prefer closer to quadrant center
+      const qcx = (bounds.x0 + bounds.x1) / 2;
+      const qcy = (bounds.y0 + bounds.y1) / 2;
+      const distToCenter = Math.abs(x - qcx) + Math.abs(y - qcy);
+      score -= distToCenter * 0.5;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestX = x;
+        bestY = y;
+      }
+    }
+  }
+
+  return { x: bestX, y: bestY };
+}
+
+function tileHasBuilding(x, y) {
+  return gameState.buildings.some(b => b.x === x && b.y === y);
+}
+
+function getBuildingAt(x, y) {
+  return gameState.buildings.find(b => b.x === x && b.y === y) || null;
+}
+
+function placeStartingBuildings(civId, cx, cy) {
+  // Place citadel at center
+  gameState.buildings.push({ type: 'citadel', owner: civId, x: cx, y: cy, active: true });
+
+  // Find adjacent buildable tiles for the rest
+  const needed = [
+    { type: 'house' },
+    { type: 'house' },
+    { type: 'farm' },
+    { type: 'solar_panel' },
+    { type: 'home_miner' },
+  ];
+
+  // Spiral outward from citadel to find placement spots
+  const offsets = [
+    {dx:1,dy:0}, {dx:-1,dy:0}, {dx:0,dy:1}, {dx:0,dy:-1},
+    {dx:1,dy:1}, {dx:-1,dy:1}, {dx:1,dy:-1}, {dx:-1,dy:-1},
+    {dx:2,dy:0}, {dx:-2,dy:0}, {dx:0,dy:2}, {dx:0,dy:-2},
+    {dx:2,dy:1}, {dx:2,dy:-1}, {dx:-2,dy:1}, {dx:-2,dy:-1},
+    {dx:1,dy:2}, {dx:-1,dy:2}, {dx:1,dy:-2}, {dx:-1,dy:-2},
+  ];
+
+  let placed = 0;
+  for (const off of offsets) {
+    if (placed >= needed.length) break;
+    const nx = cx + off.dx, ny = cy + off.dy;
+    if (isBuildable(nx, ny) && !tileHasBuilding(nx, ny)) {
+      gameState.buildings.push({ type: needed[placed].type, owner: civId, x: nx, y: ny, active: true });
+      placed++;
+    }
+  }
+}
+
+function initCivilizations() {
+  for (const civ of gameState.civs) {
+    const pos = findStartingPosition(civ.quadrant);
+    if (pos.x >= 0 && pos.y >= 0) {
+      placeStartingBuildings(civ.id, pos.x, pos.y);
+    }
+  }
+  recalculateCivStats();
+}
+
+// ============================================================
+// Economy / Turn System
+// ============================================================
+function recalculateCivStats() {
+  // Reset stats
+  for (const civ of gameState.civs) {
+    civ.energyProduced = 0;
+    civ.energyConsumed = 0;
+    civ.hashPower = 0;
+    civ.population = 0;
+    civ.maxPopulation = 0;
+    civ.foodProduced = 0;
+  }
+
+  for (const b of gameState.buildings) {
+    if (!b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    const civ = gameState.civs[b.owner];
+
+    civ.energyProduced += bt.energyOutput;
+    civ.maxPopulation += bt.popCapacity;
+    civ.foodProduced += bt.foodOutput;
+  }
+
+  // Workers = min(maxPopulation, food supports)
+  for (const civ of gameState.civs) {
+    civ.population = Math.min(civ.maxPopulation, civ.foodProduced); // simplified: 1 food per pop
+  }
+
+  // Now calculate energy consumption and hash power
+  // Miners only work if there's energy and workers available
+  for (const b of gameState.buildings) {
+    if (!b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    const civ = gameState.civs[b.owner];
+
+    if (bt.hashPower > 0) {
+      // Check if we have energy and workers
+      const energyNeeded = bt.energy;
+      const workersNeeded = bt.popCost;
+      const availableEnergy = civ.energyProduced - civ.energyConsumed;
+      // Workers already accounted for as population
+      if (availableEnergy >= energyNeeded) {
+        civ.energyConsumed += energyNeeded;
+        civ.hashPower += bt.hashPower;
+      }
+    }
+  }
+}
+
+function processTurn() {
+  gameState.turn++;
+
+  // Halving check
+  if (gameState.turn > 0 && gameState.turn % gameState.halvingInterval === 0) {
+    gameState.blockReward = Math.max(1, Math.floor(gameState.blockReward / 2));
+  }
+
+  recalculateCivStats();
+
+  // Calculate total network hash power
+  let totalHash = 0;
+  for (const civ of gameState.civs) {
+    totalHash += civ.hashPower;
+  }
+
+  // Distribute block reward proportionally
+  const earnings = [];
+  for (const civ of gameState.civs) {
+    let earned = 0;
+    if (totalHash > 0 && civ.hashPower > 0) {
+      earned = Math.round(gameState.blockReward * (civ.hashPower / totalHash) * 100) / 100;
+    }
+    civ.treasury += earned;
+    civ.treasury = Math.round(civ.treasury * 100) / 100;
+    earnings.push({ name: civ.name, color: civ.color, earned });
+  }
+
+  showTurnSummary(earnings, totalHash);
+  updateHUD();
+  updateCivPanel();
+}
+
+function showTurnSummary(earnings, totalHash) {
+  const el = document.getElementById('turnSummary');
+  const titleEl = el.querySelector('.summary-title');
+  const bodyEl = el.querySelector('.summary-body');
+
+  titleEl.textContent = `⛏ Block ${gameState.turn} Mined`;
+
+  let html = `<div class="summary-line" style="color:#888">Block reward: ${gameState.blockReward} sats · Network: ${totalHash} H/s</div>`;
+  for (const e of earnings) {
+    if (e.earned > 0) {
+      html += `<div class="summary-line"><span style="color:${e.color}">■</span> ${e.name}: <span style="color:#F7931A">+${e.earned} sats</span></div>`;
+    }
+  }
+  bodyEl.innerHTML = html;
+
+  el.classList.add('visible');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
+// ============================================================
+// HUD
+// ============================================================
+function updateHUD() {
+  const player = gameState.civs[0]; // Satoshi's Legacy is always player
+  document.getElementById('hudTurn').textContent = gameState.turn;
+  document.getElementById('hudCivName').textContent = player.name;
+  document.getElementById('hudCivColor').style.background = player.color;
+  document.getElementById('hudSats').textContent = player.treasury.toLocaleString();
+  document.getElementById('hudHash').textContent = player.hashPower;
+  document.getElementById('hudEnergy').textContent = `${player.energyProduced - player.energyConsumed}/${player.energyProduced}`;
+  document.getElementById('hudPop').textContent = `${player.population}/${player.maxPopulation}`;
+}
+
+// ============================================================
+// Civ Panel
+// ============================================================
+function updateCivPanel() {
+  const content = document.getElementById('civPanelContent');
+  let html = '';
+  for (const civ of gameState.civs) {
+    const netEnergy = civ.energyProduced - civ.energyConsumed;
+    html += `
+      <div class="civ-entry">
+        <div class="civ-name"><span class="civ-swatch" style="background:${civ.color}"></span>${civ.name}${civ.isPlayer ? ' (You)' : ' (AI)'}</div>
+        <div class="civ-stats">
+          <span>₿ ${civ.treasury.toLocaleString()}</span>
+          <span>⛏ ${civ.hashPower} H/s</span>
+          <span>👥 ${civ.population}/${civ.maxPopulation}</span>
+          <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
+        </div>
+      </div>
+    `;
+  }
+  content.innerHTML = html;
+}
+
+function toggleCivPanel() {
+  gameState.civPanelVisible = !gameState.civPanelVisible;
+  document.getElementById('civPanel').classList.toggle('hidden', !gameState.civPanelVisible);
+  if (gameState.civPanelVisible) updateCivPanel();
+}
+
+// ============================================================
+// Camera
+// ============================================================
 function initCamera() {
-  const cx = MAP_W / 2, cy = MAP_H / 2;
-  const iso = toIso(cx, cy);
-  camera.x = iso.x - window.innerWidth / 2;
-  camera.y = iso.y - window.innerHeight / 2;
+  // Center camera on player's citadel if it exists
+  const playerCitadel = gameState.buildings.find(b => b.owner === 0 && b.type === 'citadel');
+  if (playerCitadel) {
+    const iso = toIso(playerCitadel.x, playerCitadel.y);
+    camera.x = iso.x * camera.zoom;
+    camera.y = iso.y * camera.zoom;
+  } else {
+    const cx = MAP_W / 2, cy = MAP_H / 2;
+    const iso = toIso(cx, cy);
+    camera.x = iso.x * camera.zoom;
+    camera.y = iso.y * camera.zoom;
+  }
 }
 
 // ============================================================
@@ -552,7 +1080,6 @@ function toIso(tx, ty) {
 }
 
 function fromIso(sx, sy) {
-  // Screen to tile
   const wx = (sx + camera.x) / camera.zoom;
   const wy = (sy + camera.y) / camera.zoom;
   const tx = (wx / HALF_W + wy / HALF_H) / 2;
@@ -568,17 +1095,30 @@ function resizeCanvas() {
   canvas.height = window.innerHeight;
 }
 
+function noise_simple(x, y) {
+  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+function adjustColor(hex, amount) {
+  const r = Math.min(255, Math.max(0, parseInt(hex.slice(1, 3), 16) + amount));
+  const g = Math.min(255, Math.max(0, parseInt(hex.slice(3, 5), 16) + amount));
+  const b = Math.min(255, Math.max(0, parseInt(hex.slice(5, 7), 16) + amount));
+  return `rgb(${r},${g},${b})`;
+}
+
+function tileToScreen(x, y) {
+  const iso = toIso(x, y);
+  return {
+    x: (iso.x * camera.zoom) - camera.x + canvas.width / 2,
+    y: (iso.y * camera.zoom) - camera.y + canvas.height / 2,
+  };
+}
+
 function drawTile(x, y) {
   const t = map.terrain[y][x];
   const tDef = TERRAIN_BY_ID[t];
-  const iso = toIso(x, y);
-
-  const sx = (iso.x - camera.x / camera.zoom) * camera.zoom + canvas.width / 2 - (camera.x % 1) * camera.zoom;
-  const sy = (iso.y - camera.y / camera.zoom) * camera.zoom + canvas.height / 2 - (camera.y % 1) * camera.zoom;
-
-  // Actually let me redo screen transform simply
-  const screenX = (iso.x * camera.zoom) - camera.x + canvas.width / 2;
-  const screenY = (iso.y * camera.zoom) - camera.y + canvas.height / 2;
+  const { x: screenX, y: screenY } = tileToScreen(x, y);
 
   const w = HALF_W * camera.zoom;
   const h = HALF_H * camera.zoom;
@@ -593,7 +1133,7 @@ function drawTile(x, y) {
   const isSelected = selectedTile && selectedTile.x === x && selectedTile.y === y;
   const isHovered = hoveredTile && hoveredTile.x === x && hoveredTile.y === y;
 
-  // Draw tile side (depth)
+  // Tile side (depth)
   if (tileHeight > 1) {
     ctx.beginPath();
     ctx.moveTo(screenX - w, screenY);
@@ -607,7 +1147,7 @@ function drawTile(x, y) {
     ctx.fill();
   }
 
-  // Draw tile top (diamond)
+  // Tile top (diamond)
   ctx.beginPath();
   ctx.moveTo(screenX, screenY - h);
   ctx.lineTo(screenX + w, screenY);
@@ -615,12 +1155,10 @@ function drawTile(x, y) {
   ctx.lineTo(screenX - w, screenY);
   ctx.closePath();
 
-  // Fill with terrain color + slight variation
   const variation = (noise_simple(x * 7.3, y * 7.3) * 8) | 0;
   ctx.fillStyle = adjustColor(tDef.color, variation);
   ctx.fill();
 
-  // Grid lines
   ctx.strokeStyle = 'rgba(0,0,0,0.15)';
   ctx.lineWidth = 0.5;
   ctx.stroke();
@@ -653,7 +1191,6 @@ function drawTile(x, y) {
   // Terrain decorations
   const dSize = camera.zoom;
   if (t === TERRAIN.MOUNTAINS.id || t === TERRAIN.SNOW.id) {
-    // Mountain peak
     const peakColor = t === TERRAIN.SNOW.id ? '#fff' : '#aaa';
     ctx.beginPath();
     ctx.moveTo(screenX - 4 * dSize, screenY + 2 * dSize);
@@ -665,7 +1202,6 @@ function drawTile(x, y) {
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (t === TERRAIN.FOREST.id) {
-    // Trees
     for (let i = -1; i <= 1; i++) {
       const tx2 = screenX + i * 5 * dSize;
       const ty2 = screenY - 1 * dSize + Math.abs(i) * 2 * dSize;
@@ -680,7 +1216,6 @@ function drawTile(x, y) {
       ctx.globalAlpha = 1;
     }
   } else if (t === TERRAIN.VOLCANIC.id) {
-    // Lava glow
     ctx.beginPath();
     ctx.arc(screenX, screenY, 3 * dSize, 0, Math.PI * 2);
     ctx.fillStyle = '#ff4422';
@@ -688,7 +1223,6 @@ function drawTile(x, y) {
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (t === TERRAIN.RIVER.id) {
-    // Water shimmer
     ctx.beginPath();
     const shimmer = Math.sin(Date.now() * 0.002 + x * 3 + y * 2) * 2;
     ctx.moveTo(screenX - 6 * dSize, screenY + shimmer * dSize);
@@ -697,7 +1231,6 @@ function drawTile(x, y) {
     ctx.lineWidth = 2 * dSize;
     ctx.stroke();
   } else if (t === TERRAIN.DESERT.id) {
-    // Sand dune lines
     ctx.beginPath();
     ctx.moveTo(screenX - 6 * dSize, screenY + 1 * dSize);
     ctx.quadraticCurveTo(screenX - 2 * dSize, screenY - 2 * dSize, screenX + 2 * dSize, screenY + 1 * dSize);
@@ -705,7 +1238,6 @@ function drawTile(x, y) {
     ctx.lineWidth = 1 * dSize;
     ctx.stroke();
   } else if (t === TERRAIN.COAST.id || t === TERRAIN.DEEP_WATER.id) {
-    // Water ripple
     const phase = Date.now() * 0.001 + x + y * 1.3;
     ctx.beginPath();
     ctx.arc(screenX + Math.sin(phase) * 3 * dSize, screenY + Math.cos(phase) * 1.5 * dSize, 2 * dSize, 0, Math.PI * 2);
@@ -726,26 +1258,264 @@ function drawTile(x, y) {
   }
 }
 
-function noise_simple(x, y) {
-  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-  return n - Math.floor(n);
+// ============================================================
+// Building Rendering
+// ============================================================
+function drawBuilding(building) {
+  const { x: screenX, y: screenY } = tileToScreen(building.x, building.y);
+  const w = HALF_W * camera.zoom;
+  const h = HALF_H * camera.zoom;
+
+  // Frustum cull
+  if (screenX + w < -20 || screenX - w > canvas.width + 20 ||
+      screenY + h < -20 || screenY - h > canvas.height + 60) return;
+
+  const z = camera.zoom;
+  const civ = gameState.civs[building.owner];
+  const color = civ.color;
+
+  ctx.save();
+
+  switch (building.type) {
+    case 'citadel':
+      drawCitadel(screenX, screenY, z, color);
+      break;
+    case 'house':
+      drawHouse(screenX, screenY, z, color);
+      break;
+    case 'farm':
+      drawFarm(screenX, screenY, z, color);
+      break;
+    case 'solar_panel':
+      drawSolarPanel(screenX, screenY, z, color);
+      break;
+    case 'home_miner':
+      drawHomeMiner(screenX, screenY, z, color);
+      break;
+  }
+
+  ctx.restore();
 }
 
-function adjustColor(hex, amount) {
-  const r = Math.min(255, Math.max(0, parseInt(hex.slice(1, 3), 16) + amount));
-  const g = Math.min(255, Math.max(0, parseInt(hex.slice(3, 5), 16) + amount));
-  const b = Math.min(255, Math.max(0, parseInt(hex.slice(5, 7), 16) + amount));
-  return `rgb(${r},${g},${b})`;
+function drawCitadel(sx, sy, z, color) {
+  // Large diamond/castle shape
+  const s = z * 12;
+
+  // Base platform
+  ctx.beginPath();
+  ctx.moveTo(sx, sy - s * 1.8);
+  ctx.lineTo(sx + s, sy - s * 0.6);
+  ctx.lineTo(sx, sy + s * 0.2);
+  ctx.lineTo(sx - s, sy - s * 0.6);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  ctx.lineWidth = 1.5 * z;
+  ctx.stroke();
+
+  // Tower spire
+  ctx.beginPath();
+  ctx.moveTo(sx, sy - s * 2.6);
+  ctx.lineTo(sx + s * 0.4, sy - s * 1.4);
+  ctx.lineTo(sx - s * 0.4, sy - s * 1.4);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  // Castle crenellations (small rectangles on top)
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  for (let i = -2; i <= 2; i++) {
+    ctx.fillRect(sx + i * s * 0.3 - z, sy - s * 1.8 - z * 2, z * 2, z * 3);
+  }
+
+  // Glow effect
+  ctx.beginPath();
+  ctx.arc(sx, sy - s, s * 0.6, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(sx, sy - s, 0, sx, sy - s, s * 0.6);
+  grad.addColorStop(0, color + '44');
+  grad.addColorStop(1, color + '00');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.globalAlpha = 1;
 }
 
+function drawHouse(sx, sy, z, color) {
+  const s = z * 6;
+
+  // Walls
+  ctx.fillStyle = '#c8b898';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s, sy - s * 0.6, s * 2, s * 1.4);
+
+  // Roof (triangle)
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 1.3, sy - s * 0.6);
+  ctx.lineTo(sx, sy - s * 2);
+  ctx.lineTo(sx + s * 1.3, sy - s * 0.6);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.fill();
+
+  // Door
+  ctx.fillStyle = '#5a3a1a';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - z * 1.5, sy + s * 0.1, z * 3, s * 0.7);
+
+  ctx.globalAlpha = 1;
+}
+
+function drawFarm(sx, sy, z, color) {
+  const s = z * 7;
+
+  // Green field
+  ctx.fillStyle = '#5a9a3a';
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(sx, sy - s * 0.6);
+  ctx.lineTo(sx + s, sy);
+  ctx.lineTo(sx, sy + s * 0.6);
+  ctx.lineTo(sx - s, sy);
+  ctx.closePath();
+  ctx.fill();
+
+  // Crop lines
+  ctx.strokeStyle = '#3a7a1a';
+  ctx.lineWidth = z;
+  ctx.globalAlpha = 0.6;
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx + i * s * 0.25 - s * 0.3, sy - s * 0.2 + i * z);
+    ctx.lineTo(sx + i * s * 0.25 + s * 0.3, sy + s * 0.2 + i * z);
+    ctx.stroke();
+  }
+
+  // Small barn
+  ctx.fillStyle = '#8b4513';
+  ctx.globalAlpha = 0.85;
+  ctx.fillRect(sx - z * 2, sy - s * 0.9, z * 4, z * 4);
+
+  ctx.globalAlpha = 1;
+}
+
+function drawSolarPanel(sx, sy, z, color) {
+  const s = z * 7;
+
+  // Angled panel (parallelogram)
+  ctx.fillStyle = '#1a4488';
+  ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.7, sy - s * 0.8);
+  ctx.lineTo(sx + s * 0.7, sy - s * 0.8);
+  ctx.lineTo(sx + s * 0.5, sy + s * 0.2);
+  ctx.lineTo(sx - s * 0.5, sy + s * 0.2);
+  ctx.closePath();
+  ctx.fill();
+
+  // Grid lines on panel
+  ctx.strokeStyle = '#4488cc';
+  ctx.lineWidth = z * 0.6;
+  ctx.globalAlpha = 0.7;
+  // Horizontal
+  for (let i = 0; i < 3; i++) {
+    const fy = sy - s * 0.7 + i * s * 0.35;
+    ctx.beginPath();
+    ctx.moveTo(sx - s * 0.6, fy);
+    ctx.lineTo(sx + s * 0.6, fy);
+    ctx.stroke();
+  }
+  // Vertical
+  for (let i = -1; i <= 1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx + i * s * 0.35, sy - s * 0.8);
+    ctx.lineTo(sx + i * s * 0.28, sy + s * 0.2);
+    ctx.stroke();
+  }
+
+  // Support pole
+  ctx.fillStyle = '#888';
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - z, sy + s * 0.2, z * 2, s * 0.4);
+
+  // Shine
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.2, sy - s * 0.5, z * 2, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(200,230,255,0.4)';
+  ctx.fill();
+
+  ctx.globalAlpha = 1;
+}
+
+function drawHomeMiner(sx, sy, z, color) {
+  const s = z * 5;
+
+  // Box
+  ctx.fillStyle = '#333';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s, sy - s * 0.8, s * 2, s * 1.4);
+
+  // Front panel darker
+  ctx.fillStyle = '#222';
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.6, s * 1.6, s * 1);
+
+  // Ventilation lines
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = z * 0.5;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx - s * 0.6, sy - s * 0.3 + i * s * 0.3);
+    ctx.lineTo(sx + s * 0.6, sy - s * 0.3 + i * s * 0.3);
+    ctx.stroke();
+  }
+
+  // Blinking orange LED
+  const blink = Math.sin(Date.now() * 0.005 + sx * 0.1) > 0;
+  if (blink) {
+    ctx.beginPath();
+    ctx.arc(sx + s * 0.5, sy - s * 0.5, z * 2, 0, Math.PI * 2);
+    ctx.fillStyle = '#F7931A';
+    ctx.fill();
+
+    // LED glow
+    ctx.beginPath();
+    ctx.arc(sx + s * 0.5, sy - s * 0.5, z * 4, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(sx + s * 0.5, sy - s * 0.5, 0, sx + s * 0.5, sy - s * 0.5, z * 4);
+    grad.addColorStop(0, 'rgba(247,147,26,0.3)');
+    grad.addColorStop(1, 'rgba(247,147,26,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(sx + s * 0.5, sy - s * 0.5, z * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#664400';
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+}
+
+// ============================================================
+// Main render
+// ============================================================
 function render() {
   ctx.fillStyle = '#080810';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw tiles back to front for correct depth
+  // Build a map of tile coords -> buildings for quick lookup during draw
+  const buildingMap = {};
+  for (const b of gameState.buildings) {
+    buildingMap[`${b.x},${b.y}`] = b;
+  }
+
+  // Draw tiles and buildings back to front for correct depth
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
       drawTile(x, y);
+      const b = buildingMap[`${x},${y}`];
+      if (b) drawBuilding(b);
     }
   }
 }
@@ -773,33 +1543,44 @@ function renderMinimap() {
     }
   }
 
-  // Draw quadrant borders (faint colored markers)
+  // Draw buildings on minimap
+  for (const b of gameState.buildings) {
+    const civ = gameState.civs[b.owner];
+    minimapCtx.fillStyle = civ.color;
+    const bx = b.x * tileW;
+    const by = b.y * tileH;
+    if (b.type === 'citadel') {
+      minimapCtx.fillRect(bx - 1, by - 1, tileW + 2, tileH + 2);
+    } else {
+      minimapCtx.fillRect(bx, by, tileW + 0.5, tileH + 0.5);
+    }
+  }
+
+  // Quadrant lines
   const qHalfX = mw / 2, qHalfY = mh / 2;
   minimapCtx.lineWidth = 1.5;
   minimapCtx.globalAlpha = 0.35;
 
-  // Vertical center line (left half red/green, right half blue/yellow)
   minimapCtx.beginPath();
   minimapCtx.moveTo(qHalfX, 0);
   minimapCtx.lineTo(qHalfX, mh);
   minimapCtx.strokeStyle = '#ffffff';
   minimapCtx.stroke();
 
-  // Horizontal center line
   minimapCtx.beginPath();
   minimapCtx.moveTo(0, qHalfY);
   minimapCtx.lineTo(mw, qHalfY);
   minimapCtx.stroke();
 
-  // Quadrant tints — very faint filled rects
-  minimapCtx.globalAlpha = 0.08;
-  minimapCtx.fillStyle = '#ff4444'; // NW = red
+  // Quadrant tints
+  minimapCtx.globalAlpha = 0.06;
+  minimapCtx.fillStyle = '#F7931A';
   minimapCtx.fillRect(0, 0, qHalfX, qHalfY);
-  minimapCtx.fillStyle = '#4488ff'; // NE = blue
+  minimapCtx.fillStyle = '#00A8FF';
   minimapCtx.fillRect(qHalfX, 0, qHalfX, qHalfY);
-  minimapCtx.fillStyle = '#44cc44'; // SW = green
+  minimapCtx.fillStyle = '#00CC66';
   minimapCtx.fillRect(0, qHalfY, qHalfX, qHalfY);
-  minimapCtx.fillStyle = '#ffcc00'; // SE = yellow
+  minimapCtx.fillStyle = '#AA44FF';
   minimapCtx.fillRect(qHalfX, qHalfY, qHalfX, qHalfY);
   minimapCtx.globalAlpha = 1;
 
@@ -810,7 +1591,6 @@ function renderMinimap() {
   }
 
   // Viewport rect
-  // Convert screen corners to tile coords then to minimap coords
   const topLeft = fromIso(0, 48);
   const bottomRight = fromIso(canvas.width, canvas.height);
 
@@ -842,6 +1622,7 @@ function updateInfoPanel() {
   const elev = map.elevation[y][x];
   const res = map.resourceData[y][x];
   const dep = map.deposits[y][x];
+  const building = getBuildingAt(x, y);
 
   let html = `
     <div class="info-row"><span class="label">Coordinates</span><span class="value">(${x}, ${y})</span></div>
@@ -851,6 +1632,25 @@ function updateInfoPanel() {
 
   if (dep) {
     html += `<div class="info-row"><span class="label">Deposit</span><span class="deposit-badge" style="background:${dep.color};color:#fff">${dep.symbol} ${dep.name}</span></div>`;
+  }
+
+  // Building info
+  if (building) {
+    const bt = BUILDING_TYPES[building.type];
+    const civ = gameState.civs[building.owner];
+    html += `
+      <div class="building-info">
+        <div class="bi-name" style="color:${civ.color}">${bt.name}</div>
+        <div class="bi-owner">Owner: <span style="color:${civ.color}">■</span> ${civ.name}</div>
+    `;
+    if (bt.energyOutput > 0) html += `<div class="bi-stat">⚡ Energy output: <strong>${bt.energyOutput}</strong></div>`;
+    if (bt.hashPower > 0) html += `<div class="bi-stat">⛏ Hash power: <strong>${bt.hashPower} H/s</strong></div>`;
+    if (bt.energy > 0) html += `<div class="bi-stat">⚡ Energy cost: <strong>${bt.energy}</strong></div>`;
+    if (bt.popCapacity > 0) html += `<div class="bi-stat">👥 Housing: <strong>+${bt.popCapacity}</strong></div>`;
+    if (bt.popCost > 0) html += `<div class="bi-stat">👷 Workers needed: <strong>${bt.popCost}</strong></div>`;
+    if (bt.foodOutput > 0) html += `<div class="bi-stat">🌾 Food output: <strong>${bt.foodOutput}</strong></div>`;
+    html += `<div class="bi-stat" style="color:#888;font-style:italic;margin-top:4px">${bt.description}</div>`;
+    html += `</div>`;
   }
 
   html += `<div class="resource-section"><h4>Energy Potential</h4>`;
@@ -925,7 +1725,6 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mouseup', e => {
   const dist = Math.abs(e.clientX - dragStart.x) + Math.abs(e.clientY - dragStart.y);
   if (dist < 5) {
-    // Click — select tile
     const tile = fromIso(e.clientX - canvas.width / 2 + camera.x, e.clientY - canvas.height / 2 + camera.y);
     if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
       selectedTile = { x: tile.x, y: tile.y };
@@ -943,7 +1742,6 @@ canvas.addEventListener('wheel', e => {
   const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
   const newZoom = Math.max(0.3, Math.min(3, camera.zoom * zoomFactor));
 
-  // Zoom toward mouse position
   const mx = e.clientX - canvas.width / 2;
   const my = e.clientY - canvas.height / 2;
 
@@ -966,8 +1764,26 @@ minimapCanvas.addEventListener('click', e => {
   camera.y = iso.y * camera.zoom;
 });
 
-document.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+document.addEventListener('keydown', e => {
+  keys[e.key.toLowerCase()] = true;
+
+  // Spacebar = next turn
+  if (e.code === 'Space' && !e.repeat) {
+    e.preventDefault();
+    processTurn();
+  }
+
+  // C = toggle civ panel
+  if (e.key.toLowerCase() === 'c' && !e.repeat) {
+    toggleCivPanel();
+  }
+});
 document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// Next Turn button
+document.getElementById('nextTurnBtn').addEventListener('click', () => {
+  processTurn();
+});
 
 // ============================================================
 // Game loop
@@ -994,7 +1810,9 @@ function gameLoop(time) {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 buildLegend();
+initCivilizations();
 initCamera();
+updateHUD();
 requestAnimationFrame(gameLoop);
 
 </script>
