@@ -420,6 +420,7 @@ const TERRAIN = {
   MOUNTAINS:  { id: 4, name: 'Mountains',  color: '#8a8a8a', darkColor: '#6e6e6e' },
   DESERT:     { id: 5, name: 'Desert',     color: '#c4a93a', darkColor: '#a8912e' },
   RIVER:      { id: 6, name: 'River',      color: '#3488b8', darkColor: '#2878a0' },
+  MAJOR_RIVER:{ id: 10, name: 'The Great Channel', color: '#2070c0', darkColor: '#1860a8' },
   VOLCANIC:   { id: 7, name: 'Volcanic',   color: '#8b3a3a', darkColor: '#722e2e' },
   FOREST:     { id: 8, name: 'Forest',     color: '#2d5a27', darkColor: '#234a1f' },
   SNOW:       { id: 9, name: 'Snow Peak',  color: '#d8dce8', darkColor: '#b8bcc8' },
@@ -427,6 +428,8 @@ const TERRAIN = {
 
 const TERRAIN_BY_ID = {};
 for (const k in TERRAIN) TERRAIN_BY_ID[TERRAIN[k].id] = TERRAIN[k];
+// Alias: MAJOR_RIVER renders like RIVER but distinct in data
+TERRAIN_BY_ID[TERRAIN.MAJOR_RIVER.id] = TERRAIN.MAJOR_RIVER;
 
 // Buildable terrain IDs
 const BUILDABLE_TERRAIN = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.DESERT.id, TERRAIN.HILLS.id];
@@ -616,7 +619,73 @@ function generateMap() {
     }
   }
 
-  // Rivers per quadrant
+  // ============================================================
+  // Major River: "The Great Channel" — flows through NW and SW quadrants
+  // ============================================================
+  const majorRiverNoise = new Noise(seed + 500);
+  const majorRiverTiles = new Set(); // track for majorRiver property
+
+  {
+    // River flows from the north edge (in NW quadrant) down through to the south edge (in SW quadrant)
+    // Start: find a coast/water tile on the north edge in the western half
+    let startX = Math.floor(MAP_W * 0.25); // roughly 1/4 from left
+    // End: exit on the south edge or southwest coast
+    let endX = Math.floor(MAP_W * 0.3);
+
+    // Generate path points with natural meandering
+    const pathPoints = [];
+    const totalSteps = MAP_H; // one point per row
+
+    for (let row = 0; row < MAP_H; row++) {
+      // Base x position: interpolate from startX to endX with meander
+      const t = row / (MAP_H - 1);
+      const baseX = startX + (endX - startX) * t;
+      // Add noise-based meandering
+      const meander = majorRiverNoise.fbm(row * 0.08, 0.5, 3) * 10;
+      const px = Math.round(Math.max(2, Math.min(MAP_W / 2 - 3, baseX + meander)));
+      pathPoints.push({ x: px, y: row });
+    }
+
+    // Carve the major river — 2-3 tiles wide
+    for (const pt of pathPoints) {
+      const { x, y } = pt;
+      // Width varies: 2-3 tiles based on noise
+      const widthNoise = majorRiverNoise.get(x * 0.2, y * 0.2);
+      const halfWidth = widthNoise > 0 ? 1 : 0; // 0 = center+1 side (2 tiles), 1 = center+both sides (3 tiles)
+
+      for (let dx = -halfWidth; dx <= halfWidth + 1; dx++) {
+        const nx = x + dx;
+        if (nx < 0 || nx >= MAP_W) continue;
+
+        const currentTerrain = terrain[y][nx];
+        // Skip mountains/snow/volcanic — river flows around them
+        if (currentTerrain === TERRAIN.MOUNTAINS.id ||
+            currentTerrain === TERRAIN.SNOW.id ||
+            currentTerrain === TERRAIN.VOLCANIC.id) continue;
+
+        terrain[y][nx] = TERRAIN.MAJOR_RIVER.id;
+        majorRiverTiles.add(`${nx},${y}`);
+        resourceData[y][nx].hydro = Math.round(80 + Math.random() * 20);
+      }
+    }
+
+    // Boost hydro potential for tiles within 2 tiles of the major river
+    for (const key of majorRiverTiles) {
+      const [rx, ry] = key.split(',').map(Number);
+      for (let dy = -2; dy <= 2; dy++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          const nx = rx + dx, ny = ry + dy;
+          if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+            if (!majorRiverTiles.has(`${nx},${ny}`)) {
+              resourceData[ny][nx].hydro = Math.max(resourceData[ny][nx].hydro, Math.round(50 + Math.random() * 30));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Rivers per quadrant (tributaries / smaller rivers)
   const halfW = Math.floor(MAP_W / 2), halfH = Math.floor(MAP_H / 2);
   const quadrants = [
     { name: 'NW', x0: 0, y0: 0, x1: halfW, y1: halfH },
@@ -633,6 +702,7 @@ function generateMap() {
       if (visited.has(key)) break;
       visited.add(key);
       if (terrain[cy][cx] === TERRAIN.DEEP_WATER.id || terrain[cy][cx] === TERRAIN.COAST.id) break;
+      if (terrain[cy][cx] === TERRAIN.MAJOR_RIVER.id) break; // tributaries merge into major river
       if (terrain[cy][cx] !== TERRAIN.MOUNTAINS.id && terrain[cy][cx] !== TERRAIN.SNOW.id && terrain[cy][cx] !== TERRAIN.VOLCANIC.id) {
         terrain[cy][cx] = TERRAIN.RIVER.id;
         resourceData[cy][cx].hydro = Math.round(60 + Math.random() * 40);
@@ -716,7 +786,7 @@ function generateMap() {
         else if (d === DEPOSITS.GAS) depCounts.GAS++;
         else if (d === DEPOSITS.URANIUM) depCounts.URANIUM++;
         else if (d === DEPOSITS.IRON) depCounts.IRON++;
-        if (terrain[y][x] === TERRAIN.RIVER.id) riverCount++;
+        if (terrain[y][x] === TERRAIN.RIVER.id || terrain[y][x] === TERRAIN.MAJOR_RIVER.id) riverCount++;
       }
     }
 
@@ -776,7 +846,7 @@ function generateMap() {
     }
   }
 
-  return { terrain, elevation, deposits, resourceData };
+  return { terrain, elevation, deposits, resourceData, majorRiverTiles };
 }
 
 // ============================================================
@@ -839,7 +909,7 @@ function isBuildable(x, y) {
 function isBuildableOrSpecial(x, y) {
   if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return false;
   const t = map.terrain[y][x];
-  return BUILDABLE_TERRAIN.includes(t) || t === TERRAIN.RIVER.id || t === TERRAIN.VOLCANIC.id;
+  return BUILDABLE_TERRAIN.includes(t) || t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id || t === TERRAIN.VOLCANIC.id;
 }
 
 function distToNearestRiver(x, y) {
@@ -849,7 +919,7 @@ function distToNearestRiver(x, y) {
     for (let dx = -range; dx <= range; dx++) {
       const nx = x + dx, ny = y + dy;
       if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
-        if (map.terrain[ny][nx] === TERRAIN.RIVER.id) {
+        if (map.terrain[ny][nx] === TERRAIN.RIVER.id || map.terrain[ny][nx] === TERRAIN.MAJOR_RIVER.id) {
           const d = Math.abs(dx) + Math.abs(dy);
           if (d < minDist) minDist = d;
         }
@@ -924,7 +994,7 @@ function findNearestTileOfType(cx, cy, terrainId, range) {
     for (let dx = -range; dx <= range; dx++) {
       const nx = cx + dx, ny = cy + dy;
       if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
-        if (map.terrain[ny][nx] === terrainId && !tileHasBuilding(nx, ny)) {
+        if ((map.terrain[ny][nx] === terrainId || (terrainId === TERRAIN.RIVER.id && map.terrain[ny][nx] === TERRAIN.MAJOR_RIVER.id)) && !tileHasBuilding(nx, ny)) {
           const d = Math.abs(dx) + Math.abs(dy);
           if (d < bestDist) { bestDist = d; bestX = nx; bestY = ny; }
         }
@@ -963,7 +1033,7 @@ function placeStartingBuildings(civId, cx, cy) {
     needed.push({ type: 'solar_panel' });
     // Wind turbine placed separately on hill tile
   } else {
-    // NW: balanced, 1 Solar Panel
+    // NW: balanced, 1 Solar Panel + try Hydro Dam on major river
     needed.push({ type: 'solar_panel' });
   }
 
@@ -1038,6 +1108,8 @@ function recalculateCivStats() {
 
       if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) {
         energyOut = 10; // Desert solar bonus
+      } else if (b.type === 'hydro_dam' && tileTerrain === TERRAIN.MAJOR_RIVER.id) {
+        energyOut = 20; // Major river hydro bonus — strongest
       } else if (b.type === 'hydro_dam' && tileQuad === 'SW') {
         energyOut = 18; // River quadrant hydro bonus
       } else if (b.type === 'wind_turbine' && tileQuad === 'SE') {
@@ -1352,6 +1424,24 @@ function drawTile(x, y) {
     ctx.quadraticCurveTo(screenX, screenY - 2 * dSize + shimmer * dSize, screenX + 6 * dSize, screenY + shimmer * dSize);
     ctx.strokeStyle = 'rgba(100,180,255,0.5)';
     ctx.lineWidth = 2 * dSize;
+    ctx.stroke();
+  } else if (t === TERRAIN.MAJOR_RIVER.id) {
+    // Deeper, more prominent water effect for The Great Channel
+    const shimmer = Math.sin(Date.now() * 0.0015 + x * 2 + y * 1.5) * 2.5;
+    // Primary current line
+    ctx.beginPath();
+    ctx.moveTo(screenX - 8 * dSize, screenY + shimmer * dSize);
+    ctx.quadraticCurveTo(screenX, screenY - 3 * dSize + shimmer * dSize, screenX + 8 * dSize, screenY + shimmer * dSize);
+    ctx.strokeStyle = 'rgba(80,160,255,0.6)';
+    ctx.lineWidth = 3 * dSize;
+    ctx.stroke();
+    // Secondary shimmer
+    ctx.beginPath();
+    const shimmer2 = Math.sin(Date.now() * 0.002 + x * 4 + y * 3) * 1.5;
+    ctx.moveTo(screenX - 5 * dSize, screenY + shimmer2 * dSize + 2 * dSize);
+    ctx.quadraticCurveTo(screenX + 2 * dSize, screenY - 1 * dSize + shimmer2 * dSize, screenX + 5 * dSize, screenY + shimmer2 * dSize + 2 * dSize);
+    ctx.strokeStyle = 'rgba(120,200,255,0.35)';
+    ctx.lineWidth = 1.5 * dSize;
     ctx.stroke();
   } else if (t === TERRAIN.DESERT.id) {
     ctx.beginPath();
@@ -1903,6 +1993,11 @@ function updateInfoPanel() {
   if (t.id === TERRAIN.DESERT.id) bonuses.push({ text: 'Desert Solar Bonus: +25%', color: '#f0c040' });
   if (t.id === TERRAIN.RIVER.id && tileQuad === 'SW') bonuses.push({ text: 'River Hydro Bonus: +20%', color: '#4090d0' });
   if (t.id === TERRAIN.RIVER.id) bonuses.push({ text: 'River: Hydro Dam buildable', color: '#3488b8' });
+  if (t.id === TERRAIN.MAJOR_RIVER.id) {
+    bonuses.push({ text: 'The Great Channel: Major Waterway', color: '#2070c0' });
+    bonuses.push({ text: 'Major River: Hydro Dam buildable', color: '#2070c0' });
+    bonuses.push({ text: 'Trade Route potential (future)', color: '#f0c040' });
+  }
   if (t.id === TERRAIN.HILLS.id && tileQuad === 'SE') bonuses.push({ text: 'Mountain Wind Bonus: +33%', color: '#80c8ff' });
   if (t.id === TERRAIN.HILLS.id) bonuses.push({ text: 'Hills: Wind Turbine buildable', color: '#6a8f4e' });
   if (t.id === TERRAIN.VOLCANIC.id) bonuses.push({ text: 'Volcanic Geothermal Bonus: +25%', color: '#ff6644' });
@@ -1923,6 +2018,7 @@ function updateInfoPanel() {
     // Calculate actual energy output with bonuses
     let actualEnergy = bt.energyOutput;
     if (building.type === 'solar_panel' && t.id === TERRAIN.DESERT.id) actualEnergy = 10;
+    else if (building.type === 'hydro_dam' && t.id === TERRAIN.MAJOR_RIVER.id) actualEnergy = 20;
     else if (building.type === 'hydro_dam' && tileQuad === 'SW') actualEnergy = 18;
     else if (building.type === 'wind_turbine' && tileQuad === 'SE') actualEnergy = 8;
     else if (building.type === 'geothermal_plant' && t.id === TERRAIN.VOLCANIC.id) actualEnergy = 15;
@@ -1972,7 +2068,7 @@ function updateInfoPanel() {
 function buildLegend() {
   const container = document.getElementById('legendItems');
   const items = [
-    TERRAIN.DEEP_WATER, TERRAIN.COAST, TERRAIN.RIVER,
+    TERRAIN.DEEP_WATER, TERRAIN.COAST, TERRAIN.RIVER, TERRAIN.MAJOR_RIVER,
     TERRAIN.PLAINS, TERRAIN.FOREST, TERRAIN.HILLS,
     TERRAIN.MOUNTAINS, TERRAIN.SNOW, TERRAIN.DESERT, TERRAIN.VOLCANIC
   ];
