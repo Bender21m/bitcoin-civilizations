@@ -1925,9 +1925,10 @@ function toIso(tx, ty) {
   };
 }
 
-function fromIso(sx, sy) {
-  const wx = (sx + camera.x) / camera.zoom;
-  const wy = (sy + camera.y) / camera.zoom;
+function fromIso(screenX, screenY) {
+  // screenX, screenY = raw client coordinates
+  const wx = (screenX - canvas.width / 2 + camera.x) / camera.zoom;
+  const wy = (screenY - canvas.height / 2 + camera.y) / camera.zoom;
   const tx = (wx / HALF_W + wy / HALF_H) / 2;
   const ty = (wy / HALF_H - wx / HALF_W) / 2;
   return { x: Math.floor(tx), y: Math.floor(ty) };
@@ -2749,7 +2750,7 @@ canvas.addEventListener('mousemove', e => {
     camera.y = cameraStart.y - (e.clientY - dragStart.y);
   }
 
-  const tile = fromIso(e.clientX - canvas.width / 2 + camera.x, e.clientY - canvas.height / 2 + camera.y);
+  const tile = fromIso(e.clientX, e.clientY);
   if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
     hoveredTile = tile;
     document.getElementById('hoverCoords').textContent = `(${tile.x}, ${tile.y}) — ${TERRAIN_BY_ID[map.terrain[tile.y][tile.x]].name}`;
@@ -2762,7 +2763,7 @@ canvas.addEventListener('mousemove', e => {
 canvas.addEventListener('mouseup', e => {
   const dist = Math.abs(e.clientX - dragStart.x) + Math.abs(e.clientY - dragStart.y);
   if (dist < 5) {
-    const tile = fromIso(e.clientX - canvas.width / 2 + camera.x, e.clientY - canvas.height / 2 + camera.y);
+    const tile = fromIso(e.clientX, e.clientY);
     if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
       selectedTile = { x: tile.x, y: tile.y };
     } else {
