@@ -587,7 +587,7 @@ function generateMap() {
       const dx = (x - MAP_W / 2) / (MAP_W / 2);
       const dy = (y - MAP_H / 2) / (MAP_H / 2);
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const falloff = 1 - Math.pow(Math.min(dist * 0.85, 1), 2.8);
+      const falloff = 1 - Math.pow(Math.min(dist * 0.8, 1), 2.5);
 
       let e = noise1.fbm(x * 0.06, y * 0.06, 5) * 0.5 + 0.5;
       e = e * falloff;
@@ -654,16 +654,16 @@ function generateMap() {
 
   // Terrain distribution targets per quadrant (min%, max%)
   // Keys: terrain ids. "water" = DEEP_WATER + COAST combined
+  // Terrain distribution targets per quadrant (min%, max%) — LAND types only.
+  // Water is handled by noise+falloff island generation and is never touched here.
   const QUAD_TARGETS = {
     NW: {
-      // Plains + Forest: 50-65% (split roughly), Hills: 10-15%, River: 5-10%, Mountains: 5-8%, Desert: 0-5%, Volcanic: 0-2%, Water: 10-20%
       [TERRAIN.PLAINS.id]:     [25, 35],
       [TERRAIN.FOREST.id]:     [25, 30],
       [TERRAIN.HILLS.id]:      [10, 15],
       [TERRAIN.MOUNTAINS.id]:  [5, 8],
       [TERRAIN.DESERT.id]:     [0, 5],
       [TERRAIN.VOLCANIC.id]:   [0, 2],
-      water:                   [10, 20],
     },
     NE: {
       [TERRAIN.DESERT.id]:     [30, 45],
@@ -672,7 +672,6 @@ function generateMap() {
       [TERRAIN.MOUNTAINS.id]:  [5, 10],
       [TERRAIN.FOREST.id]:     [3, 8],
       [TERRAIN.VOLCANIC.id]:   [1, 3],
-      water:                   [10, 20],
     },
     SW: {
       [TERRAIN.FOREST.id]:     [30, 40],
@@ -681,7 +680,6 @@ function generateMap() {
       [TERRAIN.MOUNTAINS.id]:  [3, 6],
       [TERRAIN.VOLCANIC.id]:   [2, 5],
       [TERRAIN.DESERT.id]:     [0, 3],
-      water:                   [10, 20],
     },
     SE: {
       [TERRAIN.HILLS.id]:      [15, 20],
@@ -690,67 +688,79 @@ function generateMap() {
       [TERRAIN.PLAINS.id]:     [15, 25],
       [TERRAIN.FOREST.id]:     [5, 10],
       [TERRAIN.DESERT.id]:     [5, 10],
-      water:                   [10, 20],
     },
   };
 
   // River targets are enforced separately via river carving later
   // Snow is counted as mountains for distribution purposes
 
+  // Edge protection zone size
+  const EDGE_PROTECT = 8;
+
+  function isProtectedWater(x, y) {
+    const t = terrain[y][x];
+    const isWaterType = (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id);
+    if (!isWaterType) return false;
+    // Protect water tiles near map edges (ocean border)
+    if (x < EDGE_PROTECT || x >= MAP_W - EDGE_PROTECT || y < EDGE_PROTECT || y >= MAP_H - EDGE_PROTECT) return true;
+    // Protect water tiles where elevation is below coast threshold (island-to-ocean transition)
+    if (elevation[y][x] < 0.22) return true;
+    return false;
+  }
+
   function enforceQuadrantDistribution(q) {
     const targets = QUAD_TARGETS[q.name];
     if (!targets) return;
 
-    const totalTiles = (q.x1 - q.x0) * (q.y1 - q.y0);
-
-    // Collect all tiles in quadrant (excluding rivers/major rivers which we handle separately)
-    const tiles = [];
+    // Collect only LAND tiles in quadrant that are eligible for conversion.
+    // Exclude: rivers, major rivers, water tiles, protected water, snow (counted as mountains).
+    const landTiles = [];
     for (let y = q.y0; y < q.y1; y++) {
       for (let x = q.x0; x < q.x1; x++) {
-        tiles.push({ x, y, terrain: terrain[y][x], elev: elevation[y][x], moist: moisture[y][x], heat: heat[y][x] });
+        const t = terrain[y][x];
+        // Skip all water types entirely — never touch them
+        if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) continue;
+        // Skip rivers — never touch them
+        if (t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id) continue;
+        landTiles.push({ x, y });
       }
     }
 
-    // Count current distribution
-    function countTerrain() {
+    const totalLand = landTiles.length;
+    if (totalLand === 0) return;
+
+    // Count current land terrain distribution (snow counts as mountains)
+    function countLandTerrain() {
       const counts = {};
-      let waterCount = 0;
-      for (const tile of tiles) {
+      for (const tile of landTiles) {
         const t = terrain[tile.y][tile.x];
-        if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) {
-          waterCount++;
-        } else if (t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id) {
-          // skip rivers
-        } else if (t === TERRAIN.SNOW.id) {
+        if (t === TERRAIN.SNOW.id) {
           counts[TERRAIN.MOUNTAINS.id] = (counts[TERRAIN.MOUNTAINS.id] || 0) + 1;
         } else {
           counts[t] = (counts[t] || 0) + 1;
         }
       }
-      counts.water = waterCount;
       return counts;
     }
 
     // Multiple passes to converge
     for (let pass = 0; pass < 5; pass++) {
-      const counts = countTerrain();
+      const counts = countLandTerrain();
 
       for (const [targetKey, [minPct, maxPct]] of Object.entries(targets)) {
-        const isWater = targetKey === 'water';
-        const terrainId = isWater ? null : parseInt(targetKey);
-        const currentCount = counts[isWater ? 'water' : terrainId] || 0;
-        const currentPct = (currentCount / totalTiles) * 100;
-        const minCount = Math.floor(totalTiles * minPct / 100);
-        const maxCount = Math.ceil(totalTiles * maxPct / 100);
+        const terrainId = parseInt(targetKey);
+        const currentCount = counts[terrainId] || 0;
+        const minCount = Math.floor(totalLand * minPct / 100);
+        const maxCount = Math.ceil(totalLand * maxPct / 100);
 
         if (currentCount < minCount) {
-          // Need more of this type — find most over-represented type to convert from
+          // Need more of this type — find most over-represented land type to convert from
           let mostOverKey = null, mostOverAmount = 0;
           for (const [oKey, [oMin, oMax]] of Object.entries(targets)) {
             if (oKey === targetKey) continue;
-            const oIsWater = oKey === 'water';
-            const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
-            const oMaxCount = Math.ceil(totalTiles * oMax / 100);
+            const oId = parseInt(oKey);
+            const oCount = counts[oId] || 0;
+            const oMaxCount = Math.ceil(totalLand * oMax / 100);
             const overAmount = oCount - oMaxCount;
             if (overAmount > mostOverAmount) {
               mostOverAmount = overAmount;
@@ -758,88 +768,69 @@ function generateMap() {
             }
           }
 
-          // If no over-represented type, take from the most abundant
+          // If no over-represented type, take from the most abundant land type
           if (!mostOverKey) {
             let maxC = 0;
             for (const [oKey] of Object.entries(targets)) {
               if (oKey === targetKey) continue;
-              const oIsWater = oKey === 'water';
-              const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
+              const oId = parseInt(oKey);
+              const oCount = counts[oId] || 0;
               if (oCount > maxC) { maxC = oCount; mostOverKey = oKey; }
             }
           }
 
           if (!mostOverKey) continue;
 
-          const sourceIsWater = mostOverKey === 'water';
-          const sourceId = sourceIsWater ? null : parseInt(mostOverKey);
+          const sourceId = parseInt(mostOverKey);
           const needed = minCount - currentCount;
 
-          // Find candidate tiles to convert (from source type)
+          // Find candidate land tiles to convert (from source type)
           let candidates = [];
-          for (const tile of tiles) {
+          for (const tile of landTiles) {
             const t = terrain[tile.y][tile.x];
-            if (sourceIsWater) {
-              if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) candidates.push(tile);
-            } else {
-              if (t === sourceId || (sourceId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
-            }
+            if (t === sourceId || (sourceId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
           }
 
-          // Sort candidates by noise proximity to target terrain thresholds
           candidates.sort(() => rng() - 0.5);
 
           const toConvert = Math.min(needed, candidates.length);
           for (let i = 0; i < toConvert; i++) {
             const tile = candidates[i];
-            if (isWater) {
-              terrain[tile.y][tile.x] = rng() < 0.5 ? TERRAIN.DEEP_WATER.id : TERRAIN.COAST.id;
-            } else {
-              terrain[tile.y][tile.x] = terrainId;
-            }
+            terrain[tile.y][tile.x] = terrainId;
           }
         } else if (currentCount > maxCount) {
-          // Too many — convert excess to the quadrant's dominant type (first entry)
+          // Too many — convert excess to the most under-represented land type
           const excess = currentCount - maxCount;
           let candidates = [];
-          for (const tile of tiles) {
+          for (const tile of landTiles) {
             const t = terrain[tile.y][tile.x];
-            if (isWater) {
-              if (t === TERRAIN.DEEP_WATER.id || t === TERRAIN.COAST.id) candidates.push(tile);
-            } else {
-              if (t === terrainId || (terrainId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
-            }
+            if (t === terrainId || (terrainId === TERRAIN.MOUNTAINS.id && t === TERRAIN.SNOW.id)) candidates.push(tile);
           }
           candidates.sort(() => rng() - 0.5);
 
-          // Find the most under-represented type to convert to
+          // Find the most under-represented land type to convert to
           let bestUnderKey = null, bestUnderAmount = Infinity;
           for (const [oKey, [oMin]] of Object.entries(targets)) {
             if (oKey === targetKey) continue;
-            const oIsWater = oKey === 'water';
-            const oCount = counts[oIsWater ? 'water' : parseInt(oKey)] || 0;
-            const oMinCount = Math.floor(totalTiles * oMin / 100);
+            const oId = parseInt(oKey);
+            const oCount = counts[oId] || 0;
+            const oMinCount = Math.floor(totalLand * oMin / 100);
             if (oCount < oMinCount && oCount < bestUnderAmount) {
               bestUnderAmount = oCount;
               bestUnderKey = oKey;
             }
           }
 
-          // Fallback: convert to dominant type (first key in targets)
+          // Fallback: convert to dominant land type (first key in targets)
           const firstKey = Object.keys(targets)[0];
           if (!bestUnderKey || bestUnderKey === targetKey) bestUnderKey = firstKey;
 
-          const destIsWater = bestUnderKey === 'water';
-          const destId = destIsWater ? null : parseInt(bestUnderKey);
+          const destId = parseInt(bestUnderKey);
 
           const toConvert = Math.min(excess, candidates.length);
           for (let i = 0; i < toConvert; i++) {
             const tile = candidates[i];
-            if (destIsWater) {
-              terrain[tile.y][tile.x] = rng() < 0.5 ? TERRAIN.DEEP_WATER.id : TERRAIN.COAST.id;
-            } else {
-              terrain[tile.y][tile.x] = destId;
-            }
+            terrain[tile.y][tile.x] = destId;
           }
         }
       }
