@@ -621,10 +621,139 @@
     font-size: 10px;
     font-family: inherit;
   }
+
+  /* Tutorial Overlay */
+  #tutorialOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  #tutorialOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #tutorialCard {
+    background: linear-gradient(145deg, rgba(20,20,32,0.98) 0%, rgba(12,12,22,0.98) 100%);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 16px;
+    padding: 32px 36px 24px;
+    max-width: 460px;
+    width: 90vw;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(247,147,26,0.12);
+    position: relative;
+    text-align: center;
+  }
+  #tutorialCard h2 {
+    color: #F7931A;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: 1px;
+  }
+  #tutorialCard .tutorial-step-content {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.8;
+    text-align: left;
+    margin: 16px 0 20px;
+    min-height: 120px;
+    transition: opacity 0.25s ease;
+  }
+  #tutorialCard .tutorial-step-content div {
+    padding: 2px 0;
+  }
+  .tutorial-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tutorial-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .tutorial-dot.active {
+    background: #F7931A;
+    transform: scale(1.25);
+  }
+  .tutorial-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .tutorial-btn {
+    background: linear-gradient(135deg, #F7931A 0%, #e07800 100%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 3px 12px rgba(247,147,26,0.3);
+  }
+  .tutorial-btn:hover {
+    transform: scale(1.04);
+    box-shadow: 0 5px 20px rgba(247,147,26,0.45);
+  }
+  .tutorial-btn:active { transform: scale(0.97); }
+  .tutorial-btn.secondary {
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: none;
+    color: #aaa;
+  }
+  .tutorial-btn.secondary:hover { color: #ddd; border-color: rgba(247,147,26,0.4); }
+
+  /* Quick-start tooltips */
+  #quickTip {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 10px;
+    padding: 12px 22px;
+    font-size: 14px;
+    color: #eee;
+    z-index: 300;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    max-width: 420px;
+    text-align: center;
+  }
+  #quickTip.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 520px) {
+    #tutorialCard { padding: 22px 18px 16px; }
+    #tutorialCard h2 { font-size: 18px; }
+    #tutorialCard .tutorial-step-content { font-size: 13px; min-height: 100px; }
+    .tutorial-btn { padding: 8px 16px; font-size: 13px; }
+  }
 </style>
 </head>
 <body>
-<canvas id="gameCanvas"></canvas>
+<canvas id="gameCanvas" tabindex="0"></canvas>
 
 <div id="topBar">
   <div class="logo">₿ITCOIN <span>CIVILIZATIONS</span></div>
@@ -664,6 +793,7 @@
   <div class="hud-sep"></div>
   <button id="buildBtn" class="hud-btn" title="Open Build Menu (B)">⚒ Build</button>
   <button id="newMapBtn" style="background:linear-gradient(135deg,#444 0%,#333 100%);color:#e0e0e0;font-size:12px;font-weight:600;border:1px solid rgba(247,147,26,0.4);border-radius:6px;padding:4px 12px;cursor:pointer;white-space:nowrap;letter-spacing:0.5px;transition:background 0.15s;">🗺 New Map</button>
+  <button id="helpBtn" class="hud-btn" title="Tutorial / Help (?)" style="font-size:14px;padding:2px 10px;margin-left:2px;">?</button>
   <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
 </div>
@@ -715,6 +845,20 @@
 </div>
 
 <button id="nextTurnBtn">⏭ NEXT TURN <kbd style="background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.2);color:#fff;margin-left:6px">Space</kbd></button>
+
+<div id="quickTip"></div>
+
+<div id="tutorialOverlay">
+  <div id="tutorialCard">
+    <h2 id="tutorialTitle"></h2>
+    <div class="tutorial-step-content" id="tutorialContent"></div>
+    <div class="tutorial-dots" id="tutorialDots"></div>
+    <div class="tutorial-nav">
+      <button class="tutorial-btn secondary" id="tutorialPrev">← Back</button>
+      <button class="tutorial-btn" id="tutorialNext">Next →</button>
+    </div>
+  </div>
+</div>
 
 <div id="controls">
   <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
@@ -4173,7 +4317,18 @@ document.addEventListener('click', e => {
   }
 });
 
-document.addEventListener('keydown', e => {
+// Use window-level listeners so keyboard works regardless of focus
+window.addEventListener('keydown', e => {
+  // Don't capture if user is typing in an input/textarea
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  // Ignore if tutorial is open
+  if (document.getElementById('tutorialOverlay').classList.contains('visible')) {
+    if (e.key === 'Escape') closeTutorial();
+    if (e.key === 'ArrowRight' || e.key === 'Enter') tutorialNextStep();
+    if (e.key === 'ArrowLeft') tutorialPrevStep();
+    return;
+  }
+
   keys[e.key.toLowerCase()] = true;
 
   // Escape: cancel build mode or close menu
@@ -4213,7 +4368,7 @@ document.addEventListener('keydown', e => {
     }
   }
 });
-document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
 // Next Turn button
 document.getElementById('nextTurnBtn').addEventListener('click', () => {
@@ -4296,6 +4451,155 @@ document.getElementById('newMapBtn').addEventListener('click', () => {
 });
 
 // ============================================================
+// Tutorial System
+// ============================================================
+const TUTORIAL_STEPS = [
+  {
+    title: 'Welcome to Bitcoin Civilizations',
+    content: `<div>You lead <strong style="color:#F7931A">Satoshi's Legacy</strong> — a civilization powered by Bitcoin mining.</div>
+<div style="margin-top:8px">Your goal: build energy infrastructure, mine Bitcoin, and grow your civilization.</div>`
+  },
+  {
+    title: 'Controls',
+    content: `<div>🖱 Drag or <kbd>WASD</kbd> — Pan the map</div>
+<div>🔍 Scroll — Zoom in/out</div>
+<div>👆 Click — Select a tile</div>
+<div>ℹ️ Click a tile to see its terrain, resources, and energy potential</div>`
+  },
+  {
+    title: 'Building',
+    content: `<div>⚒ Press <kbd>B</kbd> — Open the Build Menu</div>
+<div>📋 Pick a building — hover over the map</div>
+<div>🟢 Green = valid placement, 🔴 Red = can't build here</div>
+<div>👆 Click to place — costs sats from your treasury</div>
+<div>🗑 Right-click your buildings to demolish (50% refund)</div>
+<div style="margin-top:6px;color:#F7931A">💡 Tip: Build solar panels first for energy, then miners for sats!</div>`
+  },
+  {
+    title: 'The Game Loop',
+    content: `<div>⏭ Press <kbd>Space</kbd> — Advance one turn</div>
+<div>⚡ Energy powers your miners</div>
+<div>⛏ Miners produce hash power → earn Bitcoin</div>
+<div>👥 Population grows when you have food + housing</div>
+<div>😊 Keep happiness high for productivity bonuses</div>
+<div>🏆 Grow your civilization and dominate the hash rate!</div>`
+  }
+];
+
+let tutorialStep = 0;
+
+function renderTutorialStep() {
+  const step = TUTORIAL_STEPS[tutorialStep];
+  document.getElementById('tutorialTitle').textContent = step.title;
+  const contentEl = document.getElementById('tutorialContent');
+  contentEl.style.opacity = '0';
+  setTimeout(() => {
+    contentEl.innerHTML = step.content;
+    contentEl.style.opacity = '1';
+  }, 120);
+
+  // Dots
+  const dotsEl = document.getElementById('tutorialDots');
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < TUTORIAL_STEPS.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'tutorial-dot' + (i === tutorialStep ? ' active' : '');
+    dot.addEventListener('click', () => { tutorialStep = i; renderTutorialStep(); });
+    dotsEl.appendChild(dot);
+  }
+
+  // Buttons
+  const prevBtn = document.getElementById('tutorialPrev');
+  const nextBtn = document.getElementById('tutorialNext');
+  prevBtn.style.visibility = tutorialStep === 0 ? 'hidden' : 'visible';
+
+  if (tutorialStep === TUTORIAL_STEPS.length - 1) {
+    nextBtn.textContent = "Got it! Let's mine. ⛏";
+  } else {
+    nextBtn.textContent = 'Next →';
+  }
+}
+
+function openTutorial() {
+  tutorialStep = 0;
+  renderTutorialStep();
+  document.getElementById('tutorialOverlay').classList.add('visible');
+}
+
+function closeTutorial() {
+  document.getElementById('tutorialOverlay').classList.remove('visible');
+  localStorage.setItem('btcCivTutorialSeen', '1');
+  canvas.focus();
+}
+
+function tutorialNextStep() {
+  if (tutorialStep < TUTORIAL_STEPS.length - 1) {
+    tutorialStep++;
+    renderTutorialStep();
+  } else {
+    closeTutorial();
+  }
+}
+
+function tutorialPrevStep() {
+  if (tutorialStep > 0) {
+    tutorialStep--;
+    renderTutorialStep();
+  }
+}
+
+document.getElementById('tutorialNext').addEventListener('click', tutorialNextStep);
+document.getElementById('tutorialPrev').addEventListener('click', tutorialPrevStep);
+document.getElementById('tutorialOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('tutorialOverlay')) closeTutorial();
+});
+
+// Help button re-opens tutorial
+document.getElementById('helpBtn').addEventListener('click', () => {
+  openTutorial();
+});
+
+// ============================================================
+// Quick-start Tooltips
+// ============================================================
+const QUICK_TIPS = {
+  1:  "💡 Press B to open the Build Menu and place your first Solar Panel!",
+  3:  "💡 Build a Home Miner to start earning sats!",
+  5:  "💡 Build more Houses and Farms to grow your population!",
+  10: "💡 Try building a Mining Shed for more hash power!",
+};
+
+function getShownTips() {
+  try { return JSON.parse(localStorage.getItem('btcCivShownTips') || '{}'); } catch { return {}; }
+}
+
+function markTipShown(turn) {
+  const shown = getShownTips();
+  shown[turn] = true;
+  localStorage.setItem('btcCivShownTips', JSON.stringify(shown));
+}
+
+function showQuickTip(text) {
+  const el = document.getElementById('quickTip');
+  el.textContent = text;
+  el.classList.add('visible');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => el.classList.remove('visible'), 5000);
+}
+
+// Hook into processTurn to show tips
+const _originalProcessTurn = processTurn;
+processTurn = function() {
+  _originalProcessTurn();
+  const turn = gameState.turn;
+  const shown = getShownTips();
+  if (QUICK_TIPS[turn] && !shown[turn]) {
+    setTimeout(() => showQuickTip(QUICK_TIPS[turn]), 600);
+    markTipShown(turn);
+  }
+};
+
+// ============================================================
 // Init
 // ============================================================
 window.addEventListener('resize', resizeCanvas);
@@ -4304,6 +4608,26 @@ buildLegend();
 initCivilizations();
 initCamera();
 updateHUD();
+
+// Auto-focus canvas and re-focus on click
+canvas.focus();
+canvas.addEventListener('click', () => canvas.focus());
+
+// Show tutorial on first load
+if (!localStorage.getItem('btcCivTutorialSeen')) {
+  setTimeout(openTutorial, 300);
+}
+
+// Show turn 1 tip if not seen
+if (!getShownTips()[1]) {
+  setTimeout(() => {
+    if (!document.getElementById('tutorialOverlay').classList.contains('visible')) {
+      showQuickTip(QUICK_TIPS[1]);
+      markTipShown(1);
+    }
+  }, 2000);
+}
+
 requestAnimationFrame(gameLoop);
 
 </script>
