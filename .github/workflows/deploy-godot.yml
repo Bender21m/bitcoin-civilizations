@@ -3,8 +3,6 @@ name: Deploy Godot Web Build
 on:
   push:
     branches: [master]
-    paths:
-      - 'godot/**'
   workflow_dispatch:
 
 permissions:
