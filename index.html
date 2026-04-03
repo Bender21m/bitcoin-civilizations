@@ -750,6 +750,182 @@
     #tutorialCard .tutorial-step-content { font-size: 13px; min-height: 100px; }
     .tutorial-btn { padding: 8px 16px; font-size: 13px; }
   }
+
+  /* Tech Tree Panel */
+  #techTreeOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  #techTreeOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #techTreePanel {
+    background: linear-gradient(145deg, rgba(16,16,28,0.98) 0%, rgba(10,10,18,0.98) 100%);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 16px;
+    padding: 24px 28px 20px;
+    width: 94vw;
+    max-width: 1200px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(247,147,26,0.12);
+    position: relative;
+  }
+  #techTreePanel h2 {
+    color: #F7931A;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  #techTreeClose {
+    position: absolute;
+    top: 12px; right: 16px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  #techTreeClose:hover { color: #F7931A; }
+  .tech-tiers {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 400px;
+  }
+  .tech-tier {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .tech-tier-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 4px;
+  }
+  .tech-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: default;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .tech-card.researched {
+    background: rgba(68,221,102,0.1);
+    border-color: rgba(68,221,102,0.5);
+  }
+  .tech-card.available {
+    background: rgba(0,168,255,0.08);
+    border-color: rgba(0,168,255,0.5);
+    cursor: pointer;
+  }
+  .tech-card.available:hover {
+    background: rgba(0,168,255,0.15);
+    border-color: rgba(0,168,255,0.8);
+    box-shadow: 0 0 12px rgba(0,168,255,0.2);
+  }
+  .tech-card.locked {
+    opacity: 0.4;
+  }
+  .tech-card.researching {
+    border-color: rgba(247,147,26,0.7);
+    animation: techPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes techPulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(247,147,26,0.2); }
+    50% { box-shadow: 0 0 16px rgba(247,147,26,0.5); }
+  }
+  .tech-card .tech-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ddd;
+    margin-bottom: 4px;
+  }
+  .tech-card .tech-cost {
+    font-size: 11px;
+    color: #F7931A;
+    margin-bottom: 3px;
+  }
+  .tech-card .tech-unlocks {
+    font-size: 10px;
+    color: #888;
+  }
+  .tech-card .tech-requires {
+    font-size: 10px;
+    color: #666;
+    font-style: italic;
+  }
+  .tech-card .tech-effect {
+    font-size: 10px;
+    color: #cc88ff;
+    margin-top: 2px;
+  }
+  .tech-card .tech-progress-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .tech-card .tech-progress-fill {
+    height: 100%;
+    background: #F7931A;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .tech-card .tech-status-icon {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 14px;
+  }
+
+  /* Research HUD indicator */
+  #hudResearch {
+    font-size: 11px;
+    color: #F7931A;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Build menu locked entry */
+  .build-entry.locked {
+    opacity: 0.3;
+    cursor: not-allowed;
+    position: relative;
+  }
+  .build-entry.locked:hover {
+    background: rgba(255,255,255,0.02);
+    border-left-color: transparent;
+  }
+  .build-locked-tag {
+    font-size: 9px;
+    color: #ff6644;
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -794,6 +970,8 @@
   <button id="buildBtn" class="hud-btn" title="Open Build Menu (B)">⚒ Build</button>
   <button id="newMapBtn" style="background:linear-gradient(135deg,#444 0%,#333 100%);color:#e0e0e0;font-size:12px;font-weight:600;border:1px solid rgba(247,147,26,0.4);border-radius:6px;padding:4px 12px;cursor:pointer;white-space:nowrap;letter-spacing:0.5px;transition:background 0.15s;">🗺 New Map</button>
   <button id="helpBtn" class="hud-btn" title="Tutorial / Help (?)" style="font-size:14px;padding:2px 10px;margin-left:2px;">?</button>
+  <button id="techTreeBtn" class="hud-btn" title="Tech Tree (T)">🔬 Research</button>
+  <div id="hudResearch"></div>
   <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
 </div>
@@ -848,6 +1026,14 @@
 
 <div id="quickTip"></div>
 
+<div id="techTreeOverlay">
+  <div id="techTreePanel">
+    <button id="techTreeClose">✕</button>
+    <h2>🔬 TECH TREE</h2>
+    <div id="techTreeContent" class="tech-tiers"></div>
+  </div>
+</div>
+
 <div id="tutorialOverlay">
   <div id="tutorialCard">
     <h2 id="tutorialTitle"></h2>
@@ -861,7 +1047,7 @@
 </div>
 
 <div id="controls">
-  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
+  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>T</kbd> tech tree &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
 </div>
 
 <script>
@@ -944,24 +1130,233 @@ const DEPOSITS = {
 // Building Types
 // ============================================================
 const BUILDING_TYPES = {
-  citadel:          { name: 'Citadel',            energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 0,   icon: '🏰', description: 'Central hub of your civilization' },
-  house:            { name: 'House',              energy: 0,  hashPower: 0,  popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 80,  icon: '🏠', description: 'Provides housing for 2 workers' },
-  farm:             { name: 'Farm',               energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0,  cost: 60,  icon: '🌾', description: 'Feeds your population' },
-  solar_panel:      { name: 'Solar Panel Array',  energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 8,  cost: 100, icon: '☀️', description: 'Generates 8 energy (10 in desert)', validTerrain: [2,5,8,3] },
-  wind_turbine:     { name: 'Wind Turbine',       energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 6,  cost: 150, icon: '💨', description: 'Generates 6 energy on hills (8 in mountain quadrant)', validTerrain: [3] },
-  hydro_dam:        { name: 'Hydro Dam',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 15, cost: 300, icon: '🌊', description: 'Generates 15 energy on river (18-20 with bonus). Needs 2 workers', validTerrain: [6,10] },
-  geothermal_plant: { name: 'Geothermal Plant',   energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 12, cost: 400, icon: '🌋', description: 'Generates 12 energy on volcanic (15 with bonus). Needs 2 workers', validTerrain: [7] },
-  home_miner:       { name: 'Home Miner',         energy: 2,  hashPower: 1,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 50,  icon: '⛏️', description: 'Basic Bitcoin miner: 1 H/s, uses 2⚡ + 1 worker' },
-  mining_shed:      { name: 'Mining Shed',         energy: 8,  hashPower: 5,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 200, icon: '🏗️', description: 'Mid-tier miner: 5 H/s, uses 8⚡ + 1 worker' },
-  mining_warehouse: { name: 'Mining Warehouse',    energy: 20, hashPower: 15, popCapacity: 0, popCost: 3, foodOutput: 0, energyOutput: 0,  cost: 500, icon: '🏭', description: 'Industrial miner: 15 H/s, uses 20⚡ + 3 workers' },
+  citadel:          { name: 'Citadel',            energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 0,   icon: '🏰', description: 'Central hub of your civilization', category: 'special' },
+  house:            { name: 'House',              energy: 0,  hashPower: 0,  popCapacity: 2, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 80,  icon: '🏠', description: 'Provides housing for 2 workers', category: 'infrastructure' },
+  farm:             { name: 'Farm',               energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 1, foodOutput: 4, energyOutput: 0,  cost: 60,  icon: '🌾', description: 'Feeds your population', category: 'infrastructure' },
+  solar_panel:      { name: 'Solar Panel Array',  energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 8,  cost: 100, icon: '☀️', description: 'Generates 8 energy (10 in desert)', validTerrain: [2,5,8,3], category: 'energy' },
+  wind_turbine:     { name: 'Wind Turbine',       energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 6,  cost: 150, icon: '💨', description: 'Generates 6 energy on hills (8 in mountain quadrant)', validTerrain: [3], category: 'energy' },
+  hydro_dam:        { name: 'Hydro Dam',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 15, cost: 300, icon: '🌊', description: 'Generates 15 energy on river (18-20 with bonus). Needs 2 workers', validTerrain: [6,10], category: 'energy' },
+  geothermal_plant: { name: 'Geothermal Plant',   energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 2, foodOutput: 0, energyOutput: 12, cost: 400, icon: '🌋', description: 'Generates 12 energy on volcanic (15 with bonus). Needs 2 workers', validTerrain: [7], category: 'energy' },
+  home_miner:       { name: 'Home Miner',         energy: 2,  hashPower: 1,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 50,  icon: '⛏️', description: 'Basic Bitcoin miner: 1 H/s, uses 2⚡ + 1 worker', category: 'mining' },
+  mining_shed:      { name: 'Mining Shed',         energy: 8,  hashPower: 5,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 0,  cost: 200, icon: '🏗️', description: 'Mid-tier miner: 5 H/s, uses 8⚡ + 1 worker', category: 'mining' },
+  mining_warehouse: { name: 'Mining Warehouse',    energy: 20, hashPower: 15, popCapacity: 0, popCost: 3, foodOutput: 0, energyOutput: 0,  cost: 500, icon: '🏭', description: 'Industrial miner: 15 H/s, uses 20⚡ + 3 workers', category: 'mining' },
+  // --- New Energy Infrastructure ---
+  gas_plant:        { name: 'Gas Plant',           energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 3, foodOutput: 0, energyOutput: 20, cost: 350, icon: '🏭', description: 'Burns gas for 20 energy. Causes pollution. Needs 3 workers', validTerrain: [2,3,5,8], requiresDeposit: 'GAS', pollution: true, category: 'energy' },
+  coal_station:     { name: 'Coal Power Station',  energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 4, foodOutput: 0, energyOutput: 25, cost: 300, icon: '⛏🏭', description: 'Burns coal for 25 energy. Causes pollution. Needs 4 workers', validTerrain: [3,4], requiresDeposit: 'COAL', pollution: true, category: 'energy' },
+  nuclear_reactor:  { name: 'Nuclear Reactor',     energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 5, foodOutput: 0, energyOutput: 50, cost: 2000, icon: '☢️', description: 'Massive 50 energy output. Needs uranium nearby + Nuclear Physics tech', validTerrain: [2,3,5], requiresDeposit: 'URANIUM', requiresTech: 'nuclear_physics', category: 'energy' },
+  solar_farm:       { name: 'Solar Farm',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 14, cost: 250, icon: '🌤️', description: 'Upgraded solar: 14 energy. Requires Grid Management tech', validTerrain: [2,5,8,3], requiresTech: 'grid_management', category: 'energy' },
+  wind_farm:        { name: 'Wind Farm',           energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 1, foodOutput: 0, energyOutput: 10, cost: 300, icon: '🌬️', description: 'Upgraded wind: 10 energy. Requires Grid Management tech', validTerrain: [3], requiresTech: 'grid_management', category: 'energy' },
+  // --- New Mining Infrastructure ---
+  mining_data_center: { name: 'Mining Data Center', energy: 45, hashPower: 40, popCapacity: 0, popCost: 5, foodOutput: 0, energyOutput: 0, cost: 1200, icon: '🖥️', description: 'High-performance miner: 40 H/s, uses 45⚡ + 5 workers', requiresTech: 'advanced_mining', category: 'mining' },
+  mining_mega_facility: { name: 'Mining Mega Facility', energy: 100, hashPower: 100, popCapacity: 0, popCost: 10, foodOutput: 0, energyOutput: 0, cost: 3000, icon: '🏗️', description: 'Massive mining: 100 H/s, uses 100⚡ + 10 workers', requiresTech: 'mega_mining', category: 'mining' },
+  // --- Civilization Buildings ---
+  market:           { name: 'Market',              energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏪', description: '+5 happiness. Enables trade (future)', happinessBonus: 5, requiresTech: 'trade', category: 'civilization' },
+  school:           { name: 'School',              energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 300, icon: '🏫', description: '+3 happiness, -10% research time', happinessBonus: 3, researchSpeedBonus: 0.10, requiresTech: 'education', category: 'civilization' },
+  university:       { name: 'University',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 800, icon: '🎓', description: '+5 happiness, -25% research time. Requires School built', happinessBonus: 5, researchSpeedBonus: 0.25, requiresTech: 'higher_education', requiresBuilding: 'school', category: 'civilization' },
+  bank:             { name: 'Bank',                energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 500, icon: '🏦', description: '+10% sats income bonus', satsBonusPct: 0.10, requiresTech: 'banking', category: 'civilization' },
+  lightning_tower:  { name: 'Lightning Tower',     energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 600, icon: '⚡', description: '+8 happiness, +2 sats/turn routing fees', happinessBonus: 8, satsPerTurn: 2, requiresTech: 'lightning_network', category: 'civilization' },
+  embassy:          { name: 'Embassy',             energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏛️', description: '+5 happiness. Enables diplomacy (future)', happinessBonus: 5, requiresTech: 'diplomacy', category: 'civilization' },
+  node_relay:       { name: 'Node Relay',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 350, icon: '📡', description: '+2 happiness, extends territory by 3 tiles', happinessBonus: 2, territoryBonus: 3, requiresTech: 'networking', category: 'civilization' },
+  // --- Defense Buildings ---
+  walls:            { name: 'Walls',               energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 200, icon: '🧱', description: 'Defensive walls (future combat)', requiresTech: 'construction', category: 'defense' },
+  fortress:         { name: 'Fortress',            energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 800, icon: '🏰', description: 'Strong defense + garrison (future)', requiresTech: 'fortification', category: 'defense' },
+  // --- Special Buildings ---
+  satellite_array:  { name: 'Satellite Array',     energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 2500, icon: '🛰️', description: 'Reveals all civilization stats', requiresTech: 'satellite_tech', category: 'special' },
+  research_lab:     { name: 'Research Lab',        energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 1500, icon: '🔬', description: '+50% research speed', researchSpeedBonus: 0.50, requiresTech: 'higher_education', category: 'special' },
+  treasury_vault:   { name: 'Treasury Vault',      energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 1000, icon: '🔐', description: '+10 happiness, protects 50% sats from raids', happinessBonus: 10, requiresTech: 'cryptography', category: 'special' },
+  central_hub:      { name: 'Central Hub',         energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 3000, icon: '🌐', description: '+10 sats/turn per Lightning Tower owned', requiresTech: 'network_sovereignty', category: 'special' },
 };
 
 // Building categories for the build menu
 const BUILD_MENU_CATEGORIES = [
-  { label: '⚡ Energy', types: ['solar_panel', 'wind_turbine', 'hydro_dam', 'geothermal_plant'] },
-  { label: '⛏ Mining', types: ['home_miner', 'mining_shed', 'mining_warehouse'] },
+  { label: '⚡ Energy', types: ['solar_panel', 'wind_turbine', 'hydro_dam', 'geothermal_plant', 'gas_plant', 'coal_station', 'nuclear_reactor', 'solar_farm', 'wind_farm'] },
+  { label: '⛏ Mining', types: ['home_miner', 'mining_shed', 'mining_warehouse', 'mining_data_center', 'mining_mega_facility'] },
   { label: '🏘 Infrastructure', types: ['house', 'farm'] },
+  { label: '🏛 Civilization', types: ['market', 'school', 'university', 'bank', 'lightning_tower', 'embassy', 'node_relay'] },
+  { label: '🛡 Defense', types: ['walls', 'fortress'] },
+  { label: '⭐ Special', types: ['satellite_array', 'research_lab', 'treasury_vault', 'central_hub'] },
 ];
+
+// ============================================================
+// Tech Tree
+// ============================================================
+const TECH_TREE = {
+  // Tier 1 (Starting - already unlocked)
+  basic_solar:    { name: "Basic Solar",    tier: 1, cost: 0, unlocked: true, unlocks: ['solar_panel'], requires: [] },
+  basic_wind:     { name: "Basic Wind",     tier: 1, cost: 0, unlocked: true, unlocks: ['wind_turbine'], requires: [] },
+  home_mining:    { name: "Home Mining",    tier: 1, cost: 0, unlocked: true, unlocks: ['home_miner'], requires: [] },
+  farming:        { name: "Farming",        tier: 1, cost: 0, unlocked: true, unlocks: ['farm'], requires: [] },
+  // Tier 2 (Early - 200-500 sats)
+  hydro_engineering:  { name: "Hydro Engineering",  tier: 2, cost: 300, unlocks: ['hydro_dam'], requires: ['basic_solar'] },
+  gas_extraction:     { name: "Gas Extraction",     tier: 2, cost: 400, unlocks: ['gas_plant'], requires: ['basic_solar'] },
+  mining_optimization:{ name: "Mining Optimization", tier: 2, cost: 350, unlocks: ['mining_shed', 'mining_warehouse'], requires: ['home_mining'] },
+  trade:              { name: "Trade",              tier: 2, cost: 400, unlocks: ['market'], requires: ['farming'] },
+  construction:       { name: "Construction",       tier: 2, cost: 250, unlocks: ['walls'], requires: ['farming'] },
+  // Tier 3 (Mid - 500-1000 sats)
+  advanced_mining:    { name: "Advanced Mining",    tier: 3, cost: 800, unlocks: ['mining_data_center'], requires: ['mining_optimization'] },
+  grid_management:    { name: "Grid Management",    tier: 3, cost: 600, unlocks: ['solar_farm', 'wind_farm'], requires: ['hydro_engineering'] },
+  lightning_network:  { name: "Lightning Network",  tier: 3, cost: 700, unlocks: ['lightning_tower'], requires: ['trade'] },
+  diplomacy:          { name: "Diplomacy",          tier: 3, cost: 500, unlocks: ['embassy'], requires: ['trade'] },
+  coal_mining:        { name: "Coal Mining",        tier: 3, cost: 600, unlocks: ['coal_station'], requires: ['gas_extraction'] },
+  education:          { name: "Education",          tier: 3, cost: 500, unlocks: ['school'], requires: ['construction'] },
+  banking:            { name: "Banking",            tier: 3, cost: 600, unlocks: ['bank'], requires: ['trade'] },
+  // Tier 4 (Late - 1000-2000 sats)
+  nuclear_physics:    { name: "Nuclear Physics",    tier: 4, cost: 1500, unlocks: ['nuclear_reactor'], requires: ['coal_mining', 'education'] },
+  asic_development:   { name: "ASIC Development",   tier: 4, cost: 1200, unlocks: [], requires: ['advanced_mining'], effect: 'double_hash_efficiency' },
+  mega_mining:        { name: "Mega Mining",        tier: 4, cost: 1800, unlocks: ['mining_mega_facility'], requires: ['advanced_mining'] },
+  satellite_tech:     { name: "Satellite Tech",     tier: 4, cost: 2000, unlocks: ['satellite_array'], requires: ['grid_management'] },
+  cryptography:       { name: "Cryptography",       tier: 4, cost: 1000, unlocks: ['treasury_vault'], requires: ['banking'] },
+  fortification:      { name: "Fortification",      tier: 4, cost: 1000, unlocks: ['fortress'], requires: ['construction', 'diplomacy'] },
+  higher_education:   { name: "Higher Education",   tier: 4, cost: 1000, unlocks: ['university', 'research_lab'], requires: ['education'] },
+  networking:         { name: "Networking",          tier: 4, cost: 800, unlocks: ['node_relay'], requires: ['lightning_network'] },
+  // Tier 5 (End game - 2000+ sats)
+  fusion:             { name: "Fusion Power",       tier: 5, cost: 5000, unlocks: [], requires: ['nuclear_physics'], effect: 'fusion_energy' },
+  quantum_mining:     { name: "Quantum Mining",     tier: 5, cost: 4000, unlocks: [], requires: ['mega_mining', 'asic_development'], effect: 'quantum_hash' },
+  network_sovereignty:{ name: "Network Sovereignty", tier: 5, cost: 6000, unlocks: ['central_hub'], requires: ['networking', 'cryptography'], effect: 'sovereignty' },
+};
+
+const TECH_EFFECT_DESCRIPTIONS = {
+  double_hash_efficiency: 'All miners get 2× hash power',
+  fusion_energy: 'All energy buildings produce 2× energy',
+  quantum_hash: 'All miners get 3× hash power',
+  sovereignty: 'Full network sovereignty achieved',
+};
+
+// Get all buildings unlocked by default (tier 1 techs + no tech requirement)
+function getDefaultUnlockedBuildings() {
+  const unlocked = new Set(['house', 'citadel']); // Always available
+  for (const [techId, tech] of Object.entries(TECH_TREE)) {
+    if (tech.unlocked) {
+      for (const b of tech.unlocks) unlocked.add(b);
+    }
+  }
+  return unlocked;
+}
+
+// Check if a civ has researched a tech
+function hasTech(civId, techId) {
+  return gameState.civs[civId].researched && gameState.civs[civId].researched.has(techId);
+}
+
+// Check if a building is unlocked for a civ
+function isBuildingUnlocked(civId, buildingType) {
+  const bt = BUILDING_TYPES[buildingType];
+  if (!bt.requiresTech) {
+    // Check if it's in default unlocked
+    return getDefaultUnlockedBuildings().has(buildingType);
+  }
+  return hasTech(civId, bt.requiresTech);
+}
+
+// Check if a building's prerequisite building exists
+function hasPrerequisiteBuilding(civId, buildingType) {
+  const bt = BUILDING_TYPES[buildingType];
+  if (!bt.requiresBuilding) return true;
+  return gameState.buildings.some(b => b.owner === civId && b.type === bt.requiresBuilding && b.active);
+}
+
+// Get the tech name that unlocks a building
+function getRequiredTechName(buildingType) {
+  const bt = BUILDING_TYPES[buildingType];
+  if (!bt.requiresTech) return null;
+  const tech = TECH_TREE[bt.requiresTech];
+  return tech ? tech.name : bt.requiresTech;
+}
+
+// Check if a tech is available to research
+function isTechAvailable(civId, techId) {
+  const tech = TECH_TREE[techId];
+  if (!tech) return false;
+  if (hasTech(civId, techId)) return false;
+  // All requirements must be researched
+  for (const req of tech.requires) {
+    if (!hasTech(civId, req)) return false;
+  }
+  return true;
+}
+
+// Calculate research turns with speed bonuses
+function getResearchTurns(civId, techId) {
+  const tech = TECH_TREE[techId];
+  let baseTurns = tech.tier * 3;
+  let speedBonus = 0;
+  // Count schools, universities, research labs
+  for (const b of gameState.buildings) {
+    if (b.owner !== civId || !b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    if (bt.researchSpeedBonus) speedBonus += bt.researchSpeedBonus;
+  }
+  // Cap speed bonus at 85%
+  speedBonus = Math.min(0.85, speedBonus);
+  return Math.max(1, Math.round(baseTurns * (1 - speedBonus)));
+}
+
+// Start researching a tech
+function startResearch(civId, techId) {
+  const tech = TECH_TREE[techId];
+  const civ = gameState.civs[civId];
+  if (!isTechAvailable(civId, techId)) return false;
+  if (civ.treasury < tech.cost) return false;
+  if (civ.currentResearch) return false; // Already researching
+
+  civ.treasury -= tech.cost;
+  civ.treasury = Math.round(civ.treasury * 100) / 100;
+  civ.currentResearch = techId;
+  civ.researchProgress = 0;
+  civ.researchTurnsNeeded = getResearchTurns(civId, techId);
+
+  if (civId === 0) {
+    updateHUD();
+    showToast(`🔬 Started researching: ${tech.name} (${civ.researchTurnsNeeded} turns)`, 'success');
+  }
+  return true;
+}
+
+// Process research progress each turn
+function processResearch(civId) {
+  const civ = gameState.civs[civId];
+  if (!civ.currentResearch) return;
+
+  civ.researchProgress++;
+  const turnsNeeded = civ.researchTurnsNeeded || getResearchTurns(civId, civ.currentResearch);
+
+  if (civ.researchProgress >= turnsNeeded) {
+    // Research complete!
+    const techId = civ.currentResearch;
+    const tech = TECH_TREE[techId];
+    civ.researched.add(techId);
+    civ.currentResearch = null;
+    civ.researchProgress = 0;
+    civ.researchTurnsNeeded = 0;
+
+    if (civId === 0) {
+      showToast(`🎓 Research complete: ${tech.name}!`, 'success');
+      if (tech.unlocks.length > 0) {
+        const names = tech.unlocks.map(b => BUILDING_TYPES[b]?.name || b).join(', ');
+        showToast(`🔓 Unlocked: ${names}`, 'success');
+      }
+      if (tech.effect) {
+        showToast(`✨ Effect: ${TECH_EFFECT_DESCRIPTIONS[tech.effect] || tech.effect}`, 'success');
+      }
+      updateBuildMenu();
+    }
+  }
+}
+
+// Check if deposit is nearby (within range)
+function hasDepositNearby(x, y, depositName, range) {
+  range = range || 3;
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+        const dep = map.deposits[ny][nx];
+        if (dep && dep.name === depositName) return true;
+      }
+    }
+  }
+  return false;
+}
 
 // Default valid terrain for buildings without special requirements
 const DEFAULT_BUILDABLE = [TERRAIN.PLAINS.id, TERRAIN.FOREST.id, TERRAIN.DESERT.id, TERRAIN.HILLS.id];
@@ -2010,6 +2405,12 @@ let gameState = {
     workersUsed: 0,
     idleWorkers: 0,
     lastTreasuryMilestone: 0,
+    // Tech tree state
+    researched: new Set(Object.entries(TECH_TREE).filter(([,t]) => t.unlocked).map(([id]) => id)),
+    currentResearch: null,
+    researchProgress: 0,
+    researchTurnsNeeded: 0,
+    pollutionCount: 0,
   })),
   civPanelVisible: false,
 };
@@ -2111,15 +2512,21 @@ function calculateHappiness(civId) {
   for (const b of gameState.buildings) {
     if (b.owner !== civId || !b.active) continue;
     if (b.type === 'farm') farmCount++;
-    // Coal/gas aren't explicit building types, but mining_warehouse represents heavy industry
-    if (b.type === 'mining_warehouse') pollutionBuildings++;
+    const bt = BUILDING_TYPES[b.type];
+    // Pollution from explicitly polluting buildings
+    if (bt.pollution) pollutionBuildings++;
+    // Building happiness bonuses
+    if (bt.happinessBonus) happiness += bt.happinessBonus;
   }
 
   // Per farm: +2 (food security)
   happiness += farmCount * 2;
 
-  // Per heavy industry building: -5 (pollution)
+  // Per polluting building: -5 (pollution)
   happiness -= pollutionBuildings * 5;
+
+  // Track pollution count
+  civ.pollutionCount = pollutionBuildings;
 
   // Overcrowding (pop > housing * 0.8)
   if (civ.maxPopulation > 0 && civ.population > civ.maxPopulation * 0.8) {
@@ -2169,7 +2576,7 @@ function assignWorkers(civId) {
     if (bt.popCost <= 0) continue; // no workers needed
 
     if (b.type === 'farm') farms.push(b);
-    else if (b.type === 'hydro_dam' || b.type === 'geothermal_plant') energyWorkerBuildings.push(b);
+    else if (bt.energyOutput > 0) energyWorkerBuildings.push(b);
     else if (bt.hashPower > 0) miners.push(b);
   }
 
@@ -2465,10 +2872,14 @@ function getActualEnergyOutput(b) {
     const tileTerrain = map.terrain[b.y][b.x];
     const tileQuad = getQuadrantName(b.x, b.y);
     if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) energyOut = 10;
+    else if (b.type === 'solar_farm' && tileTerrain === TERRAIN.DESERT.id) energyOut = 18;
     else if (b.type === 'hydro_dam' && tileTerrain === TERRAIN.MAJOR_RIVER.id) energyOut = 20;
     else if (b.type === 'hydro_dam' && tileQuad === 'SW') energyOut = 18;
     else if (b.type === 'wind_turbine' && tileQuad === 'SE') energyOut = 8;
+    else if (b.type === 'wind_farm' && tileQuad === 'SE') energyOut = 13;
     else if (b.type === 'geothermal_plant' && tileTerrain === TERRAIN.VOLCANIC.id) energyOut = 15;
+    // Fusion tech: all energy buildings produce 2x
+    if (hasTech(b.owner, 'fusion')) energyOut *= 2;
   }
   return energyOut;
 }
@@ -2548,8 +2959,17 @@ function recalculateCivStats() {
     }
   }
 
-  // Apply happiness effects to hash power
+  // Apply tech effects and happiness to hash power
   for (const civ of gameState.civs) {
+    // ASIC Development: 2x hash
+    if (civ.researched && civ.researched.has('asic_development')) {
+      civ.hashPower *= 2;
+    }
+    // Quantum Mining: 3x hash
+    if (civ.researched && civ.researched.has('quantum_mining')) {
+      civ.hashPower *= 3;
+    }
+
     civ.happiness = calculateHappiness(civ.id);
     if (civ.happiness > 70) {
       civ.hashPower = Math.round(civ.hashPower * 1.1); // +10% bonus
@@ -2604,6 +3024,13 @@ function processTurn() {
     totalHash += civ.hashPower;
   }
 
+  // Process research for all civs
+  for (const civ of gameState.civs) {
+    processResearch(civ.id);
+    // AI auto-research
+    if (!civ.isPlayer) aiAutoResearch(civ.id);
+  }
+
   // Distribute block reward proportionally
   const earnings = [];
   for (const civ of gameState.civs) {
@@ -2611,6 +3038,37 @@ function processTurn() {
     if (totalHash > 0 && civ.hashPower > 0) {
       earned = Math.round(gameState.blockReward * (civ.hashPower / totalHash) * 100) / 100;
     }
+
+    // Bank bonus: +10% sats income per bank
+    let bankBonus = 0;
+    for (const b of gameState.buildings) {
+      if (b.owner === civ.id && b.active && BUILDING_TYPES[b.type].satsBonusPct) {
+        bankBonus += BUILDING_TYPES[b.type].satsBonusPct;
+      }
+    }
+    if (bankBonus > 0) earned = Math.round(earned * (1 + bankBonus) * 100) / 100;
+
+    // Lightning Tower routing fees
+    let routingFees = 0;
+    let lightningTowerCount = 0;
+    for (const b of gameState.buildings) {
+      if (b.owner === civ.id && b.active && BUILDING_TYPES[b.type].satsPerTurn) {
+        routingFees += BUILDING_TYPES[b.type].satsPerTurn;
+      }
+      if (b.owner === civ.id && b.active && b.type === 'lightning_tower') {
+        lightningTowerCount++;
+      }
+    }
+
+    // Central Hub: +10 sats/turn per Lightning Tower
+    for (const b of gameState.buildings) {
+      if (b.owner === civ.id && b.active && b.type === 'central_hub') {
+        routingFees += lightningTowerCount * 10;
+      }
+    }
+
+    earned += routingFees;
+
     civ.treasury += earned;
     civ.treasury = Math.round(civ.treasury * 100) / 100;
     earnings.push({ name: civ.name, color: civ.color, earned, civId: civ.id });
@@ -2670,6 +3128,14 @@ function showTurnSummaryPanel(earnings, totalHash, popChanges, events) {
   html += `<hr class="tsp-divider">`;
   html += `<div class="tsp-line"><span class="tsp-label">👥 Population</span><span class="tsp-value" style="color:${popChangeColor}">${player.population - popChange} → ${player.population} (${popChangeStr})</span></div>`;
   html += `<div class="tsp-line"><span class="tsp-label">${getHappinessEmoji(player.happiness)} Happiness</span><span class="tsp-value" style="color:#ffcc00">${player.happiness}</span></div>`;
+  if (player.pollutionCount > 0) {
+    html += `<div class="tsp-line"><span class="tsp-label">☁️ Pollution</span><span class="tsp-value" style="color:#ff6644">${player.pollutionCount} sources</span></div>`;
+  }
+  if (player.currentResearch) {
+    const tech = TECH_TREE[player.currentResearch];
+    const total = player.researchTurnsNeeded || getResearchTurns(0, player.currentResearch);
+    html += `<div class="tsp-line"><span class="tsp-label">🔬 Research</span><span class="tsp-value" style="color:#cc88ff">${tech.name} (${player.researchProgress}/${total})</span></div>`;
+  }
   html += `<div class="tsp-line"><span class="tsp-label">💰 Treasury</span><span class="tsp-value" style="color:#F7931A">${player.treasury.toLocaleString()}₿</span></div>`;
 
   if (events.length > 0) {
@@ -2745,6 +3211,16 @@ function updateHUD() {
   document.getElementById('hudPopIdle').textContent = player.idleWorkers > 0 ? `(${player.idleWorkers} idle)` : '';
   document.getElementById('hudHappiness').textContent = player.happiness;
   document.getElementById('hudHappyEmoji').textContent = getHappinessEmoji(player.happiness);
+
+  // Research progress
+  const researchEl = document.getElementById('hudResearch');
+  if (player.currentResearch) {
+    const tech = TECH_TREE[player.currentResearch];
+    const turnsLeft = (player.researchTurnsNeeded || getResearchTurns(0, player.currentResearch)) - player.researchProgress;
+    researchEl.textContent = `🔬 ${tech.name} (${player.researchProgress}/${player.researchTurnsNeeded || getResearchTurns(0, player.currentResearch)})`;
+  } else {
+    researchEl.textContent = '';
+  }
 }
 
 // ============================================================
@@ -2752,18 +3228,26 @@ function updateHUD() {
 // ============================================================
 function updateCivPanel() {
   const content = document.getElementById('civPanelContent');
+  const hasSatellite = gameState.buildings.some(b => b.owner === 0 && b.active && b.type === 'satellite_array');
   let html = '';
   for (const civ of gameState.civs) {
     const netEnergy = civ.energyProduced - civ.energyConsumed;
+    const showDetails = civ.isPlayer || hasSatellite;
     html += `
       <div class="civ-entry">
         <div class="civ-name"><span class="civ-swatch" style="background:${civ.color}"></span>${civ.name}${civ.isPlayer ? ' (You)' : ' (AI)'}</div>
         <div class="civ-stats">
-          <span>₿ ${civ.treasury.toLocaleString()}</span>
-          <span>⛏ ${civ.hashPower} H/s</span>
-          <span>👥 ${civ.population}/${civ.maxPopulation}</span>
-          <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
-          <span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>
+          ${showDetails ? `
+            <span>₿ ${civ.treasury.toLocaleString()}</span>
+            <span>⛏ ${civ.hashPower} H/s</span>
+            <span>👥 ${civ.population}/${civ.maxPopulation}</span>
+            <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
+            <span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>
+            ${civ.pollutionCount > 0 ? `<span>☁️ ${civ.pollutionCount}</span>` : ''}
+          ` : `
+            <span>⛏ ${civ.hashPower} H/s</span>
+            <span style="color:#666">🔒 Build Satellite Array to see more</span>
+          `}
         </div>
       </div>
     `;
@@ -3066,36 +3550,36 @@ function drawBuilding(building) {
   }
 
   switch (building.type) {
-    case 'citadel':
-      drawCitadel(screenX, screenY, z, color);
-      break;
-    case 'house':
-      drawHouse(screenX, screenY, z, color);
-      break;
-    case 'farm':
-      drawFarm(screenX, screenY, z, color);
-      break;
-    case 'solar_panel':
-      drawSolarPanel(screenX, screenY, z, color);
-      break;
-    case 'home_miner':
-      drawHomeMiner(screenX, screenY, z, color);
-      break;
-    case 'hydro_dam':
-      drawHydroDam(screenX, screenY, z, color);
-      break;
-    case 'wind_turbine':
-      drawWindTurbine(screenX, screenY, z, color);
-      break;
-    case 'geothermal_plant':
-      drawGeothermalPlant(screenX, screenY, z, color);
-      break;
-    case 'mining_shed':
-      drawMiningShed(screenX, screenY, z, color);
-      break;
-    case 'mining_warehouse':
-      drawMiningWarehouse(screenX, screenY, z, color);
-      break;
+    case 'citadel': drawCitadel(screenX, screenY, z, color); break;
+    case 'house': drawHouse(screenX, screenY, z, color); break;
+    case 'farm': drawFarm(screenX, screenY, z, color); break;
+    case 'solar_panel': drawSolarPanel(screenX, screenY, z, color); break;
+    case 'home_miner': drawHomeMiner(screenX, screenY, z, color); break;
+    case 'hydro_dam': drawHydroDam(screenX, screenY, z, color); break;
+    case 'wind_turbine': drawWindTurbine(screenX, screenY, z, color); break;
+    case 'geothermal_plant': drawGeothermalPlant(screenX, screenY, z, color); break;
+    case 'mining_shed': drawMiningShed(screenX, screenY, z, color); break;
+    case 'mining_warehouse': drawMiningWarehouse(screenX, screenY, z, color); break;
+    case 'gas_plant': drawGasPlant(screenX, screenY, z, color); break;
+    case 'coal_station': drawCoalStation(screenX, screenY, z, color); break;
+    case 'nuclear_reactor': drawNuclearReactor(screenX, screenY, z, color); break;
+    case 'solar_farm': drawSolarFarm(screenX, screenY, z, color); break;
+    case 'wind_farm': drawWindFarm(screenX, screenY, z, color); break;
+    case 'mining_data_center': drawMiningDataCenter(screenX, screenY, z, color); break;
+    case 'mining_mega_facility': drawMiningMegaFacility(screenX, screenY, z, color); break;
+    case 'market': drawMarket(screenX, screenY, z, color); break;
+    case 'school': drawSchool(screenX, screenY, z, color); break;
+    case 'university': drawUniversity(screenX, screenY, z, color); break;
+    case 'bank': drawBank(screenX, screenY, z, color); break;
+    case 'lightning_tower': drawLightningTower(screenX, screenY, z, color); break;
+    case 'embassy': drawEmbassy(screenX, screenY, z, color); break;
+    case 'node_relay': drawNodeRelay(screenX, screenY, z, color); break;
+    case 'walls': drawWalls(screenX, screenY, z, color); break;
+    case 'fortress': drawFortress(screenX, screenY, z, color); break;
+    case 'satellite_array': drawSatelliteArray(screenX, screenY, z, color); break;
+    case 'research_lab': drawResearchLab(screenX, screenY, z, color); break;
+    case 'treasury_vault': drawTreasuryVault(screenX, screenY, z, color); break;
+    case 'central_hub': drawCentralHub(screenX, screenY, z, color); break;
   }
 
   ctx.restore();
@@ -3601,6 +4085,715 @@ function drawMiningWarehouse(sx, sy, z, color) {
 }
 
 // ============================================================
+// New Building Drawing Functions
+// ============================================================
+function drawGasPlant(sx, sy, z, color) {
+  const s = z * 7;
+  // Main body
+  ctx.fillStyle = '#3a3a3a';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.5, s * 1.4, s * 1.1);
+  // Chimney
+  ctx.fillStyle = '#555';
+  ctx.fillRect(sx + s * 0.2, sy - s * 1.3, s * 0.25, s * 0.8);
+  // Gas flame
+  const flicker = Math.sin(Date.now() * 0.008 + sx) * 2 * z;
+  ctx.fillStyle = '#4488ff';
+  ctx.globalAlpha = 0.7;
+  ctx.beginPath();
+  ctx.moveTo(sx + s * 0.32, sy - s * 1.3);
+  ctx.quadraticCurveTo(sx + s * 0.32 + flicker, sy - s * 1.8, sx + s * 0.32 - flicker * 0.5, sy - s * 1.3);
+  ctx.fill();
+  // Pipes
+  ctx.strokeStyle = '#777';
+  ctx.lineWidth = z * 2;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.5, sy + s * 0.3);
+  ctx.lineTo(sx - s * 0.9, sy + s * 0.3);
+  ctx.stroke();
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.7, sy + s * 0.45, s * 1.4, z * 2);
+  // Pollution smoke
+  const smokePhase = Date.now() * 0.002;
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = '#888';
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.32, sy - s * 1.5 - Math.sin(smokePhase) * s * 0.3, s * 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function drawCoalStation(sx, sy, z, color) {
+  const s = z * 8;
+  // Large dark body
+  ctx.fillStyle = '#2a2a2a';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.5, s * 1.6, s * 1.2);
+  // Two chimneys
+  ctx.fillStyle = '#444';
+  for (let i = -1; i <= 1; i += 2) {
+    ctx.fillRect(sx + i * s * 0.3 - s * 0.08, sy - s * 1.4, s * 0.16, s * 0.9);
+  }
+  // Coal pile
+  ctx.fillStyle = '#222';
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(sx - s * 0.4, sy + s * 0.3, s * 0.25, 0, Math.PI * 2);
+  ctx.fill();
+  // Smoke from chimneys
+  const sp = Date.now() * 0.002;
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = '#999';
+  for (let i = -1; i <= 1; i += 2) {
+    ctx.beginPath();
+    ctx.arc(sx + i * s * 0.3, sy - s * 1.6 - Math.sin(sp + i) * s * 0.2, s * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sx + i * s * 0.3 + s * 0.1, sy - s * 1.9 - Math.sin(sp + i + 1) * s * 0.15, s * 0.13, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.8, sy + s * 0.55, s * 1.6, z * 2.5);
+  ctx.globalAlpha = 1;
+}
+
+function drawNuclearReactor(sx, sy, z, color) {
+  const s = z * 9;
+  // Containment dome
+  ctx.fillStyle = '#bbb';
+  ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.3, s * 0.6, Math.PI, 0);
+  ctx.lineTo(sx + s * 0.6, sy + s * 0.3);
+  ctx.lineTo(sx - s * 0.6, sy + s * 0.3);
+  ctx.closePath();
+  ctx.fill();
+  // Cooling tower
+  ctx.fillStyle = '#999';
+  ctx.beginPath();
+  ctx.moveTo(sx + s * 0.5, sy + s * 0.3);
+  ctx.quadraticCurveTo(sx + s * 0.4, sy - s * 0.2, sx + s * 0.55, sy - s * 1);
+  ctx.lineTo(sx + s * 0.85, sy - s * 1);
+  ctx.quadraticCurveTo(sx + s * 0.9, sy - s * 0.2, sx + s * 0.8, sy + s * 0.3);
+  ctx.closePath();
+  ctx.fill();
+  // Radioactive glow
+  const pulse = Math.sin(Date.now() * 0.003) * 0.15 + 0.85;
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.1, s * 0.35 * pulse, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(sx, sy - s * 0.1, 0, sx, sy - s * 0.1, s * 0.35 * pulse);
+  grad.addColorStop(0, 'rgba(0,255,100,0.4)');
+  grad.addColorStop(1, 'rgba(0,255,100,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // ☢ symbol
+  ctx.font = `bold ${Math.round(10 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#44ff88';
+  ctx.globalAlpha = 0.7;
+  ctx.fillText('☢', sx, sy);
+  // Steam from cooling tower
+  const st = Date.now() * 0.003;
+  ctx.fillStyle = '#eee';
+  ctx.globalAlpha = 0.25;
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.67, sy - s * 1.2 - Math.sin(st) * s * 0.2, s * 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.3, sy + s * 0.15, s * 0.6, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawSolarFarm(sx, sy, z, color) {
+  const s = z * 8;
+  // Multiple panels in a grid
+  ctx.globalAlpha = 0.9;
+  for (let r = -1; r <= 1; r++) {
+    for (let c = -1; c <= 0; c++) {
+      const px = sx + c * s * 0.45 + r * s * 0.15;
+      const py = sy + r * s * 0.25 + c * s * 0.1;
+      ctx.fillStyle = '#1a4488';
+      ctx.fillRect(px - s * 0.18, py - s * 0.4, s * 0.36, s * 0.35);
+      ctx.strokeStyle = '#4488cc';
+      ctx.lineWidth = z * 0.4;
+      ctx.strokeRect(px - s * 0.18, py - s * 0.4, s * 0.36, s * 0.35);
+    }
+  }
+  // Glint animation
+  const gp = (Date.now() * 0.001 + sx * 0.2) % 4;
+  if (gp < 0.5) {
+    ctx.beginPath();
+    ctx.arc(sx, sy - s * 0.3, z * 4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,200,${0.5 * (1 - gp * 2)})`;
+    ctx.fill();
+  }
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.5, sy + s * 0.25, s * 1, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawWindFarm(sx, sy, z, color) {
+  const s = z * 6;
+  // Three turbines
+  for (let i = -1; i <= 1; i++) {
+    const tx = sx + i * s * 0.7;
+    const ty = sy + Math.abs(i) * s * 0.2;
+    // Pole
+    ctx.fillStyle = '#ccc';
+    ctx.globalAlpha = 0.9;
+    ctx.fillRect(tx - z * 0.7, ty - s * 1.2, z * 1.4, s * 1.5);
+    // Blades
+    const angle = (Date.now() * 0.002 + i * 1.5) % (Math.PI * 2);
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = z * 1.2;
+    for (let b = 0; b < 3; b++) {
+      const a = angle + (b * Math.PI * 2 / 3);
+      ctx.beginPath();
+      ctx.moveTo(tx, ty - s * 1.2);
+      ctx.lineTo(tx + Math.cos(a) * s * 0.6, ty - s * 1.2 + Math.sin(a) * s * 0.6);
+      ctx.stroke();
+    }
+    // Hub
+    ctx.beginPath();
+    ctx.arc(tx, ty - s * 1.2, z * 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawMiningDataCenter(sx, sy, z, color) {
+  const s = z * 9;
+  // Large server building
+  ctx.fillStyle = '#1a1a2a';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.7, s * 1.6, s * 1.4);
+  // Roof
+  ctx.fillStyle = '#111122';
+  ctx.fillRect(sx - s * 0.9, sy - s * 0.8, s * 1.8, s * 0.15);
+  // Server rack lines
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = z * 0.5;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx - s * 0.6, sy - s * 0.5 + i * s * 0.25);
+    ctx.lineTo(sx + s * 0.6, sy - s * 0.5 + i * s * 0.25);
+    ctx.stroke();
+  }
+  // Multiple blinking LEDs
+  for (let r = 0; r < 2; r++) {
+    for (let c = -2; c <= 2; c++) {
+      const phase = Math.sin(Date.now() * 0.006 + c * 0.8 + r * 2 + sx * 0.05);
+      const on = phase > -0.2;
+      ctx.beginPath();
+      ctx.arc(sx + c * s * 0.2, sy - s * 0.35 + r * s * 0.35, z * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = on ? '#00A8FF' : '#112244';
+      ctx.fill();
+    }
+  }
+  // Color stripe
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.8, sy + s * 0.55, s * 1.6, z * 2.5);
+  // Hash symbols
+  if (z > 0.5) {
+    for (let h = 0; h < 4; h++) {
+      const hp = (Date.now() * 0.0006 + sx * 0.15 + h * 0.25) % 2;
+      if (hp < 1) {
+        ctx.globalAlpha = 0.3 * (1 - hp);
+        ctx.font = `bold ${Math.round(9 * z)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#00A8FF';
+        ctx.fillText('#', sx + (h - 1.5) * s * 0.3, sy - s * 1 - hp * 14 * z);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawMiningMegaFacility(sx, sy, z, color) {
+  const s = z * 10;
+  // Massive structure
+  ctx.fillStyle = '#111';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.9, sy - s * 0.8, s * 1.8, s * 1.5);
+  // Multiple wings
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(sx - s, sy - s * 0.3, s * 0.3, s * 0.8);
+  ctx.fillRect(sx + s * 0.7, sy - s * 0.3, s * 0.3, s * 0.8);
+  // Flat roof
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(sx - s, sy - s * 0.9, s * 2, s * 0.15);
+  // Many LEDs in rows
+  for (let r = 0; r < 3; r++) {
+    for (let c = -3; c <= 3; c++) {
+      const phase = Math.sin(Date.now() * 0.007 + c * 0.5 + r * 1.5 + sx * 0.03);
+      ctx.beginPath();
+      ctx.arc(sx + c * s * 0.15, sy - s * 0.5 + r * s * 0.3, z * 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = phase > 0 ? '#F7931A' : phase > -0.5 ? '#00A8FF' : '#220000';
+      ctx.fill();
+    }
+  }
+  // Color stripe
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(sx - s * 0.9, sy + s * 0.55, s * 1.8, z * 3);
+  // Big hash symbols
+  if (z > 0.4) {
+    for (let h = 0; h < 5; h++) {
+      const hp = (Date.now() * 0.0005 + sx * 0.1 + h * 0.2) % 2;
+      if (hp < 1) {
+        ctx.globalAlpha = 0.35 * (1 - hp);
+        ctx.font = `bold ${Math.round(11 * z)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#F7931A';
+        ctx.fillText('₿', sx + (h - 2) * s * 0.25, sy - s * 1.1 - hp * 18 * z);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawMarket(sx, sy, z, color) {
+  const s = z * 7;
+  // Market stall body
+  ctx.fillStyle = '#8b6914';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.3, s * 1.4, s * 0.9);
+  // Awning (colorful)
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.9, sy - s * 0.3);
+  ctx.lineTo(sx, sy - s * 1.2);
+  ctx.lineTo(sx + s * 0.9, sy - s * 0.3);
+  ctx.closePath();
+  ctx.fill();
+  // Stripes on awning
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = z;
+  for (let i = -2; i <= 2; i++) {
+    ctx.beginPath();
+    ctx.moveTo(sx + i * s * 0.2, sy - s * 0.3);
+    ctx.lineTo(sx + i * s * 0.1, sy - s * 0.8);
+    ctx.stroke();
+  }
+  // Goods (small colored dots)
+  const goods = ['#ff4444', '#44ff44', '#ffaa00', '#4488ff'];
+  for (let i = 0; i < goods.length; i++) {
+    ctx.beginPath();
+    ctx.arc(sx - s * 0.4 + i * s * 0.25, sy + s * 0.15, z * 2, 0, Math.PI * 2);
+    ctx.fillStyle = goods[i];
+    ctx.globalAlpha = 0.7;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawSchool(sx, sy, z, color) {
+  const s = z * 7;
+  // Building
+  ctx.fillStyle = '#c8a878';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.5, s * 1.4, s * 1.1);
+  // Roof
+  ctx.fillStyle = '#994422';
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.85, sy - s * 0.5);
+  ctx.lineTo(sx, sy - s * 1.3);
+  ctx.lineTo(sx + s * 0.85, sy - s * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  // Bell tower
+  ctx.fillStyle = '#aa5533';
+  ctx.fillRect(sx - z * 2, sy - s * 1.6, z * 4, s * 0.35);
+  // Bell
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.65, z * 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#ffcc00';
+  ctx.fill();
+  // Door
+  ctx.fillStyle = '#5a3a1a';
+  ctx.fillRect(sx - z * 2, sy + s * 0.1, z * 4, s * 0.4);
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.6;
+  ctx.fillRect(sx - s * 0.5, sy - s * 0.35, s * 1, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawUniversity(sx, sy, z, color) {
+  const s = z * 8;
+  // Grand building
+  ctx.fillStyle = '#d4c4a8';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.6, s * 1.6, s * 1.2);
+  // Columns
+  ctx.fillStyle = '#eee';
+  for (let i = -2; i <= 2; i++) {
+    ctx.fillRect(sx + i * s * 0.25 - z, sy - s * 0.6, z * 2, s * 0.9);
+  }
+  // Triangular pediment
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.85, sy - s * 0.6);
+  ctx.lineTo(sx, sy - s * 1.4);
+  ctx.lineTo(sx + s * 0.85, sy - s * 0.6);
+  ctx.closePath();
+  ctx.fill();
+  // Graduation cap icon
+  ctx.font = `${Math.round(10 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#333';
+  ctx.globalAlpha = 0.7;
+  ctx.fillText('🎓', sx, sy - s * 0.9);
+  ctx.globalAlpha = 1;
+}
+
+function drawBank(sx, sy, z, color) {
+  const s = z * 7;
+  // Solid building
+  ctx.fillStyle = '#555';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.5, s * 1.4, s * 1.1);
+  // Vault door (circle)
+  ctx.beginPath();
+  ctx.arc(sx, sy, s * 0.3, 0, Math.PI * 2);
+  ctx.fillStyle = '#888';
+  ctx.fill();
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = z * 1.5;
+  ctx.stroke();
+  // Vault handle
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.15, sy);
+  ctx.lineTo(sx + s * 0.15, sy);
+  ctx.strokeStyle = '#ccc';
+  ctx.lineWidth = z * 2;
+  ctx.stroke();
+  // Roof
+  ctx.fillStyle = '#333';
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.6, s * 1.6, s * 0.12);
+  // ₿ symbol
+  ctx.font = `bold ${Math.round(10 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#F7931A';
+  ctx.globalAlpha = 0.8;
+  ctx.fillText('₿', sx, sy - s * 0.8);
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.7, sy + s * 0.45, s * 1.4, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawLightningTower(sx, sy, z, color) {
+  const s = z * 7;
+  // Tower pole
+  ctx.fillStyle = '#888';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - z * 1.5, sy - s * 1.8, z * 3, s * 2.3);
+  // Lightning bolt at top
+  const bolt = Math.sin(Date.now() * 0.005 + sx) > 0;
+  ctx.fillStyle = bolt ? '#ffdd00' : '#886600';
+  ctx.globalAlpha = bolt ? 0.9 : 0.5;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.2, sy - s * 2);
+  ctx.lineTo(sx + s * 0.1, sy - s * 1.5);
+  ctx.lineTo(sx - s * 0.05, sy - s * 1.5);
+  ctx.lineTo(sx + s * 0.2, sy - s * 1);
+  ctx.lineTo(sx - s * 0.1, sy - s * 1.4);
+  ctx.lineTo(sx + s * 0.05, sy - s * 1.4);
+  ctx.closePath();
+  ctx.fill();
+  // Glow when active
+  if (bolt) {
+    ctx.beginPath();
+    ctx.arc(sx, sy - s * 1.5, s * 0.5, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(sx, sy - s * 1.5, 0, sx, sy - s * 1.5, s * 0.5);
+    grad.addColorStop(0, 'rgba(255,221,0,0.3)');
+    grad.addColorStop(1, 'rgba(255,221,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+  // Base
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.4, sy + s * 0.5);
+  ctx.lineTo(sx, sy + s * 0.2);
+  ctx.lineTo(sx + s * 0.4, sy + s * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function drawEmbassy(sx, sy, z, color) {
+  const s = z * 7;
+  // Grand building
+  ctx.fillStyle = '#d8d0c0';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.5, s * 1.6, s * 1.1);
+  // Dome
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.5, s * 0.5, Math.PI, 0);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.fill();
+  // Columns
+  ctx.fillStyle = '#eee';
+  ctx.globalAlpha = 0.85;
+  for (let i = -1; i <= 1; i += 2) {
+    ctx.fillRect(sx + i * s * 0.4 - z, sy - s * 0.5, z * 2, s * 0.8);
+  }
+  // Flag
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx + s * 0.5, sy - s * 1.2, s * 0.4, s * 0.25);
+  // Flag pole
+  ctx.fillStyle = '#888';
+  ctx.fillRect(sx + s * 0.48, sy - s * 1.3, z, s * 1);
+  ctx.globalAlpha = 1;
+}
+
+function drawNodeRelay(sx, sy, z, color) {
+  const s = z * 7;
+  // Tower
+  ctx.fillStyle = '#777';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - z * 1.5, sy - s * 1.5, z * 3, s * 2);
+  // Dish
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.5, s * 0.4, Math.PI * 1.2, Math.PI * 1.8);
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = z * 2;
+  ctx.stroke();
+  // Signal waves
+  const wave = (Date.now() * 0.003) % (Math.PI * 2);
+  ctx.globalAlpha = 0.3;
+  for (let i = 1; i <= 3; i++) {
+    const r = s * 0.3 * i + Math.sin(wave) * s * 0.05;
+    ctx.beginPath();
+    ctx.arc(sx, sy - s * 1.5, r, -Math.PI * 0.4, Math.PI * 0.4);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = z;
+    ctx.globalAlpha = 0.4 / i;
+    ctx.stroke();
+  }
+  // Base
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(sx - s * 0.3, sy + s * 0.5);
+  ctx.lineTo(sx, sy + s * 0.3);
+  ctx.lineTo(sx + s * 0.3, sy + s * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function drawWalls(sx, sy, z, color) {
+  const s = z * 6;
+  // Wall segments
+  ctx.fillStyle = '#8a7a6a';
+  ctx.globalAlpha = 0.9;
+  // Main wall
+  ctx.fillRect(sx - s * 0.9, sy - s * 0.2, s * 1.8, s * 0.6);
+  // Crenellations
+  ctx.fillStyle = '#9a8a7a';
+  for (let i = -3; i <= 3; i++) {
+    ctx.fillRect(sx + i * s * 0.25 - z, sy - s * 0.5, z * 2, s * 0.3);
+  }
+  // Color accent at base
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(sx - s * 0.9, sy + s * 0.3, s * 1.8, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawFortress(sx, sy, z, color) {
+  const s = z * 9;
+  // Large walls
+  ctx.fillStyle = '#6a6058';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.4, s * 1.6, s * 1);
+  // Corner towers
+  for (let i = -1; i <= 1; i += 2) {
+    ctx.fillStyle = '#7a706a';
+    ctx.fillRect(sx + i * s * 0.65 - s * 0.15, sy - s * 0.8, s * 0.3, s * 1.2);
+    // Tower top
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(sx + i * s * 0.65 - s * 0.2, sy - s * 0.8);
+    ctx.lineTo(sx + i * s * 0.65, sy - s * 1.1);
+    ctx.lineTo(sx + i * s * 0.65 + s * 0.2, sy - s * 0.8);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Gate
+  ctx.fillStyle = '#3a2a1a';
+  ctx.globalAlpha = 0.9;
+  ctx.beginPath();
+  ctx.arc(sx, sy + s * 0.1, s * 0.2, Math.PI, 0);
+  ctx.lineTo(sx + s * 0.2, sy + s * 0.5);
+  ctx.lineTo(sx - s * 0.2, sy + s * 0.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function drawSatelliteArray(sx, sy, z, color) {
+  const s = z * 7;
+  // Base structure
+  ctx.fillStyle = '#555';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.3, sy - s * 0.2, s * 0.6, s * 0.7);
+  // Large dish
+  ctx.beginPath();
+  ctx.ellipse(sx, sy - s * 0.7, s * 0.7, s * 0.35, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#bbb';
+  ctx.fill();
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = z;
+  ctx.stroke();
+  // Dish details
+  ctx.beginPath();
+  ctx.moveTo(sx, sy - s * 0.7);
+  ctx.lineTo(sx, sy - s * 0.2);
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = z * 2;
+  ctx.stroke();
+  // Signal indicator
+  const sig = Math.sin(Date.now() * 0.004) > 0;
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 1.1, z * 2, 0, Math.PI * 2);
+  ctx.fillStyle = sig ? '#44ff88' : '#226644';
+  ctx.fill();
+  // Orbiting satellite (small)
+  const orbit = Date.now() * 0.001;
+  const ox = sx + Math.cos(orbit) * s * 0.6;
+  const oy = sy - s * 1.3 + Math.sin(orbit) * s * 0.15;
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(ox - z * 2, oy - z, z * 4, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawResearchLab(sx, sy, z, color) {
+  const s = z * 8;
+  // Modern building
+  ctx.fillStyle = '#e8e8f0';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.6, s * 1.4, s * 1.2);
+  // Glass panels
+  ctx.fillStyle = '#88aacc';
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(sx - s * 0.55, sy - s * 0.45, s * 0.4, s * 0.5);
+  ctx.fillRect(sx + s * 0.15, sy - s * 0.45, s * 0.4, s * 0.5);
+  // Microscope/science symbol
+  ctx.font = `${Math.round(12 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#333';
+  ctx.globalAlpha = 0.6;
+  ctx.fillText('🔬', sx, sy - s * 0.1);
+  // Bubbling effect
+  const bp = Date.now() * 0.004;
+  ctx.fillStyle = '#44ccff';
+  ctx.globalAlpha = 0.3;
+  ctx.beginPath();
+  ctx.arc(sx - s * 0.2, sy - s * 0.8 - Math.sin(bp) * s * 0.15, z * 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(sx + s * 0.15, sy - s * 0.9 - Math.sin(bp + 1) * s * 0.1, z * 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  // Color accent
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillRect(sx - s * 0.7, sy + s * 0.45, s * 1.4, z * 2);
+  ctx.globalAlpha = 1;
+}
+
+function drawTreasuryVault(sx, sy, z, color) {
+  const s = z * 7;
+  // Heavy building
+  ctx.fillStyle = '#444';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.7, sy - s * 0.6, s * 1.4, s * 1.2);
+  // Vault door (large circle)
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.05, s * 0.4, 0, Math.PI * 2);
+  ctx.fillStyle = '#666';
+  ctx.fill();
+  ctx.strokeStyle = '#F7931A';
+  ctx.lineWidth = z * 2;
+  ctx.stroke();
+  // Lock mechanism
+  ctx.fillStyle = '#F7931A';
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.arc(sx, sy - s * 0.05, s * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  // Lock icon
+  ctx.font = `${Math.round(8 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#222';
+  ctx.fillText('🔐', sx, sy);
+  // Reinforced roof
+  ctx.fillStyle = '#333';
+  ctx.globalAlpha = 0.9;
+  ctx.fillRect(sx - s * 0.8, sy - s * 0.7, s * 1.6, s * 0.12);
+  ctx.globalAlpha = 1;
+}
+
+function drawCentralHub(sx, sy, z, color) {
+  const s = z * 9;
+  // Circular base platform
+  ctx.beginPath();
+  ctx.ellipse(sx, sy + s * 0.1, s * 0.8, s * 0.4, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#333';
+  ctx.globalAlpha = 0.9;
+  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = z * 2;
+  ctx.stroke();
+  // Central tower
+  ctx.fillStyle = '#444';
+  ctx.fillRect(sx - s * 0.15, sy - s * 1.2, s * 0.3, s * 1.3);
+  // Antenna
+  ctx.fillStyle = '#888';
+  ctx.fillRect(sx - z, sy - s * 1.6, z * 2, s * 0.4);
+  // Pulsing rings
+  const pulse = Date.now() * 0.002;
+  for (let i = 1; i <= 3; i++) {
+    const r = s * 0.2 * i;
+    ctx.beginPath();
+    ctx.arc(sx, sy - s * 0.5, r, 0, Math.PI * 2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = z;
+    ctx.globalAlpha = 0.3 * Math.sin(pulse + i) * 0.5 + 0.3;
+    ctx.stroke();
+  }
+  // Globe symbol
+  ctx.font = `${Math.round(12 * z)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.7;
+  ctx.fillText('🌐', sx, sy - s * 0.5);
+  ctx.globalAlpha = 1;
+}
+
+// ============================================================
 // Main render
 // ============================================================
 function render() {
@@ -3682,6 +4875,31 @@ function render() {
 
       const b = buildingMap[`${x},${y}`];
       if (b) drawBuilding(b);
+
+      // Pollution overlay: darken tiles near polluting buildings
+      if (camera.zoom > 0.4) {
+        let pollutionLevel = 0;
+        for (const pb of gameState.buildings) {
+          if (!pb.active) continue;
+          const pbt = BUILDING_TYPES[pb.type];
+          if (!pbt.pollution) continue;
+          const dist = Math.abs(pb.x - x) + Math.abs(pb.y - y);
+          if (dist <= 2) pollutionLevel += (3 - dist) * 0.08;
+        }
+        if (pollutionLevel > 0) {
+          const { x: psx, y: psy } = tileToScreen(x, y);
+          const pw = HALF_W * camera.zoom;
+          const ph = HALF_H * camera.zoom;
+          ctx.beginPath();
+          ctx.moveTo(psx, psy - ph);
+          ctx.lineTo(psx + pw, psy);
+          ctx.lineTo(psx, psy + ph);
+          ctx.lineTo(psx - pw, psy);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(40,30,20,${Math.min(0.35, pollutionLevel)})`;
+          ctx.fill();
+        }
+      }
     }
   }
 
@@ -3885,6 +5103,12 @@ function updateInfoPanel() {
       html += `<div class="bi-stat">👷 Workers: <strong style="color:${staffColor}">${assigned}/${bt.popCost}</strong>${!building._fullyStaffed && assigned > 0 ? ' <span style="color:#ffaa00;font-size:11px">(50% efficiency)</span>' : ''}${assigned === 0 && bt.popCost > 0 ? ' <span style="color:#ff4444;font-size:11px">(no workers!)</span>' : ''}</div>`;
     }
     if (bt.foodOutput > 0) html += `<div class="bi-stat">🌾 Food output: <strong>${bt.foodOutput}</strong></div>`;
+    if (bt.happinessBonus) html += `<div class="bi-stat">😊 Happiness: <strong>+${bt.happinessBonus}</strong></div>`;
+    if (bt.satsPerTurn) html += `<div class="bi-stat">₿ Income: <strong>+${bt.satsPerTurn}/turn</strong></div>`;
+    if (bt.satsBonusPct) html += `<div class="bi-stat">₿ Income bonus: <strong>+${Math.round(bt.satsBonusPct*100)}%</strong></div>`;
+    if (bt.researchSpeedBonus) html += `<div class="bi-stat">🔬 Research speed: <strong>-${Math.round(bt.researchSpeedBonus*100)}%</strong></div>`;
+    if (bt.territoryBonus) html += `<div class="bi-stat">📡 Territory: <strong>+${bt.territoryBonus} tiles</strong></div>`;
+    if (bt.pollution) html += `<div class="bi-stat" style="color:#ff6644">☁️ Produces pollution</div>`;
     html += `<div class="bi-stat" style="color:#888;font-style:italic;margin-top:4px">${bt.description}</div>`;
     html += `</div>`;
   }
@@ -3940,17 +5164,19 @@ let buildState = {
   hoveredValid: false,   // whether hovered tile is valid for placement
 };
 
-// Territory: tiles within 5 of any player building
+// Territory: tiles within 5 of any player building (Node Relay extends by 3)
 function getPlayerTerritory() {
   const territory = new Set();
-  const RANGE = 5;
+  const BASE_RANGE = 5;
   for (const b of gameState.buildings) {
     if (b.owner !== 0) continue;
-    for (let dy = -RANGE; dy <= RANGE; dy++) {
-      for (let dx = -RANGE; dx <= RANGE; dx++) {
+    const bt = BUILDING_TYPES[b.type];
+    const range = BASE_RANGE + (bt.territoryBonus || 0);
+    for (let dy = -range; dy <= range; dy++) {
+      for (let dx = -range; dx <= range; dx++) {
         const nx = b.x + dx, ny = b.y + dy;
         if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
-          if (Math.abs(dx) + Math.abs(dy) <= RANGE) {
+          if (Math.abs(dx) + Math.abs(dy) <= range) {
             territory.add(ny * MAP_W + nx);
           }
         }
@@ -3977,13 +5203,20 @@ function getValidTerrain(typeKey) {
 function isTileValidForBuilding(tx, ty, typeKey) {
   if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H) return false;
   const t = map.terrain[ty][tx];
+  const bt = BUILDING_TYPES[typeKey];
   const validTerrain = getValidTerrain(typeKey);
   if (!validTerrain.includes(t)) return false;
   if (tileHasBuilding(tx, ty)) return false;
   const player = gameState.civs[0];
-  if (player.treasury < BUILDING_TYPES[typeKey].cost) return false;
+  if (player.treasury < bt.cost) return false;
   // Must be within player territory
   if (!playerTerritory().has(ty * MAP_W + tx)) return false;
+  // Tech requirement
+  if (bt.requiresTech && !hasTech(0, bt.requiresTech)) return false;
+  // Building prerequisite
+  if (bt.requiresBuilding && !hasPrerequisiteBuilding(0, typeKey)) return false;
+  // Deposit requirement
+  if (bt.requiresDeposit && !hasDepositNearby(tx, ty, DEPOSITS[bt.requiresDeposit].name, 3)) return false;
   return true;
 }
 
@@ -4028,10 +5261,24 @@ function updateBuildMenu() {
     html += `<div class="build-category">${cat.label}</div>`;
     for (const typeKey of cat.types) {
       const bt = BUILDING_TYPES[typeKey];
+      const unlocked = isBuildingUnlocked(0, typeKey);
+      const hasPrereq = hasPrerequisiteBuilding(0, typeKey);
       const canAfford = player.treasury >= bt.cost;
       const isSelected = buildState.selectedType === typeKey;
-      const disabledClass = canAfford ? '' : ' disabled';
-      const selectedClass = isSelected ? ' selected' : '';
+
+      // Determine entry state
+      let entryClass = '';
+      let clickable = false;
+      if (!unlocked) {
+        entryClass = ' locked';
+      } else if (!hasPrereq) {
+        entryClass = ' disabled';
+      } else if (!canAfford) {
+        entryClass = ' disabled';
+      } else {
+        clickable = true;
+      }
+      if (isSelected) entryClass += ' selected';
 
       let statsHtml = '';
       if (bt.energyOutput > 0) statsHtml += `<span style="color:#44dd66">⚡${bt.energyOutput}</span>`;
@@ -4040,16 +5287,30 @@ function updateBuildMenu() {
       if (bt.popCost > 0) statsHtml += `<span style="color:#cc88ff">👷${bt.popCost}</span>`;
       if (bt.popCapacity > 0) statsHtml += `<span style="color:#cc88ff">👥+${bt.popCapacity}</span>`;
       if (bt.foodOutput > 0) statsHtml += `<span style="color:#88cc44">🌾${bt.foodOutput}</span>`;
+      if (bt.happinessBonus) statsHtml += `<span style="color:#ffcc00">😊+${bt.happinessBonus}</span>`;
+      if (bt.satsPerTurn) statsHtml += `<span style="color:#F7931A">+${bt.satsPerTurn}₿/turn</span>`;
+      if (bt.satsBonusPct) statsHtml += `<span style="color:#F7931A">+${Math.round(bt.satsBonusPct*100)}%₿</span>`;
+      if (bt.researchSpeedBonus) statsHtml += `<span style="color:#cc88ff">🔬-${Math.round(bt.researchSpeedBonus*100)}%</span>`;
+      if (bt.pollution) statsHtml += `<span style="color:#ff4444">☁️ Pollution</span>`;
 
       const terrainLabel = getTerrainRequirementLabel(typeKey);
 
+      let lockTag = '';
+      if (!unlocked) {
+        const techName = getRequiredTechName(typeKey);
+        lockTag = `<div class="build-locked-tag">🔒 Requires: ${techName}</div>`;
+      } else if (!hasPrereq) {
+        lockTag = `<div class="build-locked-tag">🔒 Build ${BUILDING_TYPES[bt.requiresBuilding]?.name || bt.requiresBuilding} first</div>`;
+      }
+
       html += `
-        <div class="build-entry${disabledClass}${selectedClass}" data-type="${typeKey}" ${!canAfford ? '' : `onclick="selectBuildType('${typeKey}')"`}>
+        <div class="build-entry${entryClass}" data-type="${typeKey}" ${clickable ? `onclick="selectBuildType('${typeKey}')"` : ''}>
           <div class="build-icon">${bt.icon}</div>
           <div class="build-info">
             <div class="build-name">${bt.name}</div>
             <div class="build-stats">${statsHtml}</div>
-            <div class="build-terrain-tag">📍 ${terrainLabel}</div>
+            ${lockTag}
+            ${unlocked ? `<div class="build-terrain-tag">📍 ${terrainLabel}</div>` : ''}
           </div>
           <div class="build-cost">${bt.cost}₿</div>
           <div class="build-shortcut">${shortcutIdx <= 9 ? shortcutIdx : ''}</div>
@@ -4064,6 +5325,8 @@ function updateBuildMenu() {
 function selectBuildType(typeKey) {
   const player = gameState.civs[0];
   const bt = BUILDING_TYPES[typeKey];
+  if (!isBuildingUnlocked(0, typeKey)) return;
+  if (!hasPrerequisiteBuilding(0, typeKey)) return;
   if (player.treasury < bt.cost) return;
 
   buildState.buildMode = true;
@@ -4329,6 +5592,12 @@ window.addEventListener('keydown', e => {
     return;
   }
 
+  // Tech tree overlay
+  if (techTreeOpen) {
+    if (e.key === 'Escape') closeTechTree();
+    return;
+  }
+
   keys[e.key.toLowerCase()] = true;
 
   // Escape: cancel build mode or close menu
@@ -4356,6 +5625,11 @@ window.addEventListener('keydown', e => {
   // C = toggle civ panel
   if (e.key.toLowerCase() === 'c' && !e.repeat) {
     if (!buildState.menuOpen) toggleCivPanel();
+  }
+
+  // T = toggle tech tree
+  if (e.key.toLowerCase() === 't' && !e.repeat) {
+    toggleTechTree();
   }
 
   // Number keys 1-9 for quick-selecting building types
@@ -4425,6 +5699,11 @@ function regenerateMap() {
     workersUsed: 0,
     idleWorkers: 0,
     lastTreasuryMilestone: 0,
+    researched: new Set(Object.entries(TECH_TREE).filter(([,t]) => t.unlocked).map(([id]) => id)),
+    currentResearch: null,
+    researchProgress: 0,
+    researchTurnsNeeded: 0,
+    pollutionCount: 0,
   }));
   gameState.civPanelVisible = false;
 
@@ -4438,6 +5717,7 @@ function regenerateMap() {
   document.getElementById('buildBtn').classList.remove('active');
   document.getElementById('legend').style.display = '';
   invalidateTerritory();
+  if (techTreeOpen) closeTechTree();
 
   initCivilizations();
   initCamera();
@@ -4598,6 +5878,156 @@ processTurn = function() {
     markTipShown(turn);
   }
 };
+
+// ============================================================
+// Tech Tree UI
+// ============================================================
+let techTreeOpen = false;
+
+function openTechTree() {
+  techTreeOpen = true;
+  renderTechTree();
+  document.getElementById('techTreeOverlay').classList.add('visible');
+}
+
+function closeTechTree() {
+  techTreeOpen = false;
+  document.getElementById('techTreeOverlay').classList.remove('visible');
+}
+
+function toggleTechTree() {
+  if (techTreeOpen) closeTechTree();
+  else openTechTree();
+}
+
+function renderTechTree() {
+  const container = document.getElementById('techTreeContent');
+  const player = gameState.civs[0];
+  const tiers = [1, 2, 3, 4, 5];
+  const tierLabels = ['Tier 1: Basics', 'Tier 2: Early', 'Tier 3: Mid', 'Tier 4: Late', 'Tier 5: Endgame'];
+
+  let html = '';
+  for (let ti = 0; ti < tiers.length; ti++) {
+    const tier = tiers[ti];
+    html += `<div class="tech-tier"><div class="tech-tier-label">${tierLabels[ti]}</div>`;
+
+    for (const [techId, tech] of Object.entries(TECH_TREE)) {
+      if (tech.tier !== tier) continue;
+
+      const researched = player.researched.has(techId);
+      const available = isTechAvailable(0, techId);
+      const isResearching = player.currentResearch === techId;
+      const canAfford = player.treasury >= tech.cost;
+
+      let cardClass = 'tech-card';
+      let statusIcon = '';
+      if (researched) {
+        cardClass += ' researched';
+        statusIcon = '✅';
+      } else if (isResearching) {
+        cardClass += ' researching';
+        statusIcon = '🔄';
+      } else if (available) {
+        cardClass += ' available';
+        statusIcon = canAfford ? '🔵' : '💰';
+      } else {
+        cardClass += ' locked';
+        statusIcon = '🔒';
+      }
+
+      const unlockNames = tech.unlocks.map(b => BUILDING_TYPES[b]?.name || b).join(', ');
+      const reqNames = tech.requires.map(r => TECH_TREE[r]?.name || r).join(', ');
+
+      let progressHtml = '';
+      if (isResearching) {
+        const total = player.researchTurnsNeeded || getResearchTurns(0, techId);
+        const pct = Math.round((player.researchProgress / total) * 100);
+        progressHtml = `<div class="tech-progress-bar"><div class="tech-progress-fill" style="width:${pct}%"></div></div>`;
+        progressHtml += `<div style="font-size:10px;color:#F7931A;margin-top:2px">${player.researchProgress}/${total} turns</div>`;
+      }
+
+      html += `
+        <div class="${cardClass}" data-tech="${techId}" ${available && !researched && !isResearching ? `onclick="onTechClick('${techId}')"` : ''}>
+          <div class="tech-status-icon">${statusIcon}</div>
+          <div class="tech-name">${tech.name}</div>
+          ${!researched ? `<div class="tech-cost">${tech.cost > 0 ? tech.cost + '₿' : 'Free'}</div>` : ''}
+          ${unlockNames ? `<div class="tech-unlocks">🔓 ${unlockNames}</div>` : ''}
+          ${tech.effect ? `<div class="tech-effect">✨ ${TECH_EFFECT_DESCRIPTIONS[tech.effect] || tech.effect}</div>` : ''}
+          ${!researched && reqNames ? `<div class="tech-requires">Requires: ${reqNames}</div>` : ''}
+          ${progressHtml}
+        </div>
+      `;
+    }
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+function onTechClick(techId) {
+  const tech = TECH_TREE[techId];
+  const player = gameState.civs[0];
+
+  if (!isTechAvailable(0, techId)) return;
+  if (player.currentResearch) {
+    showToast(`Already researching: ${TECH_TREE[player.currentResearch].name}`, 'error');
+    return;
+  }
+  if (player.treasury < tech.cost) {
+    showToast(`Not enough sats! Need ${tech.cost}₿`, 'error');
+    return;
+  }
+
+  // Confirm
+  if (tech.cost > 0) {
+    const turns = getResearchTurns(0, techId);
+    if (!confirm(`Research ${tech.name}?\nCost: ${tech.cost}₿ | Time: ${turns} turns`)) return;
+  }
+
+  startResearch(0, techId);
+  renderTechTree();
+  updateHUD();
+
+  // Flash treasury
+  const satsEl = document.getElementById('hudSats');
+  satsEl.classList.remove('flash');
+  void satsEl.offsetWidth;
+  satsEl.classList.add('flash');
+  setTimeout(() => satsEl.classList.remove('flash'), 600);
+}
+
+// Tech tree button
+document.getElementById('techTreeBtn').addEventListener('click', toggleTechTree);
+document.getElementById('techTreeClose').addEventListener('click', closeTechTree);
+document.getElementById('techTreeOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('techTreeOverlay')) closeTechTree();
+});
+
+// ============================================================
+// AI Research (simple auto-research for AI civs)
+// ============================================================
+function aiAutoResearch(civId) {
+  const civ = gameState.civs[civId];
+  if (civ.currentResearch) return; // Already researching
+
+  // Find available techs, pick cheapest affordable one
+  const available = [];
+  for (const [techId, tech] of Object.entries(TECH_TREE)) {
+    if (isTechAvailable(civId, techId) && civ.treasury >= tech.cost) {
+      available.push({ id: techId, ...tech });
+    }
+  }
+  if (available.length === 0) return;
+
+  // Prioritize by tier (lowest first), then cost
+  available.sort((a, b) => a.tier - b.tier || a.cost - b.cost);
+  const pick = available[0];
+
+  civ.treasury -= pick.cost;
+  civ.currentResearch = pick.id;
+  civ.researchProgress = 0;
+  civ.researchTurnsNeeded = getResearchTurns(civId, pick.id);
+}
 
 // ============================================================
 // Init
