@@ -330,6 +330,114 @@
   @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
   @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 
+  /* Turn Summary Panel (Phase 4) */
+  #turnSummaryPanel {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: rgba(12,12,20,0.96);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 12px;
+    padding: 18px 28px;
+    z-index: 210;
+    backdrop-filter: blur(16px);
+    font-size: 13px;
+    color: #ddd;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    min-width: 300px;
+    max-width: 380px;
+    font-family: 'Courier New', monospace;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(247,147,26,0.15);
+  }
+  #turnSummaryPanel.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) scale(1);
+  }
+  #turnSummaryPanel .tsp-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #F7931A;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+  }
+  #turnSummaryPanel .tsp-line {
+    padding: 3px 0;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+  }
+  #turnSummaryPanel .tsp-line .tsp-label { color: #999; }
+  #turnSummaryPanel .tsp-line .tsp-value { color: #eee; font-weight: 600; }
+  #turnSummaryPanel .tsp-divider {
+    border: none;
+    border-top: 1px solid rgba(247,147,26,0.2);
+    margin: 6px 0;
+  }
+  #turnSummaryPanel .tsp-event {
+    font-size: 12px;
+    color: #F7931A;
+    padding: 2px 0;
+    text-align: center;
+  }
+
+  /* Happiness indicator in HUD */
+  .hud-val.happiness { color: #ffcc00; }
+
+  /* Vignette overlay */
+  #vignetteOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%);
+  }
+
+  /* Turn flash overlay */
+  #turnFlash {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: rgba(247,147,26,0.08);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  #turnFlash.active { opacity: 1; }
+
+  /* Panel slide transitions */
+  #infoPanel {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    transform: translateX(0);
+  }
+  #infoPanel.hidden {
+    transform: translateX(20px);
+  }
+
+  /* Build menu tooltip */
+  .build-tooltip {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 8px;
+    background: rgba(12,12,20,0.96);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #ccc;
+    min-width: 180px;
+    pointer-events: none;
+    z-index: 120;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    display: none;
+  }
+  .build-entry:hover .build-tooltip { display: block; }
+
   /* Demolish context menu */
   #demolishMenu {
     position: fixed;
@@ -543,9 +651,12 @@
   </div>
   <div class="hud-sep"></div>
   <div class="hud-item">
-    👥 <span class="hud-val pop" id="hudPop">0/0</span>
+    👥 <span class="hud-val pop" id="hudPop">0/0</span> <span style="color:#666;font-size:10px" id="hudPopIdle"></span>
   </div>
   <div class="hud-sep"></div>
+  <div class="hud-item">
+    <span id="hudHappyEmoji">😐</span> <span class="hud-val happiness" id="hudHappiness">50</span>
+  </div>
   <div class="hud-sep"></div>
   <div class="hud-item">
     🏗 <span class="hud-val" id="hudBuildings" style="color:#aaa">0</span>
@@ -589,6 +700,14 @@
 <div id="buildModeIndicator">Building: <span id="buildModeName">—</span> · <span style="font-weight:400;font-size:11px">Click to place · Esc/Right-click to cancel</span></div>
 
 <div id="toastContainer"></div>
+
+<div id="turnSummaryPanel">
+  <div class="tsp-title"></div>
+  <div class="tsp-body"></div>
+</div>
+
+<div id="vignetteOverlay"></div>
+<div id="turnFlash"></div>
 
 <div id="demolishMenu">
   <div class="demolish-option" id="demolishBtn">🗑️ Demolish Building</div>
@@ -1733,19 +1852,269 @@ let gameState = {
   turn: 0,
   blockReward: 50,
   halvingInterval: 100, // halve every 100 turns
-  buildings: [],        // { type, owner, x, y, active }
+  buildings: [],        // { type, owner, x, y, active, scale (animation) }
   civs: CIVILIZATIONS.map(c => ({
     ...c,
     treasury: 1000,
     hashPower: 0,
     energyProduced: 0,
     energyConsumed: 0,
-    population: 0,
+    population: 4,       // Start with 4 (from 2 houses)
     maxPopulation: 0,
     foodProduced: 0,
+    happiness: 50,
+    workersUsed: 0,
+    idleWorkers: 0,
+    lastTreasuryMilestone: 0,
   })),
   civPanelVisible: false,
 };
+
+// ============================================================
+// Floating text animations (Phase 4)
+// ============================================================
+let floatingTexts = [];
+
+function addFloatingText(x, y, text, color = '#F7931A', duration = 1500) {
+  const screen = tileToScreen(x, y);
+  floatingTexts.push({
+    x: screen.x,
+    y: screen.y - 10,
+    text,
+    color,
+    startTime: performance.now(),
+    duration,
+  });
+}
+
+function renderFloatingTexts(now) {
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const ft = floatingTexts[i];
+    const elapsed = now - ft.startTime;
+    if (elapsed >= ft.duration) {
+      floatingTexts.splice(i, 1);
+      continue;
+    }
+    const progress = elapsed / ft.duration;
+    const alpha = 1 - progress;
+    const yOff = progress * 40;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = `bold ${Math.round(14 * camera.zoom)}px 'Courier New', monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = ft.color;
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(ft.text, ft.x, ft.y - yOff);
+    ctx.restore();
+  }
+}
+
+// ============================================================
+// Building placement particles (Phase 4)
+// ============================================================
+let particles = [];
+
+function addPlacementParticles(x, y, count = 8) {
+  const screen = tileToScreen(x, y);
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
+    particles.push({
+      x: screen.x,
+      y: screen.y,
+      vx: Math.cos(angle) * (1 + Math.random() * 2),
+      vy: Math.sin(angle) * (1 + Math.random() * 2) - 1,
+      life: 1,
+      decay: 0.015 + Math.random() * 0.01,
+      size: 2 + Math.random() * 2,
+      color: '#F7931A',
+    });
+  }
+}
+
+function renderParticles(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.05; // gravity
+    p.life -= p.decay;
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * camera.zoom, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ============================================================
+// Happiness System (Phase 4)
+// ============================================================
+function calculateHappiness(civId) {
+  const civ = gameState.civs[civId];
+  let happiness = 50; // Base
+
+  let farmCount = 0;
+  let pollutionBuildings = 0;
+
+  for (const b of gameState.buildings) {
+    if (b.owner !== civId || !b.active) continue;
+    if (b.type === 'farm') farmCount++;
+    // Coal/gas aren't explicit building types, but mining_warehouse represents heavy industry
+    if (b.type === 'mining_warehouse') pollutionBuildings++;
+  }
+
+  // Per farm: +2 (food security)
+  happiness += farmCount * 2;
+
+  // Per heavy industry building: -5 (pollution)
+  happiness -= pollutionBuildings * 5;
+
+  // Overcrowding (pop > housing * 0.8)
+  if (civ.maxPopulation > 0 && civ.population > civ.maxPopulation * 0.8) {
+    happiness -= 10;
+  }
+
+  // Treasury bonuses
+  if (civ.treasury > 20000) happiness += 20;
+  else if (civ.treasury > 5000) happiness += 10;
+
+  // Idle workers (>2): -3 per idle
+  if (civ.idleWorkers > 2) {
+    happiness -= (civ.idleWorkers - 2) * 3;
+  }
+
+  // Full employment bonus
+  if (civ.idleWorkers === 0 && civ.workersUsed > 0) {
+    happiness += 5;
+  }
+
+  return Math.max(0, Math.min(100, happiness));
+}
+
+function getHappinessEmoji(h) {
+  if (h > 70) return '😊';
+  if (h >= 40) return '😐';
+  if (h >= 20) return '😟';
+  return '😡';
+}
+
+// ============================================================
+// Worker Assignment System (Phase 4)
+// ============================================================
+function assignWorkers(civId) {
+  const civ = gameState.civs[civId];
+  let availableWorkers = civ.population;
+  civ.workersUsed = 0;
+
+  // Build lists by priority
+  const farms = [];
+  const energyWorkerBuildings = []; // hydro, geothermal
+  const miners = [];
+
+  for (const b of gameState.buildings) {
+    if (b.owner !== civId || !b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    if (bt.popCost <= 0) continue; // no workers needed
+
+    if (b.type === 'farm') farms.push(b);
+    else if (b.type === 'hydro_dam' || b.type === 'geothermal_plant') energyWorkerBuildings.push(b);
+    else if (bt.hashPower > 0) miners.push(b);
+  }
+
+  // Assign in priority order
+  function assignToList(list) {
+    for (const b of list) {
+      const bt = BUILDING_TYPES[b.type];
+      if (availableWorkers >= bt.popCost) {
+        b._workersAssigned = bt.popCost;
+        b._fullyStaffed = true;
+        availableWorkers -= bt.popCost;
+        civ.workersUsed += bt.popCost;
+      } else if (availableWorkers > 0) {
+        b._workersAssigned = availableWorkers;
+        b._fullyStaffed = false;
+        civ.workersUsed += availableWorkers;
+        availableWorkers = 0;
+      } else {
+        b._workersAssigned = 0;
+        b._fullyStaffed = false;
+      }
+    }
+  }
+
+  assignToList(farms);
+  assignToList(energyWorkerBuildings);
+  assignToList(miners);
+
+  civ.idleWorkers = Math.max(0, civ.population - civ.workersUsed);
+}
+
+// ============================================================
+// Event System (Phase 4)
+// ============================================================
+let turnEvents = [];
+
+function checkEvents(civId) {
+  const civ = gameState.civs[civId];
+  turnEvents = [];
+
+  // Halving (checked in processTurn already, but make prominent)
+  if (gameState.turn > 0 && gameState.turn % gameState.halvingInterval === 0) {
+    turnEvents.push(`⚡ Halving! Block reward → ${gameState.blockReward} sats`);
+  }
+
+  // Population boom
+  if (civ.happiness > 80) {
+    // 30% chance of bonus pop
+    if (Math.random() < 0.3 && civ.population < civ.maxPopulation) {
+      civ.population++;
+      turnEvents.push('🎉 Population boom! +1 extra citizen');
+    }
+  }
+
+  // Energy shortage
+  if (civ.energyConsumed > civ.energyProduced) {
+    turnEvents.push('⚠️ Energy shortage! Miners throttled');
+  }
+
+  // Treasury milestones
+  const milestones = [1000, 5000, 10000, 25000, 50000, 100000];
+  for (const m of milestones) {
+    if (civ.treasury >= m && civ.lastTreasuryMilestone < m) {
+      turnEvents.push(`🏆 Milestone: ${m.toLocaleString()}₿!`);
+      civ.lastTreasuryMilestone = m;
+    }
+  }
+
+  // Unhappy workers
+  if (civ.happiness < 40) {
+    turnEvents.push('😟 Workers unhappy — productivity declining');
+  }
+
+  // Civil unrest
+  if (civ.happiness < 20) {
+    // Random building may go inactive
+    const activeBuildings = gameState.buildings.filter(b => b.owner === civId && b.active && b.type !== 'citadel');
+    if (activeBuildings.length > 0 && Math.random() < 0.2) {
+      const victim = activeBuildings[Math.floor(Math.random() * activeBuildings.length)];
+      victim.active = false;
+      const bt = BUILDING_TYPES[victim.type];
+      turnEvents.push(`😡 Civil unrest! ${bt.name} went inactive`);
+      // Reactivate next turn automatically
+      setTimeout(() => { victim.active = true; }, 0);
+    }
+  }
+
+  return turnEvents;
+}
 
 // ============================================================
 // Starting Position Selection & Building Placement
@@ -1945,68 +2314,103 @@ function initCivilizations() {
 // ============================================================
 // Economy / Turn System
 // ============================================================
+function getActualEnergyOutput(b) {
+  const bt = BUILDING_TYPES[b.type];
+  let energyOut = bt.energyOutput;
+  if (energyOut > 0 && b.x >= 0 && b.y >= 0) {
+    const tileTerrain = map.terrain[b.y][b.x];
+    const tileQuad = getQuadrantName(b.x, b.y);
+    if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) energyOut = 10;
+    else if (b.type === 'hydro_dam' && tileTerrain === TERRAIN.MAJOR_RIVER.id) energyOut = 20;
+    else if (b.type === 'hydro_dam' && tileQuad === 'SW') energyOut = 18;
+    else if (b.type === 'wind_turbine' && tileQuad === 'SE') energyOut = 8;
+    else if (b.type === 'geothermal_plant' && tileTerrain === TERRAIN.VOLCANIC.id) energyOut = 15;
+  }
+  return energyOut;
+}
+
 function recalculateCivStats() {
-  // Reset stats
+  // Reset stats (but keep population — it's dynamic now)
   for (const civ of gameState.civs) {
     civ.energyProduced = 0;
     civ.energyConsumed = 0;
     civ.hashPower = 0;
-    civ.population = 0;
     civ.maxPopulation = 0;
     civ.foodProduced = 0;
+    civ.workersUsed = 0;
+    civ.idleWorkers = 0;
   }
 
+  // First pass: calculate maxPop, food, energy production
   for (const b of gameState.buildings) {
     if (!b.active) continue;
     const bt = BUILDING_TYPES[b.type];
     const civ = gameState.civs[b.owner];
 
-    // Calculate energy output with terrain bonuses
-    let energyOut = bt.energyOutput;
-    if (energyOut > 0 && b.x >= 0 && b.y >= 0) {
-      const tileTerrain = map.terrain[b.y][b.x];
-      const tileQuad = getQuadrantName(b.x, b.y);
+    civ.maxPopulation += bt.popCapacity;
+    civ.foodProduced += bt.foodOutput;
 
-      if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) {
-        energyOut = 10; // Desert solar bonus
-      } else if (b.type === 'hydro_dam' && tileTerrain === TERRAIN.MAJOR_RIVER.id) {
-        energyOut = 20; // Major river hydro bonus — strongest
-      } else if (b.type === 'hydro_dam' && tileQuad === 'SW') {
-        energyOut = 18; // River quadrant hydro bonus
-      } else if (b.type === 'wind_turbine' && tileQuad === 'SE') {
-        energyOut = 8; // Mountain quadrant wind bonus
-      } else if (b.type === 'geothermal_plant' && tileTerrain === TERRAIN.VOLCANIC.id) {
-        energyOut = 15; // Volcanic geothermal bonus
+    // Energy output (non-worker buildings produce regardless)
+    const energyOut = getActualEnergyOutput(b);
+    if (bt.popCost === 0 && energyOut > 0) {
+      civ.energyProduced += energyOut;
+    }
+  }
+
+  // Assign workers per civ
+  for (const civ of gameState.civs) {
+    assignWorkers(civ.id);
+  }
+
+  // Second pass: calculate energy from worker buildings and hash power
+  for (const b of gameState.buildings) {
+    if (!b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    const civ = gameState.civs[b.owner];
+    const energyOut = getActualEnergyOutput(b);
+
+    // Worker-dependent energy buildings
+    if (bt.popCost > 0 && energyOut > 0) {
+      if (b._fullyStaffed) {
+        civ.energyProduced += energyOut;
+      } else if (b._workersAssigned > 0) {
+        civ.energyProduced += Math.floor(energyOut * 0.5); // 50% efficiency
       }
     }
 
-    civ.energyProduced += energyOut;
-    civ.maxPopulation += bt.popCapacity;
-    civ.foodProduced += bt.foodOutput;
+    // Farms with reduced workers produce less food
+    if (b.type === 'farm' && !b._fullyStaffed && b._workersAssigned === 0) {
+      civ.foodProduced -= bt.foodOutput; // undo the full food
+    } else if (b.type === 'farm' && !b._fullyStaffed && b._workersAssigned > 0) {
+      civ.foodProduced -= Math.floor(bt.foodOutput * 0.5); // reduce by half
+    }
   }
 
-  // Workers = min(maxPopulation, food supports)
-  for (const civ of gameState.civs) {
-    civ.population = Math.min(civ.maxPopulation, civ.foodProduced); // simplified: 1 food per pop
-  }
-
-  // Now calculate energy consumption and hash power
-  // Miners only work if there's energy and workers available
+  // Third pass: hash power from miners (need energy + workers)
   for (const b of gameState.buildings) {
     if (!b.active) continue;
     const bt = BUILDING_TYPES[b.type];
+    if (bt.hashPower <= 0) continue;
     const civ = gameState.civs[b.owner];
+    const energyNeeded = bt.energy;
+    const availableEnergy = civ.energyProduced - civ.energyConsumed;
 
-    if (bt.hashPower > 0) {
-      // Check if we have energy and workers
-      const energyNeeded = bt.energy;
-      const workersNeeded = bt.popCost;
-      const availableEnergy = civ.energyProduced - civ.energyConsumed;
-      // Workers already accounted for as population
-      if (availableEnergy >= energyNeeded) {
-        civ.energyConsumed += energyNeeded;
-        civ.hashPower += bt.hashPower;
-      }
+    if (availableEnergy >= energyNeeded && b._fullyStaffed) {
+      civ.energyConsumed += energyNeeded;
+      civ.hashPower += bt.hashPower;
+    } else if (availableEnergy >= energyNeeded && b._workersAssigned > 0) {
+      civ.energyConsumed += energyNeeded;
+      civ.hashPower += Math.floor(bt.hashPower * 0.5); // 50% output
+    }
+  }
+
+  // Apply happiness effects to hash power
+  for (const civ of gameState.civs) {
+    civ.happiness = calculateHappiness(civ.id);
+    if (civ.happiness > 70) {
+      civ.hashPower = Math.round(civ.hashPower * 1.1); // +10% bonus
+    } else if (civ.happiness < 40) {
+      civ.hashPower = Math.round(civ.hashPower * 0.8); // -20% penalty
     }
   }
 }
@@ -2019,7 +2423,36 @@ function processTurn() {
     gameState.blockReward = Math.max(1, Math.floor(gameState.blockReward / 2));
   }
 
+  // Population growth/decline per civ
+  const popChanges = {};
+  for (const civ of gameState.civs) {
+    const prevPop = civ.population;
+    const happiness = civ.happiness;
+    let popChange = 0;
+
+    // Food check
+    if (civ.foodProduced >= civ.population && civ.population < civ.maxPopulation) {
+      popChange += 1; // surplus food + housing → grow
+    } else if (civ.foodProduced < civ.population) {
+      popChange -= 1; // starvation
+    }
+
+    // Happiness modifiers
+    if (happiness > 70 && civ.population < civ.maxPopulation) {
+      popChange += 1; // happy growth bonus
+    }
+    if (happiness < 40) {
+      popChange -= 1; // emigration
+    }
+
+    civ.population = Math.max(1, Math.min(civ.maxPopulation, civ.population + popChange));
+    popChanges[civ.id] = civ.population - prevPop;
+  }
+
   recalculateCivStats();
+
+  // Check events for player
+  const events = checkEvents(0);
 
   // Calculate total network hash power
   let totalHash = 0;
@@ -2036,46 +2469,138 @@ function processTurn() {
     }
     civ.treasury += earned;
     civ.treasury = Math.round(civ.treasury * 100) / 100;
-    earnings.push({ name: civ.name, color: civ.color, earned });
+    earnings.push({ name: civ.name, color: civ.color, earned, civId: civ.id });
   }
 
-  showTurnSummary(earnings, totalHash);
+  // Floating text effects for player's miners
+  const playerEarned = earnings[0]?.earned || 0;
+  if (playerEarned > 0) {
+    // Find player miners for floating text
+    const playerMiners = gameState.buildings.filter(b => b.owner === 0 && BUILDING_TYPES[b.type].hashPower > 0);
+    if (playerMiners.length > 0) {
+      const miner = playerMiners[Math.floor(Math.random() * playerMiners.length)];
+      addFloatingText(miner.x, miner.y, `+${playerEarned}₿`, '#F7931A');
+    }
+  }
+
+  // Population change floating text
+  const playerPopChange = popChanges[0] || 0;
+  if (playerPopChange !== 0) {
+    const citadel = gameState.buildings.find(b => b.owner === 0 && b.type === 'citadel');
+    if (citadel) {
+      const txt = playerPopChange > 0 ? `+${playerPopChange}👶` : `${playerPopChange}💀`;
+      const col = playerPopChange > 0 ? '#44dd66' : '#ff4444';
+      addFloatingText(citadel.x, citadel.y, txt, col);
+    }
+  }
+
+  // Turn flash effect
+  const flash = document.getElementById('turnFlash');
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 200);
+
+  showTurnSummaryPanel(earnings, totalHash, popChanges, events);
   updateHUD();
   updateCivPanel();
 }
 
-function showTurnSummary(earnings, totalHash) {
-  const el = document.getElementById('turnSummary');
-  const titleEl = el.querySelector('.summary-title');
-  const bodyEl = el.querySelector('.summary-body');
+function showTurnSummaryPanel(earnings, totalHash, popChanges, events) {
+  const panel = document.getElementById('turnSummaryPanel');
+  const titleEl = panel.querySelector('.tsp-title');
+  const bodyEl = panel.querySelector('.tsp-body');
 
-  titleEl.textContent = `⛏ Block ${gameState.turn} Mined`;
+  const player = gameState.civs[0];
+  const netEnergy = player.energyProduced - player.energyConsumed;
+  const networkShare = totalHash > 0 ? Math.round((player.hashPower / totalHash) * 100) : 0;
+  const popChange = popChanges[0] || 0;
+  const popChangeStr = popChange > 0 ? `+${popChange}` : popChange === 0 ? '±0' : `${popChange}`;
+  const popChangeColor = popChange > 0 ? '#44dd66' : popChange < 0 ? '#ff4444' : '#888';
+  const playerEarned = earnings[0]?.earned || 0;
 
-  let html = `<div class="summary-line" style="color:#888">Block reward: ${gameState.blockReward} sats · Network: ${totalHash} H/s</div>`;
-  for (const e of earnings) {
-    if (e.earned > 0) {
-      html += `<div class="summary-line"><span style="color:${e.color}">■</span> ${e.name}: <span style="color:#F7931A">+${e.earned} sats</span></div>`;
+  titleEl.textContent = `═══ Turn ${gameState.turn} ═══`;
+
+  let html = '';
+  html += `<div class="tsp-line"><span class="tsp-label">⚡ Energy</span><span class="tsp-value" style="color:#44dd66">${netEnergy}/${player.energyProduced} (${netEnergy >= 0 ? '+' : ''}${netEnergy} surplus)</span></div>`;
+  html += `<div class="tsp-line"><span class="tsp-label">⛏ Hash Power</span><span class="tsp-value" style="color:#00A8FF">${player.hashPower} H/s (${networkShare}% network)</span></div>`;
+  html += `<div class="tsp-line"><span class="tsp-label">₿ Mined</span><span class="tsp-value" style="color:#F7931A">+${playerEarned} sats</span></div>`;
+  html += `<hr class="tsp-divider">`;
+  html += `<div class="tsp-line"><span class="tsp-label">👥 Population</span><span class="tsp-value" style="color:${popChangeColor}">${player.population - popChange} → ${player.population} (${popChangeStr})</span></div>`;
+  html += `<div class="tsp-line"><span class="tsp-label">${getHappinessEmoji(player.happiness)} Happiness</span><span class="tsp-value" style="color:#ffcc00">${player.happiness}</span></div>`;
+  html += `<div class="tsp-line"><span class="tsp-label">💰 Treasury</span><span class="tsp-value" style="color:#F7931A">${player.treasury.toLocaleString()}₿</span></div>`;
+
+  if (events.length > 0) {
+    html += `<hr class="tsp-divider">`;
+    for (const evt of events) {
+      html += `<div class="tsp-event">${evt}</div>`;
     }
   }
+
   bodyEl.innerHTML = html;
 
-  el.classList.add('visible');
-  clearTimeout(el._timeout);
-  el._timeout = setTimeout(() => el.classList.remove('visible'), 3000);
+  panel.classList.add('visible');
+  clearTimeout(panel._timeout);
+  panel._timeout = setTimeout(() => panel.classList.remove('visible'), 4000);
+
+  // Also show events as toasts
+  for (const evt of events) {
+    showToast(evt, evt.includes('⚠') || evt.includes('😡') || evt.includes('😟') ? 'error' : 'success');
+  }
+
+  // Hide the old turn summary
+  const oldSummary = document.getElementById('turnSummary');
+  oldSummary.classList.remove('visible');
 }
 
 // ============================================================
 // HUD
 // ============================================================
+// Animated HUD value transitions
+const hudAnimations = {};
+function animateHudValue(elementId, newValue) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const currentText = el.textContent.replace(/[^0-9.-]/g, '');
+  const current = parseFloat(currentText) || 0;
+  const target = typeof newValue === 'number' ? newValue : parseFloat(String(newValue).replace(/[^0-9.-]/g, '')) || 0;
+
+  if (Math.abs(current - target) < 0.5) {
+    el.textContent = typeof newValue === 'string' ? newValue : newValue.toLocaleString();
+    return;
+  }
+
+  if (hudAnimations[elementId]) cancelAnimationFrame(hudAnimations[elementId]);
+
+  const startTime = performance.now();
+  const duration = 400;
+  const startVal = current;
+
+  function tick(now) {
+    const progress = Math.min(1, (now - startTime) / duration);
+    const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+    const val = Math.round(startVal + (target - startVal) * eased);
+    el.textContent = val.toLocaleString();
+    if (progress < 1) {
+      hudAnimations[elementId] = requestAnimationFrame(tick);
+    } else {
+      el.textContent = typeof newValue === 'string' ? newValue : target.toLocaleString();
+    }
+  }
+  hudAnimations[elementId] = requestAnimationFrame(tick);
+}
+
 function updateHUD() {
-  const player = gameState.civs[0]; // Satoshi's Legacy is always player
+  const player = gameState.civs[0];
   document.getElementById('hudTurn').textContent = gameState.turn;
   document.getElementById('hudCivName').textContent = player.name;
   document.getElementById('hudCivColor').style.background = player.color;
-  document.getElementById('hudSats').textContent = player.treasury.toLocaleString();
+
+  animateHudValue('hudSats', Math.round(player.treasury));
   document.getElementById('hudHash').textContent = player.hashPower;
   document.getElementById('hudEnergy').textContent = `${player.energyProduced - player.energyConsumed}/${player.energyProduced}`;
-  document.getElementById('hudPop').textContent = `${player.population}/${player.maxPopulation}`;
+  document.getElementById('hudPop').textContent = `${player.workersUsed}/${player.population}`;
+  document.getElementById('hudPopIdle').textContent = player.idleWorkers > 0 ? `(${player.idleWorkers} idle)` : '';
+  document.getElementById('hudHappiness').textContent = player.happiness;
+  document.getElementById('hudHappyEmoji').textContent = getHappinessEmoji(player.happiness);
 }
 
 // ============================================================
@@ -2094,6 +2619,7 @@ function updateCivPanel() {
           <span>⛏ ${civ.hashPower} H/s</span>
           <span>👥 ${civ.population}/${civ.maxPopulation}</span>
           <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
+          <span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>
         </div>
       </div>
     `;
@@ -2213,10 +2739,14 @@ function drawTile(x, y) {
   ctx.closePath();
 
   const variation = (noise_simple(x * 7.3, y * 7.3) * 8) | 0;
-  ctx.fillStyle = adjustColor(tDef.color, variation);
+  // Elevation-based gradient shading on tile tops
+  const elevShade = Math.floor((elev - 0.4) * 20);
+  ctx.fillStyle = adjustColor(tDef.color, variation + elevShade);
   ctx.fill();
 
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  // Subtler grid lines at default zoom, more visible when zoomed
+  const gridAlpha = Math.min(0.25, 0.05 + camera.zoom * 0.08);
+  ctx.strokeStyle = `rgba(0,0,0,${gridAlpha})`;
   ctx.lineWidth = 0.5;
   ctx.stroke();
 
@@ -2259,16 +2789,20 @@ function drawTile(x, y) {
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (t === TERRAIN.FOREST.id) {
+    // Varied tree sizes for organic feel
+    const treeSeed = noise_simple(x * 3.7, y * 5.1);
     for (let i = -1; i <= 1; i++) {
+      const sizeVar = 0.7 + noise_simple(x * 11.3 + i, y * 9.7 + i) * 0.6;
       const tx2 = screenX + i * 5 * dSize;
       const ty2 = screenY - 1 * dSize + Math.abs(i) * 2 * dSize;
       ctx.beginPath();
-      ctx.moveTo(tx2 - 2.5 * dSize, ty2 + 2 * dSize);
-      ctx.lineTo(tx2, ty2 - 3 * dSize);
-      ctx.lineTo(tx2 + 2.5 * dSize, ty2 + 2 * dSize);
+      ctx.moveTo(tx2 - 2.5 * dSize * sizeVar, ty2 + 2 * dSize);
+      ctx.lineTo(tx2, ty2 - 3 * dSize * sizeVar);
+      ctx.lineTo(tx2 + 2.5 * dSize * sizeVar, ty2 + 2 * dSize);
       ctx.closePath();
-      ctx.fillStyle = '#1a4a15';
-      ctx.globalAlpha = 0.7;
+      const shade = Math.floor(treeSeed * 15);
+      ctx.fillStyle = adjustColor('#1a4a15', shade - 5);
+      ctx.globalAlpha = 0.75;
       ctx.fill();
       ctx.globalAlpha = 1;
     }
@@ -2306,12 +2840,25 @@ function drawTile(x, y) {
     ctx.lineWidth = 1.5 * dSize;
     ctx.stroke();
   } else if (t === TERRAIN.DESERT.id) {
+    // Sand dune line
     ctx.beginPath();
     ctx.moveTo(screenX - 6 * dSize, screenY + 1 * dSize);
     ctx.quadraticCurveTo(screenX - 2 * dSize, screenY - 2 * dSize, screenX + 2 * dSize, screenY + 1 * dSize);
     ctx.strokeStyle = 'rgba(200,180,80,0.3)';
     ctx.lineWidth = 1 * dSize;
     ctx.stroke();
+    // Heat shimmer effect (subtle wavering)
+    if (camera.zoom > 0.5) {
+      const heatPhase = Date.now() * 0.002 + x * 7 + y * 5;
+      const shimX = Math.sin(heatPhase) * 1.5 * dSize;
+      const shimY = Math.cos(heatPhase * 0.7) * 0.8 * dSize;
+      ctx.beginPath();
+      ctx.moveTo(screenX - 4 * dSize + shimX, screenY - 3 * dSize + shimY);
+      ctx.quadraticCurveTo(screenX + shimX * 0.5, screenY - 5 * dSize + shimY, screenX + 4 * dSize + shimX, screenY - 3 * dSize + shimY);
+      ctx.strokeStyle = 'rgba(255,220,120,0.12)';
+      ctx.lineWidth = 2 * dSize;
+      ctx.stroke();
+    }
   } else if (t === TERRAIN.COAST.id || t === TERRAIN.DEEP_WATER.id) {
     const phase = Date.now() * 0.001 + x + y * 1.3;
     ctx.beginPath();
@@ -2350,6 +2897,29 @@ function drawBuilding(building) {
   const color = civ.color;
 
   ctx.save();
+
+  // Building shadow (all buildings)
+  const shadowOffX = 3 * z;
+  const shadowOffY = 2 * z;
+  ctx.beginPath();
+  ctx.ellipse(screenX + shadowOffX, screenY + h * 0.3 + shadowOffY, w * 0.5, h * 0.25, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fill();
+
+  // Building placement scale animation
+  let scale = 1;
+  if (building._placeTime) {
+    const elapsed = Date.now() - building._placeTime;
+    if (elapsed < 300) {
+      scale = 0.3 + 0.7 * (elapsed / 300);
+      scale = scale * (1 + 0.1 * Math.sin(elapsed * 0.03)); // slight bounce
+    } else {
+      building._placeTime = null; // done animating
+    }
+    ctx.translate(screenX, screenY);
+    ctx.scale(scale, scale);
+    ctx.translate(-screenX, -screenY);
+  }
 
   switch (building.type) {
     case 'citadel':
@@ -2420,11 +2990,13 @@ function drawCitadel(sx, sy, z, color) {
     ctx.fillRect(sx + i * s * 0.3 - z, sy - s * 1.8 - z * 2, z * 2, z * 3);
   }
 
-  // Glow effect
+  // Pulsing glow effect
+  const pulsePhase = Math.sin(Date.now() * 0.002) * 0.15 + 0.85;
   ctx.beginPath();
-  ctx.arc(sx, sy - s, s * 0.6, 0, Math.PI * 2);
-  const grad = ctx.createRadialGradient(sx, sy - s, 0, sx, sy - s, s * 0.6);
-  grad.addColorStop(0, color + '44');
+  ctx.arc(sx, sy - s, s * 0.8 * pulsePhase, 0, Math.PI * 2);
+  const grad = ctx.createRadialGradient(sx, sy - s, 0, sx, sy - s, s * 0.8 * pulsePhase);
+  grad.addColorStop(0, color + '66');
+  grad.addColorStop(0.5, color + '22');
   grad.addColorStop(1, color + '00');
   ctx.fillStyle = grad;
   ctx.fill();
@@ -2530,11 +3102,20 @@ function drawSolarPanel(sx, sy, z, color) {
   ctx.globalAlpha = 0.8;
   ctx.fillRect(sx - z, sy + s * 0.2, z * 2, s * 0.4);
 
-  // Shine
-  ctx.beginPath();
-  ctx.arc(sx + s * 0.2, sy - s * 0.5, z * 2, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(200,230,255,0.4)';
-  ctx.fill();
+  // Animated shine/glint
+  const glintPhase = (Date.now() * 0.001 + sx * 0.3) % 3;
+  if (glintPhase < 0.5) {
+    const glintAlpha = 0.6 * (1 - glintPhase * 2);
+    ctx.beginPath();
+    ctx.arc(sx + s * (glintPhase - 0.25) * 2, sy - s * 0.5, z * 3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${glintAlpha})`;
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(sx + s * 0.2, sy - s * 0.5, z * 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(200,230,255,0.3)';
+    ctx.fill();
+  }
 
   ctx.globalAlpha = 1;
 }
@@ -2582,6 +3163,18 @@ function drawHomeMiner(sx, sy, z, color) {
     ctx.arc(sx + s * 0.5, sy - s * 0.5, z * 1.5, 0, Math.PI * 2);
     ctx.fillStyle = '#664400';
     ctx.fill();
+  }
+
+  // Animated hash symbol floating up
+  if (z > 0.5) {
+    const hashPhase = (Date.now() * 0.001 + sx * 0.5) % 2;
+    if (hashPhase < 1) {
+      ctx.globalAlpha = 0.4 * (1 - hashPhase);
+      ctx.font = `bold ${Math.round(8 * z)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#F7931A';
+      ctx.fillText('#', sx, sy - s * 1.2 - hashPhase * 12 * z);
+    }
   }
 
   ctx.globalAlpha = 1;
@@ -2769,6 +3362,20 @@ function drawMiningShed(sx, sy, z, color) {
   ctx.globalAlpha = 0.7;
   ctx.fillRect(sx - s * 0.7, sy + s * 0.4, s * 1.4, z * 2);
 
+  // Animated hash symbols floating up
+  if (z > 0.5) {
+    for (let h = 0; h < 2; h++) {
+      const hp = (Date.now() * 0.0008 + sx * 0.3 + h * 0.5) % 2;
+      if (hp < 1) {
+        ctx.globalAlpha = 0.35 * (1 - hp);
+        ctx.font = `bold ${Math.round(9 * z)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#F7931A';
+        ctx.fillText('#', sx + (h - 0.5) * s * 0.4, sy - s * 1.5 - hp * 15 * z);
+      }
+    }
+  }
+
   ctx.globalAlpha = 1;
 }
 
@@ -2831,6 +3438,20 @@ function drawMiningWarehouse(sx, sy, z, color) {
   ctx.fillStyle = color;
   ctx.globalAlpha = 0.8;
   ctx.fillRect(sx - s * 0.8, sy + s * 0.55, s * 1.6, z * 2.5);
+
+  // Animated hash symbols floating up (3 for warehouse)
+  if (z > 0.5) {
+    for (let h = 0; h < 3; h++) {
+      const hp = (Date.now() * 0.0007 + sx * 0.2 + h * 0.33) % 2;
+      if (hp < 1) {
+        ctx.globalAlpha = 0.3 * (1 - hp);
+        ctx.font = `bold ${Math.round(10 * z)}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#F7931A';
+        ctx.fillText('#', sx + (h - 1) * s * 0.35, sy - s * 1 - hp * 18 * z);
+      }
+    }
+  }
 
   ctx.globalAlpha = 1;
 }
@@ -2919,6 +3540,11 @@ function render() {
       if (b) drawBuilding(b);
     }
   }
+
+  // Render floating texts and particles on top
+  const nowPerf = performance.now();
+  renderFloatingTexts(nowPerf);
+  renderParticles(nowPerf);
 }
 
 // ============================================================
@@ -2985,10 +3611,39 @@ function renderMinimap() {
   minimapCtx.fillRect(qHalfX, qHalfY, qHalfX, qHalfY);
   minimapCtx.globalAlpha = 1;
 
-  // Selected tile
+  // Player territory boundary (faint orange outline)
+  const territory = getPlayerTerritory();
+  minimapCtx.strokeStyle = 'rgba(247,147,26,0.25)';
+  minimapCtx.lineWidth = 0.5;
+  for (const key of territory) {
+    const tx = key % MAP_W;
+    const ty = (key - tx) / MAP_W;
+    // Check if edge of territory
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    let isEdge = false;
+    for (const [dx, dy] of dirs) {
+      const nk = (ty + dy) * MAP_W + (tx + dx);
+      if (tx + dx < 0 || tx + dx >= MAP_W || ty + dy < 0 || ty + dy >= MAP_H || !territory.has(nk)) {
+        isEdge = true;
+        break;
+      }
+    }
+    if (isEdge) {
+      minimapCtx.fillStyle = 'rgba(247,147,26,0.15)';
+      minimapCtx.fillRect(tx * tileW, ty * tileH, tileW + 0.5, tileH + 0.5);
+    }
+  }
+
+  // Selected tile with pulse
   if (selectedTile) {
+    const pulseSize = 1 + Math.sin(Date.now() * 0.005) * 0.5;
     minimapCtx.fillStyle = BTC_ORANGE;
-    minimapCtx.fillRect(selectedTile.x * tileW - 1, selectedTile.y * tileH - 1, tileW + 2, tileH + 2);
+    minimapCtx.fillRect(
+      selectedTile.x * tileW - pulseSize,
+      selectedTile.y * tileH - pulseSize,
+      tileW + pulseSize * 2,
+      tileH + pulseSize * 2
+    );
   }
 
   // Viewport rect
@@ -3080,7 +3735,11 @@ function updateInfoPanel() {
     if (bt.hashPower > 0) html += `<div class="bi-stat">⛏ Hash power: <strong>${bt.hashPower} H/s</strong></div>`;
     if (bt.energy > 0) html += `<div class="bi-stat">⚡ Energy cost: <strong>${bt.energy}</strong></div>`;
     if (bt.popCapacity > 0) html += `<div class="bi-stat">👥 Housing: <strong>+${bt.popCapacity}</strong></div>`;
-    if (bt.popCost > 0) html += `<div class="bi-stat">👷 Workers needed: <strong>${bt.popCost}</strong></div>`;
+    if (bt.popCost > 0) {
+      const assigned = building._workersAssigned || 0;
+      const staffColor = building._fullyStaffed ? '#44dd66' : assigned > 0 ? '#ffaa00' : '#ff4444';
+      html += `<div class="bi-stat">👷 Workers: <strong style="color:${staffColor}">${assigned}/${bt.popCost}</strong>${!building._fullyStaffed && assigned > 0 ? ' <span style="color:#ffaa00;font-size:11px">(50% efficiency)</span>' : ''}${assigned === 0 && bt.popCost > 0 ? ' <span style="color:#ff4444;font-size:11px">(no workers!)</span>' : ''}</div>`;
+    }
     if (bt.foodOutput > 0) html += `<div class="bi-stat">🌾 Food output: <strong>${bt.foodOutput}</strong></div>`;
     html += `<div class="bi-stat" style="color:#888;font-style:italic;margin-top:4px">${bt.description}</div>`;
     html += `</div>`;
@@ -3292,8 +3951,11 @@ function placePlayerBuilding(tx, ty, typeKey) {
   player.treasury -= bt.cost;
   player.treasury = Math.round(player.treasury * 100) / 100;
 
-  // Place building
-  gameState.buildings.push({ type: typeKey, owner: 0, x: tx, y: ty, active: true });
+  // Place building with animation
+  gameState.buildings.push({ type: typeKey, owner: 0, x: tx, y: ty, active: true, _placeTime: Date.now() });
+
+  // Placement particles
+  addPlacementParticles(tx, ty);
 
   // Recalculate
   invalidateTerritory();
@@ -3392,6 +4054,11 @@ document.getElementById('demolishBtn').addEventListener('click', () => {
 // Build button
 document.getElementById('buildBtn').addEventListener('click', () => {
   toggleBuildMenu();
+});
+
+// Click to dismiss turn summary panel
+document.getElementById('turnSummaryPanel').addEventListener('click', () => {
+  document.getElementById('turnSummaryPanel').classList.remove('visible');
 });
 
 // ============================================================
@@ -3596,14 +4263,20 @@ function regenerateMap() {
     hashPower: 0,
     energyProduced: 0,
     energyConsumed: 0,
-    population: 0,
+    population: 4,
     maxPopulation: 0,
     foodProduced: 0,
+    happiness: 50,
+    workersUsed: 0,
+    idleWorkers: 0,
+    lastTreasuryMilestone: 0,
   }));
   gameState.civPanelVisible = false;
 
   selectedTile = null;
   hoveredTile = null;
+  floatingTexts = [];
+  particles = [];
   cancelBuildMode();
   buildState.menuOpen = false;
   document.getElementById('buildMenu').classList.add('hidden');
