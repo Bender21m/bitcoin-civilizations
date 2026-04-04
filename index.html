@@ -697,6 +697,136 @@
   }
   #minimapCanvas { display: block; }
 
+  /* Unit Action Bar (bottom) */
+  #unitActionBar {
+    position: fixed;
+    bottom: 105px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(14,14,22,0.96);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 12px;
+    padding: 8px 18px;
+    z-index: 150;
+    backdrop-filter: blur(14px);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #ddd;
+    white-space: nowrap;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    max-width: 90vw;
+  }
+  #unitActionBar.visible { display: flex; }
+  #unitActionBar .uab-icon { font-size: 22px; }
+  #unitActionBar .uab-name { font-weight: 700; color: #F7931A; }
+  #unitActionBar .uab-stats { display: flex; gap: 10px; font-size: 12px; color: #bbb; }
+  #unitActionBar .uab-stats span { white-space: nowrap; }
+  #unitActionBar .uab-sep { width: 1px; height: 24px; background: rgba(255,255,255,0.1); }
+  #unitActionBar .uab-actions { display: flex; gap: 6px; }
+  .uab-btn {
+    background: rgba(247,147,26,0.12);
+    border: 1px solid rgba(247,147,26,0.35);
+    color: #F7931A;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .uab-btn:hover { background: rgba(247,147,26,0.25); transform: translateY(-1px); }
+  .uab-btn:active { transform: scale(0.96); }
+  .uab-btn.active-mode { background: rgba(247,147,26,0.4); border-color: #F7931A; color: #fff; }
+  .uab-btn.danger { color: #ff5555; border-color: rgba(255,85,85,0.3); background: rgba(255,85,85,0.08); }
+  .uab-btn.danger:hover { background: rgba(255,85,85,0.2); }
+  #unitActionBar .uab-hint { font-size: 11px; color: #666; }
+
+  /* Unit Context Menu (popup near unit) */
+  #unitContextMenu {
+    position: fixed;
+    background: rgba(14,14,22,0.96);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 10px;
+    padding: 6px;
+    z-index: 200;
+    backdrop-filter: blur(14px);
+    display: none;
+    flex-direction: column;
+    gap: 3px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    min-width: 120px;
+  }
+  #unitContextMenu.visible { display: flex; }
+  .ucm-btn {
+    background: rgba(255,255,255,0.04);
+    border: none;
+    color: #ddd;
+    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  .ucm-btn:hover { background: rgba(247,147,26,0.15); color: #F7931A; }
+  .ucm-btn.danger { color: #ff6666; }
+  .ucm-btn.danger:hover { background: rgba(255,68,68,0.15); }
+
+  /* Worker Build Popup */
+  #workerBuildMenu {
+    position: fixed;
+    background: rgba(14,14,22,0.96);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 10px;
+    padding: 8px;
+    z-index: 200;
+    backdrop-filter: blur(14px);
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    max-height: 300px;
+    overflow-y: auto;
+    min-width: 200px;
+  }
+  #workerBuildMenu.visible { display: flex; }
+  .wbm-title {
+    font-size: 11px; color: #F7931A; text-transform: uppercase;
+    letter-spacing: 1px; padding: 4px 8px; border-bottom: 1px solid rgba(247,147,26,0.15);
+    margin-bottom: 2px;
+  }
+  .wbm-entry {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; transition: background 0.12s;
+  }
+  .wbm-entry:hover { background: rgba(247,147,26,0.12); }
+  .wbm-entry.disabled { opacity: 0.35; cursor: not-allowed; }
+  .wbm-entry.disabled:hover { background: transparent; }
+  .wbm-entry .wbm-icon { font-size: 16px; }
+  .wbm-entry .wbm-name { font-size: 12px; color: #ddd; flex: 1; }
+  .wbm-entry .wbm-cost { font-size: 11px; color: #F7931A; font-weight: 600; }
+
+  /* Tooltip for tile hover */
+  #tileTooltip {
+    position: fixed;
+    background: rgba(10,10,18,0.94);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 11px;
+    color: #ccc;
+    z-index: 180;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+  #tileTooltip.visible { display: block; }
+
   /* Controls hint */
   #controls {
     position: fixed;
@@ -1520,6 +1650,26 @@
   <div class="demolish-refund" id="demolishRefund" style="padding:2px 16px 8px;"></div>
 </div>
 
+<!-- Unit Action Bar (bottom bar) -->
+<div id="unitActionBar">
+  <span class="uab-icon" id="uabIcon"></span>
+  <span class="uab-name" id="uabName"></span>
+  <div class="uab-stats" id="uabStats"></div>
+  <div class="uab-sep"></div>
+  <div class="uab-actions" id="uabActions"></div>
+  <div class="uab-sep"></div>
+  <span class="uab-hint"><kbd>ESC</kbd> deselect</span>
+</div>
+
+<!-- Unit Context Menu (popup near tile) -->
+<div id="unitContextMenu"></div>
+
+<!-- Worker Build Menu (popup) -->
+<div id="workerBuildMenu"></div>
+
+<!-- Tile Tooltip -->
+<div id="tileTooltip"></div>
+
 <button id="nextTurnBtn">⏭ NEXT TURN <kbd style="background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.2);color:#fff;margin-left:6px">Space</kbd></button>
 
 <div id="quickTip"></div>
@@ -1603,7 +1753,7 @@
 <input type="file" id="importFileInput" accept=".json">
 
 <div id="controls">
-  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>T</kbd> tech tree &nbsp;·&nbsp; <kbd>V</kbd> victory &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
+  <kbd>WASD</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>U</kbd> units &nbsp;·&nbsp; <kbd>T</kbd> tech &nbsp;·&nbsp; Unit: <kbd>M</kbd>ove <kbd>A</kbd>ttack <kbd>F</kbd>ortify <kbd>X</kbd> dismiss
 </div>
 
 <script>
@@ -3012,6 +3162,12 @@ let unitPanelOpen = false;
 let nextUnitId = 1;
 let unitAnimations = [];          // { unit, fromX, fromY, toX, toY, startTime, duration }
 let combatAnimations = [];        // { x, y, damage, color, startTime, duration }
+let dustParticles = [];           // { x, y, startTime, duration, particles: [...] }
+
+// Unit interaction modes
+let unitMode = null;              // null | 'move' | 'attack' | 'build'
+let workerBuildType = null;       // building type selected for worker placement
+let workerBuildTiles = null;      // Set of "x,y" valid tiles for worker building
 
 let gameState = {
   turn: 0,
@@ -3547,6 +3703,9 @@ function createUnit(type, owner, x, y) {
     maxMoves: ut.maxMoves,
     strength: ut.strength,
     facing: 'right', // 'left' or 'right'
+    autoExplore: false, // scout auto-explore toggle
+    fortified: false,    // fortify defense bonus
+    builtThisTurn: false, // worker can build once per turn
   };
   gameState.units.push(unit);
   return unit;
@@ -3703,6 +3862,13 @@ function selectUnit(unit) {
       unitMovementCosts.set(key, cost);
     }
   }
+  // Reset mode — don't auto-enter move mode, show context first
+  unitMode = null;
+  workerBuildType = null;
+  workerBuildTiles = null;
+  hideUnitContextMenu();
+  hideWorkerBuildMenu();
+  updateUnitActionBar();
   updateInfoPanel();
 }
 
@@ -3710,6 +3876,455 @@ function deselectUnit() {
   selectedUnit = null;
   unitMovementRange = null;
   unitMovementCosts = null;
+  unitMode = null;
+  workerBuildType = null;
+  workerBuildTiles = null;
+  hideUnitActionBar();
+  hideUnitContextMenu();
+  hideWorkerBuildMenu();
+}
+
+// ============================================================
+// Unit Action Bar (bottom bar)
+// ============================================================
+function updateUnitActionBar() {
+  const bar = document.getElementById('unitActionBar');
+  if (!selectedUnit) { hideUnitActionBar(); return; }
+  const unit = selectedUnit;
+  const ut = UNIT_TYPES[unit.type];
+  const civ = gameState.civs[unit.owner];
+
+  document.getElementById('uabIcon').textContent = ut.icon;
+  document.getElementById('uabName').textContent = ut.name;
+
+  let stats = `<span>❤️ ${unit.health}/${unit.maxHealth}</span>`;
+  stats += `<span>🦶 ${unit.movesLeft}/${unit.maxMoves}</span>`;
+  if (ut.strength > 0) stats += `<span>⚔️ Str:${ut.strength}</span>`;
+  if (unit.fortified) stats += `<span style="color:#44dd66">🛡 Fortified</span>`;
+  if (unit.autoExplore) stats += `<span style="color:#00ccdd">🔄 Auto</span>`;
+  document.getElementById('uabStats').innerHTML = stats;
+
+  let actions = '';
+  const moveClass = unitMode === 'move' ? ' active-mode' : '';
+  if (unit.movesLeft > 0) {
+    actions += `<button class="uab-btn${moveClass}" onclick="enterUnitMoveMode()">🦶 Move <kbd>M</kbd></button>`;
+  }
+
+  if (unit.type === 'scout') {
+    const autoClass = unit.autoExplore ? ' active-mode' : '';
+    actions += `<button class="uab-btn${autoClass}" onclick="toggleAutoExplore()">🔄 Explore <kbd>E</kbd></button>`;
+  }
+
+  if (unit.type === 'worker' && !unit.builtThisTurn && unit.movesLeft >= 0) {
+    const buildClass = unitMode === 'build' ? ' active-mode' : '';
+    actions += `<button class="uab-btn${buildClass}" onclick="enterWorkerBuildMode()">🔨 Build <kbd>B</kbd></button>`;
+  }
+
+  if (ut.canAttack && unit.movesLeft > 0) {
+    const atkClass = unitMode === 'attack' ? ' active-mode' : '';
+    actions += `<button class="uab-btn${atkClass}" onclick="enterUnitAttackMode()">⚔️ Attack <kbd>A</kbd></button>`;
+  }
+
+  if (ut.strength > 0 && !unit.fortified && unit.movesLeft > 0) {
+    actions += `<button class="uab-btn" onclick="fortifyUnit()">🛡 Fortify <kbd>F</kbd></button>`;
+  }
+
+  actions += `<button class="uab-btn danger" onclick="dismissUnit()">✖ Dismiss <kbd>X</kbd></button>`;
+
+  document.getElementById('uabActions').innerHTML = actions;
+  bar.classList.add('visible');
+}
+
+function hideUnitActionBar() {
+  document.getElementById('unitActionBar').classList.remove('visible');
+}
+
+// ============================================================
+// Unit Context Menu (popup near unit on click)
+// ============================================================
+function showUnitContextMenu(unit, screenX, screenY) {
+  const menu = document.getElementById('unitContextMenu');
+  const ut = UNIT_TYPES[unit.type];
+  let html = '';
+
+  if (unit.movesLeft > 0) {
+    html += `<button class="ucm-btn" onclick="enterUnitMoveMode();hideUnitContextMenu()">🦶 Move</button>`;
+  }
+
+  if (unit.type === 'scout') {
+    const label = unit.autoExplore ? '🔄 Stop Explore' : '🔄 Auto-Explore';
+    html += `<button class="ucm-btn" onclick="toggleAutoExplore();hideUnitContextMenu()">${label}</button>`;
+  }
+
+  if (unit.type === 'worker' && !unit.builtThisTurn) {
+    html += `<button class="ucm-btn" onclick="enterWorkerBuildMode();hideUnitContextMenu()">🔨 Build</button>`;
+  }
+
+  if (ut.canAttack && unit.movesLeft > 0) {
+    html += `<button class="ucm-btn" onclick="enterUnitAttackMode();hideUnitContextMenu()">⚔️ Attack</button>`;
+  }
+
+  if (ut.strength > 0 && !unit.fortified && unit.movesLeft > 0) {
+    html += `<button class="ucm-btn" onclick="fortifyUnit();hideUnitContextMenu()">🛡 Fortify</button>`;
+  }
+
+  html += `<button class="ucm-btn" onclick="showUnitInfoPanel();hideUnitContextMenu()">ℹ️ Info</button>`;
+  html += `<button class="ucm-btn danger" onclick="dismissUnit();hideUnitContextMenu()">✖ Dismiss</button>`;
+
+  menu.innerHTML = html;
+
+  // Position the menu near the click, clamped to viewport
+  const mw = 140, mh = html.split('ucm-btn').length * 34;
+  let mx = screenX + 10;
+  let my = screenY - mh / 2;
+  if (mx + mw > window.innerWidth - 10) mx = screenX - mw - 10;
+  if (my < 60) my = 60;
+  if (my + mh > window.innerHeight - 60) my = window.innerHeight - mh - 60;
+  menu.style.left = mx + 'px';
+  menu.style.top = my + 'px';
+  menu.classList.add('visible');
+}
+
+function hideUnitContextMenu() {
+  document.getElementById('unitContextMenu').classList.remove('visible');
+}
+
+// ============================================================
+// Unit Modes (Move, Attack, Build)
+// ============================================================
+function enterUnitMoveMode() {
+  if (!selectedUnit || selectedUnit.movesLeft <= 0) return;
+  unitMode = 'move';
+  hideWorkerBuildMenu();
+  updateUnitActionBar();
+}
+
+function enterUnitAttackMode() {
+  if (!selectedUnit) return;
+  const ut = UNIT_TYPES[selectedUnit.type];
+  if (!ut.canAttack || selectedUnit.movesLeft <= 0) return;
+  unitMode = 'attack';
+  hideWorkerBuildMenu();
+  updateUnitActionBar();
+}
+
+function enterWorkerBuildMode() {
+  if (!selectedUnit || selectedUnit.type !== 'worker') return;
+  if (selectedUnit.builtThisTurn) {
+    showToast('👷 Worker already built this turn', 'error');
+    return;
+  }
+  unitMode = 'build';
+
+  // Calculate valid adjacent tiles for worker building
+  workerBuildTiles = new Set();
+  const wx = selectedUnit.x, wy = selectedUnit.y;
+  const dirs = [[0,0],[0,-1],[1,0],[0,1],[-1,0],[1,-1],[1,1],[-1,1],[-1,-1]];
+  for (const [dx, dy] of dirs) {
+    const nx = wx + dx, ny = wy + dy;
+    if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+      if (!tileHasBuilding(nx, ny) && isTerrainPassable(map.terrain[ny][nx])) {
+        workerBuildTiles.add(`${nx},${ny}`);
+      }
+    }
+  }
+
+  // Show the worker build popup menu
+  showWorkerBuildPopup();
+  updateUnitActionBar();
+}
+
+function showWorkerBuildPopup() {
+  const menu = document.getElementById('workerBuildMenu');
+  const player = gameState.civs[0];
+  let html = '<div class="wbm-title">👷 Build with Worker</div>';
+
+  // Show buildings the player has unlocked
+  for (const [typeKey, bt] of Object.entries(BUILDING_TYPES)) {
+    if (typeKey === 'citadel') continue;
+    if (bt.requiresTech && !hasTech(0, bt.requiresTech)) continue;
+    if (bt.requiresBuilding && !hasPrerequisiteBuilding(0, typeKey)) continue;
+    const canAfford = player.treasury >= bt.cost;
+
+    // Check if there's at least one valid tile for this building type near the worker
+    let hasValidTile = false;
+    if (workerBuildTiles) {
+      for (const key of workerBuildTiles) {
+        const [tx, ty] = key.split(',').map(Number);
+        const validTerrain = getValidTerrain(typeKey);
+        if (validTerrain.includes(map.terrain[ty][tx])) {
+          if (!bt.requiresDeposit || hasDepositNearby(tx, ty, DEPOSITS[bt.requiresDeposit].name, 3)) {
+            hasValidTile = true;
+            break;
+          }
+        }
+      }
+    }
+
+    const disabled = !canAfford || !hasValidTile;
+    html += `
+      <div class="wbm-entry${disabled ? ' disabled' : ''}" ${disabled ? '' : `onclick="selectWorkerBuild('${typeKey}')"`}>
+        <span class="wbm-icon">${bt.icon}</span>
+        <span class="wbm-name">${bt.name}</span>
+        <span class="wbm-cost">${bt.cost}₿</span>
+      </div>
+    `;
+  }
+
+  menu.innerHTML = html;
+
+  // Position near the unit
+  const screen = tileToScreen(selectedUnit.x, selectedUnit.y);
+  let mx = screen.x + 30;
+  let my = screen.y - 100;
+  if (mx + 220 > window.innerWidth) mx = screen.x - 230;
+  if (my < 60) my = 60;
+  if (my + 300 > window.innerHeight) my = window.innerHeight - 310;
+  menu.style.left = mx + 'px';
+  menu.style.top = my + 'px';
+  menu.classList.add('visible');
+}
+
+function selectWorkerBuild(typeKey) {
+  workerBuildType = typeKey;
+  hideWorkerBuildMenu();
+  showToast(`👷 Click a highlighted tile to build ${BUILDING_TYPES[typeKey].name}`, 'info');
+}
+
+function hideWorkerBuildMenu() {
+  document.getElementById('workerBuildMenu').classList.remove('visible');
+}
+
+function placeWorkerBuilding(tx, ty) {
+  if (!selectedUnit || selectedUnit.type !== 'worker' || !workerBuildType) return false;
+  const typeKey = workerBuildType;
+  const bt = BUILDING_TYPES[typeKey];
+  const player = gameState.civs[0];
+
+  if (player.treasury < bt.cost) {
+    showToast('❌ Not enough sats!', 'error');
+    return false;
+  }
+
+  // Validate terrain
+  const validTerrain = getValidTerrain(typeKey);
+  if (!validTerrain.includes(map.terrain[ty][tx])) {
+    showToast('❌ Invalid terrain for this building', 'error');
+    return false;
+  }
+
+  if (tileHasBuilding(tx, ty)) {
+    showToast('❌ Tile already has a building', 'error');
+    return false;
+  }
+
+  // Deposit check
+  if (bt.requiresDeposit && !hasDepositNearby(tx, ty, DEPOSITS[bt.requiresDeposit].name, 3)) {
+    showToast(`❌ No ${DEPOSITS[bt.requiresDeposit].name} nearby`, 'error');
+    return false;
+  }
+
+  // Place the building (no territory restriction for workers!)
+  player.treasury -= bt.cost;
+  player.treasury = Math.round(player.treasury * 100) / 100;
+  const building = { type: typeKey, owner: 0, x: tx, y: ty, active: true, scale: 0.01 };
+  gameState.buildings.push(building);
+
+  selectedUnit.builtThisTurn = true;
+  workerBuildType = null;
+  workerBuildTiles = null;
+  unitMode = null;
+
+  addFloatingText(tx, ty, `+${bt.icon} ${bt.name}`, '#44dd66');
+  addPlacementParticles(tx, ty, 10);
+  invalidateTerritory();
+  recalculateVisibility();
+  updateHUD();
+  updateUnitActionBar();
+  updateInfoPanel();
+  showToast(`👷 Worker built ${bt.name}!`, 'success');
+  return true;
+}
+
+// ============================================================
+// Unit Actions: Fortify, Dismiss, Auto-Explore, Info
+// ============================================================
+function fortifyUnit() {
+  if (!selectedUnit) return;
+  const ut = UNIT_TYPES[selectedUnit.type];
+  if (ut.strength <= 0 || selectedUnit.fortified) return;
+  selectedUnit.fortified = true;
+  selectedUnit.movesLeft = 0;
+  addFloatingText(selectedUnit.x, selectedUnit.y, '🛡 Fortified', '#44dd66');
+  showToast(`🛡 ${ut.name} fortified! +25% defense next attack`, 'success');
+  unitMovementRange = null;
+  unitMovementCosts = null;
+  unitMode = null;
+  updateUnitActionBar();
+  updateInfoPanel();
+}
+
+function dismissUnit() {
+  if (!selectedUnit || selectedUnit.owner !== 0) return;
+  const ut = UNIT_TYPES[selectedUnit.type];
+  const refund = Math.floor(ut.cost * 0.25);
+  gameState.civs[0].treasury += refund;
+  addFloatingText(selectedUnit.x, selectedUnit.y, `+${refund}₿`, '#F7931A');
+  showToast(`✖ Dismissed ${ut.name} (refund: ${refund}₿)`, 'info');
+  removeUnit(selectedUnit);
+  updateHUD();
+  updateInfoPanel();
+}
+
+function toggleAutoExplore() {
+  if (!selectedUnit || selectedUnit.type !== 'scout') return;
+  selectedUnit.autoExplore = !selectedUnit.autoExplore;
+  if (selectedUnit.autoExplore) {
+    showToast('🔄 Scout will auto-explore each turn', 'success');
+  } else {
+    showToast('🔄 Auto-explore disabled', 'info');
+  }
+  updateUnitActionBar();
+}
+
+function showUnitInfoPanel() {
+  if (!selectedUnit) return;
+  selectedTile = { x: selectedUnit.x, y: selectedUnit.y };
+  updateInfoPanel();
+}
+
+// ============================================================
+// Tile Tooltip
+// ============================================================
+function updateTileTooltip(e) {
+  const tooltip = document.getElementById('tileTooltip');
+  if (!hoveredTile || buildState.buildMode) {
+    tooltip.classList.remove('visible');
+    return;
+  }
+  const { x, y } = hoveredTile;
+  const unitOnTile = getUnitAt(x, y);
+  if (unitOnTile) {
+    const ut = UNIT_TYPES[unitOnTile.type];
+    const civ = gameState.civs[unitOnTile.owner];
+    let text;
+    if (unitOnTile.owner === 0) {
+      text = `Your ${ut.name} (${unitOnTile.movesLeft} moves left)`;
+    } else {
+      text = `${civ.name} ${ut.name} ⚠️`;
+    }
+    tooltip.textContent = text;
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY - 28) + 'px';
+    tooltip.classList.add('visible');
+    canvas.style.cursor = 'pointer';
+  } else {
+    tooltip.classList.remove('visible');
+    if (!isDragging) canvas.style.cursor = buildState.buildMode ? 'crosshair' : 'grab';
+  }
+}
+
+// ============================================================
+// Dust Particles (after unit movement)
+// ============================================================
+function addDustParticles(x, y) {
+  const screen = tileToScreen(x, y);
+  const parts = [];
+  for (let i = 0; i < 6; i++) {
+    parts.push({
+      x: screen.x + (Math.random() - 0.5) * 16,
+      y: screen.y + (Math.random() - 0.5) * 8,
+      vx: (Math.random() - 0.5) * 2,
+      vy: -Math.random() * 1.5 - 0.5,
+      size: 2 + Math.random() * 3,
+      alpha: 0.6 + Math.random() * 0.3,
+    });
+  }
+  dustParticles.push({ startTime: performance.now(), duration: 600, particles: parts });
+}
+
+function renderDustParticles() {
+  const now = performance.now();
+  dustParticles = dustParticles.filter(d => now - d.startTime < d.duration);
+  for (const dust of dustParticles) {
+    const t = (now - dust.startTime) / dust.duration;
+    for (const p of dust.particles) {
+      const alpha = p.alpha * (1 - t);
+      ctx.beginPath();
+      ctx.arc(p.x + p.vx * t * 30, p.y + p.vy * t * 30, p.size * camera.zoom * (1 - t * 0.5), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(180,160,130,${alpha})`;
+      ctx.fill();
+    }
+  }
+}
+
+// ============================================================
+// Auto-Explore AI for Scouts
+// ============================================================
+function processAutoExplore(unit) {
+  if (!unit.autoExplore || unit.type !== 'scout' || unit.movesLeft <= 0) return;
+
+  // Find nearest unexplored tile (fog of war hidden)
+  let bestTile = null;
+  let bestDist = Infinity;
+  const range = 20; // search radius
+
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const nx = unit.x + dx, ny = unit.y + dy;
+      if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
+      const vis = getTileVisibility(nx, ny);
+      if (vis > 0) continue; // already explored
+      // Prefer tiles adjacent to explored areas
+      let adjExplored = false;
+      const dirs4 = [[0,-1],[1,0],[0,1],[-1,0]];
+      for (const [adx, ady] of dirs4) {
+        const ax = nx + adx, ay = ny + ady;
+        if (ax >= 0 && ax < MAP_W && ay >= 0 && ay < MAP_H && getTileVisibility(ax, ay) > 0) {
+          adjExplored = true;
+          break;
+        }
+      }
+      const dist = Math.abs(dx) + Math.abs(dy);
+      const score = dist - (adjExplored ? 5 : 0); // prefer edge of explored
+      if (score < bestDist) {
+        bestDist = score;
+        bestTile = { x: nx, y: ny };
+      }
+    }
+  }
+
+  if (!bestTile) {
+    unit.autoExplore = false; // nothing left to explore
+    return;
+  }
+
+  // Move one step toward the target using the movement range
+  const movRange = calculateMovementRange(unit);
+  let bestStep = null;
+  let bestStepDist = Infinity;
+  for (const [key, cost] of movRange) {
+    if (key === `${unit.x},${unit.y}`) continue;
+    const [sx, sy] = key.split(',').map(Number);
+    // Don't step on friendly units
+    if (getUnitAt(sx, sy)) continue;
+    const d = Math.abs(sx - bestTile.x) + Math.abs(sy - bestTile.y);
+    if (d < bestStepDist) {
+      bestStepDist = d;
+      bestStep = { x: sx, y: sy, cost };
+    }
+  }
+
+  if (bestStep) {
+    startUnitAnimation(unit, unit.x, unit.y, bestStep.x, bestStep.y);
+    if (bestStep.x > unit.x) unit.facing = 'right';
+    else if (bestStep.x < unit.x) unit.facing = 'left';
+    unit.x = bestStep.x;
+    unit.y = bestStep.y;
+    unit.movesLeft = Math.max(0, unit.movesLeft - bestStep.cost);
+    addDustParticles(bestStep.x, bestStep.y);
+    recalculateVisibility();
+  }
 }
 
 function moveUnit(unit, targetX, targetY) {
@@ -3758,16 +4373,25 @@ function moveUnit(unit, targetX, targetY) {
     unit.movesLeft = Math.max(0, unit.movesLeft - cost);
   }
 
+  // Dust effect at destination
+  addDustParticles(targetX, targetY);
+
+  // Un-fortify on move
+  unit.fortified = false;
+
   // Recalc visibility (units provide sight)
   recalculateVisibility();
   // Refresh movement range
   if (unit.movesLeft > 0) {
     selectUnit(unit);
+    if (unitMode === 'move') enterUnitMoveMode(); // stay in move mode
   } else {
     unitMovementRange = null;
     unitMovementCosts = null;
+    unitMode = null;
   }
   updateHUD();
+  updateUnitActionBar();
   updateInfoPanel();
   return true;
 }
@@ -3813,6 +4437,9 @@ function resolveCombat(attacker, defender) {
   let defendStrength = defender.strength;
 
   // Combat bonuses
+  // Fortification bonus +25%
+  if (defender.fortified) defendStrength *= 1.25;
+
   // Hills defense bonus +20%
   const defTerrain = map.terrain[defender.y][defender.x];
   if (defTerrain === TERRAIN.HILLS.id) defendStrength *= 1.2;
@@ -3902,13 +4529,29 @@ function drawUnit(unit) {
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.fill();
 
-  // Selection ring (pulsing orange)
+  // Selection ring (pulsing orange, thicker)
   if (isSelected) {
     const pulse = 0.6 + Math.sin(performance.now() / 200) * 0.4;
+    // Outer glow
+    ctx.beginPath();
+    ctx.ellipse(sx, screen.y + 1 * z, 12 * z, 6 * z, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(247,147,26,${pulse * 0.3})`;
+    ctx.lineWidth = 5 * z;
+    ctx.stroke();
+    // Inner ring
     ctx.beginPath();
     ctx.ellipse(sx, screen.y + 1 * z, 10 * z, 5 * z, 0, 0, Math.PI * 2);
     ctx.strokeStyle = `rgba(247,147,26,${pulse})`;
-    ctx.lineWidth = 2 * z;
+    ctx.lineWidth = 2.5 * z;
+    ctx.stroke();
+  }
+
+  // Hover glow (non-selected units)
+  if (!isSelected && hoveredTile && hoveredTile.x === unit.x && hoveredTile.y === unit.y) {
+    ctx.beginPath();
+    ctx.ellipse(sx, screen.y + 1 * z, 10 * z, 5 * z, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 1.5 * z;
     ctx.stroke();
   }
 
@@ -3939,14 +4582,49 @@ function drawUnit(unit) {
     ctx.fillRect(barX, barY, barW * healthPct, barH);
   }
 
-  // Civ color dot
-  ctx.beginPath();
-  ctx.arc(sx + 8 * z, sy - 10 * z, 2.5 * z, 0, Math.PI * 2);
-  ctx.fillStyle = civ.color;
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-  ctx.lineWidth = 0.5 * z;
-  ctx.stroke();
+  // Banner/flag for military units
+  if (ut.strength > 0) {
+    // Flag pole
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 1 * z;
+    ctx.beginPath();
+    ctx.moveTo(sx + 8 * z, sy - 6 * z);
+    ctx.lineTo(sx + 8 * z, sy - 16 * z);
+    ctx.stroke();
+    // Flag
+    ctx.fillStyle = civ.color;
+    ctx.beginPath();
+    ctx.moveTo(sx + 8 * z, sy - 16 * z);
+    ctx.lineTo(sx + 14 * z, sy - 14 * z);
+    ctx.lineTo(sx + 8 * z, sy - 12 * z);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    // Civ color dot for non-military
+    ctx.beginPath();
+    ctx.arc(sx + 8 * z, sy - 10 * z, 2.5 * z, 0, Math.PI * 2);
+    ctx.fillStyle = civ.color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 0.5 * z;
+    ctx.stroke();
+  }
+
+  // Fortified indicator
+  if (unit.fortified) {
+    ctx.font = `bold ${Math.round(9 * z)}px sans-serif`;
+    ctx.fillStyle = '#44dd66';
+    ctx.textAlign = 'center';
+    ctx.fillText('🛡', sx - 9 * z, sy - 8 * z);
+  }
+
+  // Auto-explore indicator
+  if (unit.autoExplore) {
+    ctx.font = `bold ${Math.round(8 * z)}px sans-serif`;
+    ctx.fillStyle = '#00ccdd';
+    ctx.textAlign = 'center';
+    ctx.fillText('🔄', sx - 9 * z, sy - 2 * z);
+  }
 
   ctx.restore();
 }
@@ -4411,9 +5089,17 @@ function aiMoveMilitary(unit, civId) {
 // Unit Turn Processing
 // ============================================================
 function processUnitTurn() {
-  // Reset all unit moves
+  // Reset all unit moves and per-turn flags
   for (const unit of gameState.units) {
     unit.movesLeft = unit.maxMoves;
+    unit.builtThisTurn = false;
+    // Fortified units keep fortified status (cleared on move)
+  }
+
+  // Process auto-explore for player scouts
+  const playerScouts = gameState.units.filter(u => u.owner === 0 && u.type === 'scout' && u.autoExplore);
+  for (const scout of playerScouts) {
+    processAutoExplore(scout);
   }
 
   // Deduct unit upkeep from each civ
@@ -6610,8 +7296,8 @@ function render() {
     }
   }
 
-  // Draw unit movement range highlight
-  if (selectedUnit && unitMovementRange) {
+  // Draw unit movement range highlight (only in move or attack mode, or when first selected)
+  if (selectedUnit && unitMovementRange && (unitMode === 'move' || unitMode === 'attack' || unitMode === null)) {
     for (const key of unitMovementRange) {
       const [rx, ry] = key.split(',').map(Number);
       const { x: rsx, y: rsy } = tileToScreen(rx, ry);
@@ -6627,23 +7313,43 @@ function render() {
       ctx.closePath();
       // Check if enemy unit there
       const eu = getEnemyUnitAt(rx, ry, selectedUnit.owner);
-      if (eu) {
-        ctx.fillStyle = 'rgba(255,68,68,0.2)';
+      if (eu && unitMode === 'attack') {
+        ctx.fillStyle = 'rgba(255,68,68,0.25)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(255,68,68,0.6)';
+        ctx.strokeStyle = 'rgba(255,68,68,0.7)';
+        ctx.lineWidth = 2 * camera.zoom;
+      } else if (eu) {
+        ctx.fillStyle = 'rgba(255,68,68,0.15)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,68,68,0.5)';
+        ctx.lineWidth = 1 * camera.zoom;
+      } else if (unitMode === 'move') {
+        ctx.fillStyle = 'rgba(0,140,220,0.18)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,180,255,0.5)';
+        ctx.lineWidth = 1.5 * camera.zoom;
       } else {
-        ctx.fillStyle = 'rgba(0,180,200,0.15)';
+        ctx.fillStyle = 'rgba(0,180,200,0.1)';
         ctx.fill();
-        ctx.strokeStyle = 'rgba(0,200,220,0.4)';
+        ctx.strokeStyle = 'rgba(0,200,220,0.3)';
+        ctx.lineWidth = 1 * camera.zoom;
       }
-      ctx.lineWidth = 1 * camera.zoom;
       ctx.stroke();
+
+      // Footprint marker on movement range tiles (only in move mode)
+      if (unitMode === 'move' && !eu && camera.zoom > 0.5) {
+        ctx.font = `${Math.round(8 * camera.zoom)}px sans-serif`;
+        ctx.fillStyle = 'rgba(0,200,220,0.5)';
+        ctx.textAlign = 'center';
+        ctx.fillText('🦶', rsx, rsy + 3 * camera.zoom);
+      }
     }
 
     // Draw movement path on hover
-    if (hoveredTile && unitMovementRange.has(`${hoveredTile.x},${hoveredTile.y}`)) {
+    if (hoveredTile && unitMovementRange.has(`${hoveredTile.x},${hoveredTile.y}`) && (unitMode === 'move' || unitMode === null)) {
       const path = findUnitPath(selectedUnit, hoveredTile.x, hoveredTile.y);
       if (path && path.length > 0) {
+        // Draw path line
         ctx.beginPath();
         const startScreen = tileToScreen(selectedUnit.x, selectedUnit.y);
         ctx.moveTo(startScreen.x, startScreen.y - 4 * camera.zoom);
@@ -6652,22 +7358,77 @@ function render() {
           ctx.lineTo(s.x, s.y - 4 * camera.zoom);
         }
         ctx.strokeStyle = 'rgba(0,200,220,0.7)';
-        ctx.lineWidth = 2 * camera.zoom;
+        ctx.lineWidth = 2.5 * camera.zoom;
         ctx.setLineDash([4 * camera.zoom, 4 * camera.zoom]);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Show move cost on hover
+        // Arrow markers along path
+        for (let i = 0; i < path.length; i++) {
+          const s = tileToScreen(path[i].x, path[i].y);
+          ctx.font = `${Math.round(10 * camera.zoom)}px sans-serif`;
+          ctx.fillStyle = 'rgba(0,220,240,0.7)';
+          ctx.textAlign = 'center';
+          ctx.fillText('→', s.x, s.y - 6 * camera.zoom);
+        }
+
+        // Show move cost at destination
         const cost = unitMovementCosts.get(`${hoveredTile.x},${hoveredTile.y}`);
         if (cost !== undefined) {
           const hs = tileToScreen(hoveredTile.x, hoveredTile.y);
+          const label = `${cost} move${cost !== 1 ? 's' : ''}`;
           ctx.font = `bold ${Math.round(11 * camera.zoom)}px 'Segoe UI', sans-serif`;
-          ctx.fillStyle = 'rgba(0,0,0,0.7)';
-          ctx.fillRect(hs.x - 16 * camera.zoom, hs.y - 22 * camera.zoom, 32 * camera.zoom, 14 * camera.zoom);
+          const tw = ctx.measureText(label).width + 10 * camera.zoom;
+          ctx.fillStyle = 'rgba(0,0,0,0.75)';
+          const rx = hs.x - tw / 2, ry = hs.y - 24 * camera.zoom;
+          ctx.beginPath();
+          if (ctx.roundRect) {
+            ctx.roundRect(rx, ry, tw, 16 * camera.zoom, 4 * camera.zoom);
+          } else {
+            ctx.rect(rx, ry, tw, 16 * camera.zoom);
+          }
+          ctx.fill();
           ctx.fillStyle = '#00ccdd';
           ctx.textAlign = 'center';
-          ctx.fillText(`${cost} moves`, hs.x, hs.y - 11 * camera.zoom);
+          ctx.fillText(label, hs.x, hs.y - 11 * camera.zoom);
         }
+      }
+    }
+  }
+
+  // Draw worker build tiles highlight (green)
+  if (selectedUnit && unitMode === 'build' && workerBuildTiles) {
+    for (const key of workerBuildTiles) {
+      const [rx, ry] = key.split(',').map(Number);
+      const { x: rsx, y: rsy } = tileToScreen(rx, ry);
+      const rw = HALF_W * camera.zoom;
+      const rh = HALF_H * camera.zoom;
+      if (rsx + rw < -10 || rsx - rw > canvas.width + 10) continue;
+
+      // Check if this tile is valid for the selected building type
+      let valid = true;
+      if (workerBuildType) {
+        const vt = getValidTerrain(workerBuildType);
+        valid = vt.includes(map.terrain[ry][rx]);
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(rsx, rsy - rh);
+      ctx.lineTo(rsx + rw, rsy);
+      ctx.lineTo(rsx, rsy + rh);
+      ctx.lineTo(rsx - rw, rsy);
+      ctx.closePath();
+      ctx.fillStyle = valid ? 'rgba(68,221,102,0.2)' : 'rgba(255,100,68,0.15)';
+      ctx.fill();
+      ctx.strokeStyle = valid ? 'rgba(68,221,102,0.6)' : 'rgba(255,100,68,0.4)';
+      ctx.lineWidth = 1.5 * camera.zoom;
+      ctx.stroke();
+
+      if (valid && camera.zoom > 0.5) {
+        ctx.font = `${Math.round(9 * camera.zoom)}px sans-serif`;
+        ctx.fillStyle = 'rgba(68,221,102,0.6)';
+        ctx.textAlign = 'center';
+        ctx.fillText('🔨', rsx, rsy + 3 * camera.zoom);
       }
     }
   }
@@ -6680,6 +7441,9 @@ function render() {
 
   // Render combat damage animations
   renderCombatAnimations();
+
+  // Render dust particles
+  renderDustParticles();
 
   // Render floating texts and particles on top
   const nowPerf = performance.now();
@@ -7380,6 +8144,9 @@ canvas.addEventListener('mousemove', e => {
     buildState.hoveredValid = false;
     document.getElementById('hoverCoords').textContent = '—';
   }
+
+  // Update tile tooltip
+  updateTileTooltip(e);
 });
 
 canvas.addEventListener('mouseup', e => {
@@ -7388,35 +8155,96 @@ canvas.addEventListener('mouseup', e => {
 
   if (e.button === 0 && !wasDrag) {
     hideDemolishMenu();
+    hideUnitContextMenu();
     const tile = fromIso(e.clientX, e.clientY);
     if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
+
+      // Priority 1: Build mode (normal building placement)
       if (buildState.buildMode) {
         if (isTileValidForBuilding(tile.x, tile.y, buildState.selectedType)) {
           placePlayerBuilding(tile.x, tile.y, buildState.selectedType);
         } else {
           flashTile(tile.x, tile.y, 'rgba(255,68,68,0.5)');
         }
-      } else {
-        // Check for player unit on this tile
-        const playerUnit = getPlayerUnitAt(tile.x, tile.y);
-        if (playerUnit) {
-          if (selectedUnit && selectedUnit.id === playerUnit.id) {
-            // Toggle: if clicking same unit, deselect
-            deselectUnit();
-            selectedTile = { x: tile.x, y: tile.y };
+        isDragging = false;
+        canvas.classList.remove('dragging');
+        return;
+      }
+
+      // Priority 2: Worker build mode — place building on clicked tile
+      if (selectedUnit && unitMode === 'build' && workerBuildType && workerBuildTiles) {
+        if (workerBuildTiles.has(`${tile.x},${tile.y}`)) {
+          const vt = getValidTerrain(workerBuildType);
+          if (vt.includes(map.terrain[tile.y][tile.x])) {
+            placeWorkerBuilding(tile.x, tile.y);
           } else {
-            // Select this unit
-            selectUnit(playerUnit);
+            flashTile(tile.x, tile.y, 'rgba(255,68,68,0.5)');
+            showToast('❌ Invalid terrain for this building', 'error');
           }
         } else {
-          // If no unit, deselect any selected unit
-          if (selectedUnit) {
-            deselectUnit();
-          }
-          selectedTile = { x: tile.x, y: tile.y };
+          // Click outside build range = cancel
+          unitMode = null;
+          workerBuildType = null;
+          workerBuildTiles = null;
+          hideWorkerBuildMenu();
+          updateUnitActionBar();
         }
-        updateInfoPanel();
+        isDragging = false;
+        canvas.classList.remove('dragging');
+        return;
       }
+
+      // Priority 3: Unit move mode — left-click to move
+      if (selectedUnit && unitMode === 'move' && unitMovementRange) {
+        if (unitMovementRange.has(`${tile.x},${tile.y}`)) {
+          moveUnit(selectedUnit, tile.x, tile.y);
+        } else {
+          // Click outside range = cancel move mode
+          unitMode = null;
+          updateUnitActionBar();
+        }
+        isDragging = false;
+        canvas.classList.remove('dragging');
+        return;
+      }
+
+      // Priority 4: Unit attack mode — left-click enemy to attack
+      if (selectedUnit && unitMode === 'attack' && unitMovementRange) {
+        const enemyUnit = getEnemyUnitAt(tile.x, tile.y, selectedUnit.owner);
+        if (enemyUnit && unitMovementRange.has(`${tile.x},${tile.y}`)) {
+          moveUnit(selectedUnit, tile.x, tile.y);
+        } else {
+          unitMode = null;
+          updateUnitActionBar();
+        }
+        isDragging = false;
+        canvas.classList.remove('dragging');
+        return;
+      }
+
+      // Priority 5: Click on own unit → select and show context menu
+      const playerUnit = getPlayerUnitAt(tile.x, tile.y);
+      if (playerUnit) {
+        if (selectedUnit && selectedUnit.id === playerUnit.id) {
+          // Double-click same unit = enter move mode
+          enterUnitMoveMode();
+        } else {
+          selectUnit(playerUnit);
+          showUnitContextMenu(playerUnit, e.clientX, e.clientY);
+        }
+        isDragging = false;
+        canvas.classList.remove('dragging');
+        return;
+      }
+
+      // Priority 6: If unit selected but clicked elsewhere, deselect
+      if (selectedUnit) {
+        deselectUnit();
+      }
+
+      // Priority 7: Show tile/building info
+      selectedTile = { x: tile.x, y: tile.y };
+      updateInfoPanel();
     } else {
       selectedTile = null;
       deselectUnit();
@@ -7428,20 +8256,24 @@ canvas.addEventListener('mouseup', e => {
   canvas.classList.remove('dragging');
 });
 
-// Right-click for unit movement or demolish
+// Right-click: demolish menu (unit movement now uses left-click)
 canvas.addEventListener('contextmenu', e => {
   e.preventDefault();
   if (buildState.buildMode) {
     cancelBuildMode();
     return;
   }
+  // Cancel any active unit mode
+  if (unitMode) {
+    unitMode = null;
+    workerBuildType = null;
+    workerBuildTiles = null;
+    hideWorkerBuildMenu();
+    updateUnitActionBar();
+    return;
+  }
   const tile = fromIso(e.clientX, e.clientY);
   if (tile.x >= 0 && tile.x < MAP_W && tile.y >= 0 && tile.y < MAP_H) {
-    // Unit movement: right-click on highlighted tile
-    if (selectedUnit && unitMovementRange && unitMovementRange.has(`${tile.x},${tile.y}`)) {
-      moveUnit(selectedUnit, tile.x, tile.y);
-      return;
-    }
     // Demolish
     const building = getBuildingAt(tile.x, tile.y);
     if (building && building.owner === 0 && building.type !== 'citadel') {
@@ -7479,10 +8311,16 @@ minimapCanvas.addEventListener('click', e => {
   camera.y = iso.y * camera.zoom;
 });
 
-// Click outside demolish menu to close it
+// Click outside menus to close them
 document.addEventListener('click', e => {
   if (!e.target.closest('#demolishMenu')) {
     hideDemolishMenu();
+  }
+  if (!e.target.closest('#unitContextMenu') && !e.target.closest('#gameCanvas')) {
+    hideUnitContextMenu();
+  }
+  if (!e.target.closest('#workerBuildMenu') && !e.target.closest('#unitActionBar')) {
+    hideWorkerBuildMenu();
   }
 });
 
@@ -7520,6 +8358,9 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (settingsOpen) { closeSettings(); return; }
     if (hashWarOpen) { closeHashWarPanel(); return; }
+    hideUnitContextMenu();
+    hideWorkerBuildMenu();
+    if (unitMode) { unitMode = null; workerBuildType = null; workerBuildTiles = null; updateUnitActionBar(); return; }
     if (selectedUnit) { deselectUnit(); updateInfoPanel(); return; }
     if (unitPanelOpen) { toggleUnitPanel(); return; }
     if (buildState.buildMode) {
@@ -7531,14 +8372,25 @@ window.addEventListener('keydown', e => {
     return;
   }
 
+  // Unit-specific keyboard shortcuts when a unit is selected
+  if (selectedUnit && selectedUnit.owner === 0 && !e.repeat) {
+    const key = e.key.toLowerCase();
+    if (key === 'm') { enterUnitMoveMode(); return; }
+    if (key === 'b' && selectedUnit.type === 'worker') { enterWorkerBuildMode(); return; }
+    if (key === 'a' && UNIT_TYPES[selectedUnit.type].canAttack) { enterUnitAttackMode(); return; }
+    if (key === 'f' && UNIT_TYPES[selectedUnit.type].strength > 0) { fortifyUnit(); return; }
+    if (key === 'x') { dismissUnit(); return; }
+    if (key === 'e' && selectedUnit.type === 'scout') { toggleAutoExplore(); return; }
+  }
+
   // Spacebar = next turn (only if not in build mode)
   if (e.code === 'Space' && !e.repeat) {
     e.preventDefault();
     if (!buildState.buildMode) processTurn();
   }
 
-  // B = toggle build menu
-  if (e.key.toLowerCase() === 'b' && !e.repeat) {
+  // B = toggle build menu (only if no unit selected or unit isn't worker)
+  if (e.key.toLowerCase() === 'b' && !e.repeat && !(selectedUnit && selectedUnit.type === 'worker')) {
     toggleBuildMenu();
   }
 
@@ -7663,11 +8515,18 @@ function regenerateMap() {
   selectedUnit = null;
   unitMovementRange = null;
   unitMovementCosts = null;
+  unitMode = null;
+  workerBuildType = null;
+  workerBuildTiles = null;
+  dustParticles = [];
   unitAnimations = [];
   combatAnimations = [];
   floatingTexts = [];
   particles = [];
   hashWars = [];
+  hideUnitActionBar();
+  hideUnitContextMenu();
+  hideWorkerBuildMenu();
   cancelBuildMode();
   buildState.menuOpen = false;
   unitPanelOpen = false;
@@ -7718,6 +8577,17 @@ const TUTORIAL_STEPS = [
 <div>👆 Click to place — costs sats from your treasury</div>
 <div>🗑 Right-click your buildings to demolish (50% refund)</div>
 <div style="margin-top:6px;color:#F7931A">💡 Tip: Build solar panels first for energy, then miners for sats!</div>`
+  },
+  {
+    title: 'Units',
+    content: `<div>🎖 Press <kbd>U</kbd> — Open the Unit Training panel</div>
+<div>🔭 <strong>Scouts</strong> — Explore the fog of war (auto-explore!)</div>
+<div>👷 <strong>Workers</strong> — Build structures far from your citadel</div>
+<div>⚔️ <strong>Military</strong> — Defend your territory</div>
+<div style="margin-top:8px;color:#F7931A">Click a unit to see actions</div>
+<div>Click <strong>Move</strong> then click a destination (left-click!)</div>
+<div>Workers can build on adjacent tiles</div>
+<div>Press <kbd>M</kbd> move · <kbd>B</kbd> build · <kbd>A</kbd> attack · <kbd>F</kbd> fortify</div>`
   },
   {
     title: 'The Game Loop',
@@ -8678,6 +9548,9 @@ function createSaveData() {
       health: u.health, maxHealth: u.maxHealth,
       movesLeft: u.movesLeft, maxMoves: u.maxMoves,
       strength: u.strength, facing: u.facing,
+      autoExplore: u.autoExplore || false,
+      fortified: u.fortified || false,
+      builtThisTurn: u.builtThisTurn || false,
     })),
     nextUnitId: nextUnitId,
     civs: gameState.civs.map(c => ({
@@ -8749,6 +9622,9 @@ function loadGameFromData(data) {
       health: u.health, maxHealth: u.maxHealth,
       movesLeft: u.movesLeft, maxMoves: u.maxMoves,
       strength: u.strength, facing: u.facing || 'right',
+      autoExplore: u.autoExplore || false,
+      fortified: u.fortified || false,
+      builtThisTurn: u.builtThisTurn || false,
     }));
     nextUnitId = data.nextUnitId || (gameState.units.length > 0 ? Math.max(...gameState.units.map(u => u.id)) + 1 : 1);
 
