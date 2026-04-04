@@ -1028,6 +1028,288 @@
 
   /* Difficulty indicator */
   .hud-val.difficulty { color: #ff8844; }
+
+  /* Settings/Save Menu */
+  #settingsOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  #settingsOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #settingsPanel {
+    background: linear-gradient(145deg, rgba(16,16,28,0.98) 0%, rgba(10,10,18,0.98) 100%);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 16px;
+    padding: 24px 32px;
+    width: 380px;
+    max-width: 90vw;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(247,147,26,0.12);
+  }
+  #settingsPanel h2 {
+    color: #F7931A;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .settings-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 8px;
+    color: #ddd;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .settings-btn:hover {
+    background: linear-gradient(135deg, #444 0%, #333 100%);
+    border-color: rgba(247,147,26,0.6);
+  }
+  .settings-btn.danger { border-color: rgba(255,68,68,0.4); }
+  .settings-btn.danger:hover { border-color: rgba(255,68,68,0.7); }
+  .settings-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    margin: 8px 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+  }
+  .settings-toggle label { color: #ddd; font-size: 14px; }
+  .settings-toggle input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: #F7931A;
+    cursor: pointer;
+  }
+  .settings-divider {
+    border: none;
+    border-top: 1px solid rgba(247,147,26,0.15);
+    margin: 12px 0;
+  }
+
+  /* Hash War Panel */
+  #hashWarOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  #hashWarOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #hashWarPanel {
+    background: linear-gradient(145deg, rgba(20,12,12,0.98) 0%, rgba(15,8,8,0.98) 100%);
+    border: 1px solid rgba(255,68,68,0.5);
+    border-radius: 16px;
+    padding: 24px 28px;
+    width: 500px;
+    max-width: 94vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(255,68,68,0.12);
+  }
+  #hashWarPanel h2 {
+    color: #ff4444;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .hw-target {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 14px;
+    margin: 10px 0;
+    transition: border-color 0.2s;
+  }
+  .hw-target:hover { border-color: rgba(255,68,68,0.4); }
+  .hw-target-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .hw-target-name {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hw-target-hash {
+    font-size: 12px;
+    color: #00A8FF;
+    font-family: 'Courier New', monospace;
+  }
+  .hw-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .hw-slider-row input[type="range"] {
+    flex: 1;
+    accent-color: #ff4444;
+    height: 6px;
+  }
+  .hw-slider-label {
+    font-size: 12px;
+    color: #aaa;
+    min-width: 45px;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+  }
+  .hw-analysis {
+    font-size: 11px;
+    color: #999;
+    padding: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+  .hw-analysis .positive { color: #44dd66; }
+  .hw-analysis .negative { color: #ff4444; }
+  .hw-analysis .neutral { color: #ffcc00; }
+  .hw-attack-btn {
+    background: linear-gradient(135deg, #cc2222 0%, #991111 100%);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .hw-attack-btn:hover { transform: scale(1.03); }
+  .hw-stop-btn {
+    background: linear-gradient(135deg, #444 0%, #333 100%);
+    color: #ddd;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 8px 20px;
+    cursor: pointer;
+  }
+  .hw-active-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(255,68,68,0.2);
+    color: #ff4444;
+    animation: hwPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes hwPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  /* AT WAR HUD indicator */
+  .hud-war-indicator {
+    color: #ff4444;
+    font-weight: 700;
+    font-size: 12px;
+    animation: hwPulse 1.5s ease-in-out infinite;
+  }
+
+  /* Save/Load Dialog */
+  #loadDialog {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  #loadDialog.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #loadDialogCard {
+    background: linear-gradient(145deg, rgba(20,20,32,0.98) 0%, rgba(12,12,22,0.98) 100%);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 16px;
+    padding: 32px 40px;
+    max-width: 420px;
+    width: 90vw;
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(247,147,26,0.12);
+  }
+  #loadDialogCard h2 {
+    color: #F7931A;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  #loadDialogCard p {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .load-dialog-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .load-dialog-btn {
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .load-dialog-btn:hover { transform: scale(1.04); }
+  .load-dialog-btn.primary {
+    background: linear-gradient(135deg, #F7931A 0%, #e07800 100%);
+    color: #fff;
+  }
+  .load-dialog-btn.secondary {
+    background: linear-gradient(135deg, #333 0%, #222 100%);
+    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  /* Hidden file input */
+  #importFileInput { display: none; }
+
 </style>
 </head>
 <body>
@@ -1074,6 +1356,10 @@
   <button id="helpBtn" class="hud-btn" title="Tutorial / Help (?)" style="font-size:14px;padding:2px 10px;margin-left:2px;">?</button>
   <button id="techTreeBtn" class="hud-btn" title="Tech Tree (T)">🔬 Research</button>
   <button id="victoryBtn" class="hud-btn" title="Victory Progress (V)">🏆 Victory</button>
+  <button id="hashWarBtn" class="hud-btn" title="Hash War (H)" style="display:none">⚔️ Hash War</button>
+  <span id="hudWarStatus" style="display:none" class="hud-war-indicator">⚔️ AT WAR</span>
+  <button id="saveBtn" class="hud-btn" title="Save Game">💾</button>
+  <button id="settingsBtn" class="hud-btn" title="Settings (Esc)">⚙️</button>
   <div id="hudResearch"></div>
   <div class="hud-sep"></div>
   <div class="hud-item">
@@ -1168,6 +1454,48 @@
 </div>
 
 <div id="aiLog"></div>
+
+
+<div id="settingsOverlay">
+  <div id="settingsPanel">
+    <h2>⚙️ SETTINGS</h2>
+    <button class="settings-btn" id="settSaveGame">💾 Save Game</button>
+    <button class="settings-btn" id="settLoadGame">📂 Load Game</button>
+    <hr class="settings-divider">
+    <button class="settings-btn" id="settExportSave">📤 Export Save (.json)</button>
+    <button class="settings-btn" id="settImportSave">📥 Import Save (.json)</button>
+    <hr class="settings-divider">
+    <div class="settings-toggle">
+      <label>🌫️ Fog of War</label>
+      <input type="checkbox" id="settFogToggle" checked>
+    </div>
+    <hr class="settings-divider">
+    <button class="settings-btn" id="settClose" style="text-align:center;color:#888">← Back to Game</button>
+  </div>
+</div>
+
+<div id="hashWarOverlay">
+  <div id="hashWarPanel">
+    <h2>⚔️ HASH WARS</h2>
+    <div id="hashWarContent"></div>
+    <div style="text-align:center;margin-top:16px">
+      <button class="hw-stop-btn" id="hashWarClose">← Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadDialog">
+  <div id="loadDialogCard">
+    <h2>₿ITCOIN CIVILIZATIONS</h2>
+    <p id="loadDialogText">Saved game found (Turn X). Continue?</p>
+    <div class="load-dialog-btns">
+      <button class="load-dialog-btn primary" id="loadDialogContinue">▶ Continue</button>
+      <button class="load-dialog-btn secondary" id="loadDialogNew">🗺 New Game</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importFileInput" accept=".json">
 
 <div id="controls">
   <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>T</kbd> tech tree &nbsp;·&nbsp; <kbd>V</kbd> victory &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
@@ -2510,6 +2838,17 @@ let keys = {};
 let lastTime = 0;
 
 // --- Game state: Civs, Buildings, Economy ---
+// Fog of War settings
+let fogOfWarEnabled = localStorage.getItem('btcCivFogOfWar') !== 'false'; // default true
+let visibility = []; // 2D array: 0=hidden, 1=explored, 2=visible
+
+// Hash War state
+let hashWars = []; // { attackerId, defenderId, redirectPct }
+let hashWarOpen = false;
+
+// Settings panel state
+let settingsOpen = false;
+
 let gameState = {
   turn: 0,
   blockReward: 50,
@@ -2707,6 +3046,9 @@ function calculateHappiness(civId) {
   if (civ.idleWorkers === 0 && civ.workersUsed > 0) {
     happiness += 5;
   }
+
+  // Hash war happiness penalty
+  happiness -= calculateHashWarHappiness(civId);
 
   return Math.max(0, Math.min(100, happiness));
 }
@@ -3153,6 +3495,10 @@ function processTurn() {
   // Difficulty adjustment every 100 turns
   processDifficultyAdjustment();
 
+  // Process Hash Wars
+  processHashWars();
+  processAIHashWars();
+
   // Process AI turns (build, research)
   for (let i = 1; i <= 3; i++) {
     processAITurn(i);
@@ -3190,10 +3536,10 @@ function processTurn() {
   // Check events for player
   const events = checkEvents(0);
 
-  // Calculate total network hash power
+  // Calculate total network hash power (adjusted for hash wars)
   let totalHash = 0;
   for (const civ of gameState.civs) {
-    if (!civ.eliminated) totalHash += civ.hashPower;
+    if (!civ.eliminated) totalHash += getEffectiveHash(civ.id);
   }
 
   // Process research for all civs
@@ -3212,8 +3558,9 @@ function processTurn() {
   for (const civ of gameState.civs) {
     if (civ.eliminated) { earnings.push({ name: civ.name, color: civ.color, earned: 0, civId: civ.id }); continue; }
     let earned = 0;
-    if (totalHash > 0 && civ.hashPower > 0) {
-      earned = Math.round(effectiveReward * (civ.hashPower / totalHash) * 100) / 100;
+    const civEffHash = getEffectiveHash(civ.id);
+    if (totalHash > 0 && civEffHash > 0) {
+      earned = Math.round(effectiveReward * (civEffHash / totalHash) * 100) / 100;
     }
 
     // Bank bonus: +10% sats income per bank
@@ -3282,6 +3629,16 @@ function processTurn() {
   updateHUD();
   updateCivPanel();
   if (gameState.victoryPanelVisible) updateVictoryPanel();
+
+  // Recalculate fog of war
+  recalculateVisibility();
+
+  // Update hash war button
+  updateHashWarButton();
+  updateWarStatus();
+
+  // Auto-save every 10 turns
+  autoSave();
 
   // Check victory conditions
   checkVictoryConditions();
@@ -3422,7 +3779,7 @@ function updateCivPanel() {
   let html = '';
   for (const civ of gameState.civs) {
     const netEnergy = civ.energyProduced - civ.energyConsumed;
-    const showDetails = civ.isPlayer || hasSatellite;
+    const showDetails = civ.isPlayer || hasSatellite || !fogOfWarEnabled;
     const hashPct = totalHash > 0 ? Math.round((civ.hashPower / totalHash) * 100) : 0;
     const eliminated = civ.eliminated;
     const personality = AI_PERSONALITIES[civ.id];
@@ -3537,6 +3894,24 @@ function drawTile(x, y) {
   // Frustum cull
   if (screenX + w < -10 || screenX - w > canvas.width + 10 ||
       screenY + h < -10 || screenY - h > canvas.height + 50) return;
+
+  // Fog of War: hidden tiles
+  const tileVis = getTileVisibility(x, y);
+  if (tileVis === 0) {
+    // Hidden tile - draw dark diamond
+    ctx.beginPath();
+    ctx.moveTo(screenX, screenY - h);
+    ctx.lineTo(screenX + w, screenY);
+    ctx.lineTo(screenX, screenY + h);
+    ctx.lineTo(screenX - w, screenY);
+    ctx.closePath();
+    ctx.fillStyle = '#0a0a0f';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(30,30,40,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    return;
+  }
 
   const elev = map.elevation[y][x];
   const tileHeight = Math.max(0, (elev - 0.25) * 18) * camera.zoom;
@@ -3695,9 +4070,9 @@ function drawTile(x, y) {
     ctx.fill();
   }
 
-  // Resource deposit markers
+  // Resource deposit markers (only in visible tiles)
   const dep = map.deposits[y][x];
-  if (dep && camera.zoom > 0.5) {
+  if (dep && camera.zoom > 0.5 && tileVis === 2) {
     ctx.font = `bold ${Math.round(10 * camera.zoom)}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -3705,6 +4080,18 @@ function drawTile(x, y) {
     ctx.globalAlpha = 0.9;
     ctx.fillText(dep.symbol, screenX, screenY - 2 * camera.zoom);
     ctx.globalAlpha = 1;
+  }
+
+  // Fog of War: explored overlay (50% darkened)
+  if (tileVis === 1) {
+    ctx.beginPath();
+    ctx.moveTo(screenX, screenY - h);
+    ctx.lineTo(screenX + w, screenY);
+    ctx.lineTo(screenX, screenY + h);
+    ctx.lineTo(screenX - w, screenY);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fill();
   }
 }
 
@@ -5101,7 +5488,13 @@ function render() {
       }
 
       const b = buildingMap[`${x},${y}`];
-      if (b) drawBuilding(b);
+      if (b) {
+        // Fog of War: only show buildings in visible tiles (or own buildings)
+        const bVis = getTileVisibility(x, y);
+        if (bVis === 2 || b.owner === 0 || !fogOfWarEnabled) {
+          drawBuilding(b);
+        }
+      }
 
       // Pollution overlay: darken tiles near polluting buildings
       if (camera.zoom > 0.4) {
@@ -5150,17 +5543,31 @@ function renderMinimap() {
 
   for (let y = 0; y < MAP_H; y++) {
     for (let x = 0; x < MAP_W; x++) {
+      const vis = getTileVisibility(x, y);
+      if (vis === 0) {
+        // Hidden on minimap
+        minimapCtx.fillStyle = '#08080f';
+        minimapCtx.fillRect(x * tileW, y * tileH, tileW + 0.5, tileH + 0.5);
+        continue;
+      }
       const t = TERRAIN_BY_ID[map.terrain[y][x]];
       minimapCtx.fillStyle = t.color;
-      if (map.deposits[y][x]) {
+      if (vis === 2 && map.deposits[y][x]) {
         minimapCtx.fillStyle = map.deposits[y][x].color;
       }
       minimapCtx.fillRect(x * tileW, y * tileH, tileW + 0.5, tileH + 0.5);
+      // Explored: dim overlay
+      if (vis === 1) {
+        minimapCtx.fillStyle = 'rgba(0,0,0,0.45)';
+        minimapCtx.fillRect(x * tileW, y * tileH, tileW + 0.5, tileH + 0.5);
+      }
     }
   }
 
-  // Draw buildings on minimap
+  // Draw buildings on minimap (respect fog)
   for (const b of gameState.buildings) {
+    const vis = getTileVisibility(b.x, b.y);
+    if (vis < 2 && b.owner !== 0 && fogOfWarEnabled) continue; // hide AI buildings in fog
     const civ = gameState.civs[b.owner];
     minimapCtx.fillStyle = civ.color;
     const bx = b.x * tileW;
@@ -5169,6 +5576,35 @@ function renderMinimap() {
       minimapCtx.fillRect(bx - 1, by - 1, tileW + 2, tileH + 2);
     } else {
       minimapCtx.fillRect(bx, by, tileW + 0.5, tileH + 0.5);
+    }
+  }
+
+  // Hash War lightning effects on minimap
+  for (const war of hashWars) {
+    if (war.attackerId === 0 || war.defenderId === 0) {
+      const attCitadel = getCitadelPosition(war.attackerId);
+      const defCitadel = getCitadelPosition(war.defenderId);
+      if (attCitadel && defCitadel) {
+        const ax = attCitadel.x * tileW + tileW / 2;
+        const ay = attCitadel.y * tileH + tileH / 2;
+        const dx = defCitadel.x * tileW + tileW / 2;
+        const dy = defCitadel.y * tileH + tileH / 2;
+        // Animated lightning line
+        const phase = Date.now() * 0.003;
+        minimapCtx.strokeStyle = 'rgba(255,68,68,' + (0.4 + Math.sin(phase) * 0.3) + ')';
+        minimapCtx.lineWidth = 1.5;
+        minimapCtx.beginPath();
+        minimapCtx.moveTo(ax, ay);
+        // Jagged lightning with 3 segments
+        const mx1 = ax + (dx - ax) * 0.33 + Math.sin(phase * 2) * 5;
+        const my1 = ay + (dy - ay) * 0.33 + Math.cos(phase * 3) * 5;
+        const mx2 = ax + (dx - ax) * 0.66 + Math.sin(phase * 2.5) * 5;
+        const my2 = ay + (dy - ay) * 0.66 + Math.cos(phase * 1.5) * 5;
+        minimapCtx.lineTo(mx1, my1);
+        minimapCtx.lineTo(mx2, my2);
+        minimapCtx.lineTo(dx, dy);
+        minimapCtx.stroke();
+      }
     }
   }
 
@@ -5594,6 +6030,7 @@ function placePlayerBuilding(tx, ty, typeKey) {
   // Recalculate
   invalidateTerritory();
   recalculateCivStats();
+  recalculateVisibility();
   updateHUD();
   updateBuildMenu();
   updateInfoPanel();
@@ -5819,6 +6256,16 @@ window.addEventListener('keydown', e => {
     return;
   }
 
+  // Settings overlay
+  if (settingsOpen) {
+    if (e.key === 'Escape') closeSettings();
+    return;
+  }
+  // Hash war overlay
+  if (hashWarOpen) {
+    if (e.key === 'Escape') closeHashWarPanel();
+    return;
+  }
   // Tech tree overlay
   if (techTreeOpen) {
     if (e.key === 'Escape') closeTechTree();
@@ -5827,8 +6274,10 @@ window.addEventListener('keydown', e => {
 
   keys[e.key.toLowerCase()] = true;
 
-  // Escape: cancel build mode or close menu
+  // Escape: close panels or cancel build mode
   if (e.key === 'Escape') {
+    if (settingsOpen) { closeSettings(); return; }
+    if (hashWarOpen) { closeHashWarPanel(); return; }
     if (buildState.buildMode) {
       cancelBuildMode();
     } else if (buildState.menuOpen) {
@@ -5862,6 +6311,11 @@ window.addEventListener('keydown', e => {
   // V = toggle victory panel
   if (e.key.toLowerCase() === 'v' && !e.repeat) {
     toggleVictoryPanel();
+  }
+
+  // H = hash war panel
+  if (e.key.toLowerCase() === 'h' && !e.repeat) {
+    if (gameState.civs[0].hashPower > 10) openHashWarPanel();
   }
 
   // Number keys 1-9 for quick-selecting building types
@@ -5957,6 +6411,7 @@ function regenerateMap() {
   hoveredTile = null;
   floatingTexts = [];
   particles = [];
+  hashWars = [];
   cancelBuildMode();
   buildState.menuOpen = false;
   document.getElementById('buildMenu').classList.add('hidden');
@@ -5966,9 +6421,13 @@ function regenerateMap() {
   if (techTreeOpen) closeTechTree();
 
   initCivilizations();
+  initVisibility();
+  recalculateVisibility();
   initCamera();
   updateHUD();
   updateInfoPanel();
+  updateHashWarButton();
+  updateWarStatus();
   renderMinimap();
 }
 
@@ -6867,6 +7326,636 @@ function processDifficultyAdjustment() {
   document.getElementById('hudDifficulty').textContent = `${gameState.difficultyMultiplier.toFixed(1)}×`;
 }
 
+
+// ============================================================
+// Fog of War System
+// ============================================================
+function initVisibility() {
+  visibility = [];
+  for (let y = 0; y < MAP_H; y++) {
+    visibility[y] = [];
+    for (let x = 0; x < MAP_W; x++) {
+      visibility[y][x] = 0; // hidden
+    }
+  }
+}
+
+function getViewRange(buildingType) {
+  if (buildingType === 'citadel') return 6;
+  if (buildingType === 'node_relay') return 8;
+  if (buildingType === 'satellite_array') return 999; // reveals entire map
+  return 4;
+}
+
+function recalculateVisibility() {
+  if (!fogOfWarEnabled) return;
+  // Downgrade visible to explored (keep explored as explored)
+  for (let y = 0; y < MAP_H; y++) {
+    for (let x = 0; x < MAP_W; x++) {
+      if (visibility[y][x] === 2) visibility[y][x] = 1;
+    }
+  }
+  // Set visible tiles around player buildings
+  for (const b of gameState.buildings) {
+    if (b.owner !== 0) continue;
+    const range = getViewRange(b.type);
+    if (range >= 999) {
+      // Satellite array reveals entire map
+      for (let y = 0; y < MAP_H; y++) {
+        for (let x = 0; x < MAP_W; x++) {
+          visibility[y][x] = 2;
+        }
+      }
+      return;
+    }
+    for (let dy = -range; dy <= range; dy++) {
+      for (let dx = -range; dx <= range; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) > range) continue;
+        const nx = b.x + dx, ny = b.y + dy;
+        if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+          visibility[ny][nx] = 2;
+        }
+      }
+    }
+  }
+}
+
+function getTileVisibility(x, y) {
+  if (!fogOfWarEnabled) return 2; // fully visible
+  if (x < 0 || x >= MAP_W || y < 0 || y >= MAP_H) return 0;
+  return visibility[y][x];
+}
+
+// ============================================================
+// Save/Load System
+// ============================================================
+function createSaveData() {
+  return {
+    version: 1,
+    seed: currentSeed,
+    turn: gameState.turn,
+    blockReward: gameState.blockReward,
+    difficultyMultiplier: gameState.difficultyMultiplier,
+    lastDifficultyHash: gameState.lastDifficultyHash,
+    buildings: gameState.buildings.map(b => ({
+      type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active
+    })),
+    civs: gameState.civs.map(c => ({
+      id: c.id, treasury: c.treasury, hashPower: c.hashPower,
+      population: c.population, maxPopulation: c.maxPopulation,
+      energyProduced: c.energyProduced, energyConsumed: c.energyConsumed,
+      foodProduced: c.foodProduced, happiness: c.happiness,
+      researched: [...c.researched],
+      currentResearch: c.currentResearch,
+      researchProgress: c.researchProgress,
+      researchTurnsNeeded: c.researchTurnsNeeded,
+      bankruptcyTurns: c.bankruptcyTurns || 0,
+      eliminated: c.eliminated,
+      hashDominanceTurns: c.hashDominanceTurns || 0,
+      culturalVictoryTurns: c.culturalVictoryTurns || 0,
+      lastTreasuryMilestone: c.lastTreasuryMilestone || 0,
+      pollutionCount: c.pollutionCount || 0,
+    })),
+    visibility: fogOfWarEnabled ? visibility : null,
+    hashWars: hashWars,
+    settings: {
+      fogOfWar: fogOfWarEnabled
+    },
+    gameOver: gameState.gameOver,
+  };
+}
+
+function saveGame() {
+  try {
+    const data = createSaveData();
+    localStorage.setItem('btcCivSave', JSON.stringify(data));
+    showToast('💾 Game saved!', 'success');
+    return true;
+  } catch (e) {
+    showToast('❌ Save failed: ' + e.message, 'error');
+    return false;
+  }
+}
+
+function loadGameFromData(data) {
+  if (!data || data.version !== 1) {
+    showToast('❌ Invalid save data', 'error');
+    return false;
+  }
+
+  try {
+    // Restore seed and regenerate map
+    saveSeed(data.seed);
+    const newMap = generateMap();
+    map.terrain = newMap.terrain;
+    map.elevation = newMap.elevation;
+    map.deposits = newMap.deposits;
+    map.resourceData = newMap.resourceData;
+    map.majorRiverTiles = newMap.majorRiverTiles;
+
+    // Restore game state
+    gameState.turn = data.turn;
+    gameState.blockReward = data.blockReward;
+    gameState.difficultyMultiplier = data.difficultyMultiplier || 1.0;
+    gameState.lastDifficultyHash = data.lastDifficultyHash || 0;
+    gameState.gameOver = data.gameOver || false;
+    gameState.buildings = data.buildings.map(b => ({
+      type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active
+    }));
+
+    // Restore civs
+    for (let i = 0; i < data.civs.length && i < gameState.civs.length; i++) {
+      const saved = data.civs[i];
+      const civ = gameState.civs[i];
+      civ.treasury = saved.treasury;
+      civ.population = saved.population;
+      civ.maxPopulation = saved.maxPopulation;
+      civ.researched = new Set(saved.researched);
+      civ.currentResearch = saved.currentResearch;
+      civ.researchProgress = saved.researchProgress;
+      civ.researchTurnsNeeded = saved.researchTurnsNeeded;
+      civ.bankruptcyTurns = saved.bankruptcyTurns || 0;
+      civ.eliminated = saved.eliminated;
+      civ.hashDominanceTurns = saved.hashDominanceTurns || 0;
+      civ.culturalVictoryTurns = saved.culturalVictoryTurns || 0;
+      civ.lastTreasuryMilestone = saved.lastTreasuryMilestone || 0;
+      civ.pollutionCount = saved.pollutionCount || 0;
+    }
+
+    // Restore fog of war
+    if (data.settings && data.settings.fogOfWar !== undefined) {
+      fogOfWarEnabled = data.settings.fogOfWar;
+      localStorage.setItem('btcCivFogOfWar', fogOfWarEnabled.toString());
+      const fogToggle = document.getElementById('settFogToggle');
+      if (fogToggle) fogToggle.checked = fogOfWarEnabled;
+    }
+
+    // Restore visibility
+    if (data.visibility && fogOfWarEnabled) {
+      visibility = data.visibility;
+    } else {
+      initVisibility();
+      recalculateVisibility();
+    }
+
+    // Restore hash wars
+    hashWars = data.hashWars || [];
+
+    // Reset UI state
+    selectedTile = null;
+    hoveredTile = null;
+    floatingTexts = [];
+    particles = [];
+    _lastVictoryWarnings = {};
+    aiActivityLog = [];
+    cancelBuildMode();
+    buildState.menuOpen = false;
+    document.getElementById('buildMenu').classList.add('hidden');
+    document.getElementById('buildBtn').classList.remove('active');
+    document.getElementById('legend').style.display = '';
+    document.getElementById('victoryOverlay').classList.remove('visible');
+    document.getElementById('victoryPanel').classList.add('hidden');
+    document.getElementById('aiLog').innerHTML = '';
+    invalidateTerritory();
+    if (techTreeOpen) closeTechTree();
+
+    recalculateCivStats();
+    initCamera();
+    updateHUD();
+    updateHashWarButton();
+    updateWarStatus();
+
+    showToast('✅ Game loaded! (Turn ' + data.turn + ')', 'success');
+    return true;
+  } catch (e) {
+    showToast('❌ Load failed: ' + e.message, 'error');
+    console.error('Load error:', e);
+    return false;
+  }
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('btcCivSave');
+    if (!raw) {
+      showToast('No saved game found', 'error');
+      return false;
+    }
+    return loadGameFromData(JSON.parse(raw));
+  } catch (e) {
+    showToast('❌ Load failed: ' + e.message, 'error');
+    return false;
+  }
+}
+
+function exportSave() {
+  try {
+    const data = createSaveData();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bitcoin-civ-save-turn' + data.turn + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('📤 Save exported!', 'success');
+  } catch (e) {
+    showToast('❌ Export failed: ' + e.message, 'error');
+  }
+}
+
+function importSave() {
+  document.getElementById('importFileInput').click();
+}
+
+function handleImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (loadGameFromData(data)) {
+        closeSettings();
+      }
+    } catch (err) {
+      showToast('❌ Invalid save file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = ''; // reset so same file can be imported again
+}
+
+// Auto-save every 10 turns
+function autoSave() {
+  if (gameState.turn > 0 && gameState.turn % 10 === 0) {
+    try {
+      const data = createSaveData();
+      localStorage.setItem('btcCivSave', JSON.stringify(data));
+    } catch (e) { /* silent fail for auto-save */ }
+  }
+}
+
+// ============================================================
+// Settings Panel
+// ============================================================
+function openSettings() {
+  settingsOpen = true;
+  document.getElementById('settingsOverlay').classList.add('visible');
+}
+
+function closeSettings() {
+  settingsOpen = false;
+  document.getElementById('settingsOverlay').classList.remove('visible');
+}
+
+function toggleSettings() {
+  if (settingsOpen) closeSettings();
+  else openSettings();
+}
+
+// ============================================================
+// Hash War System
+// ============================================================
+function getActiveHashWar(attackerId, defenderId) {
+  return hashWars.find(w => w.attackerId === attackerId && w.defenderId === defenderId);
+}
+
+function getHashWarsAttacking(civId) {
+  return hashWars.filter(w => w.attackerId === civId);
+}
+
+function getHashWarsDefending(civId) {
+  return hashWars.filter(w => w.defenderId === civId);
+}
+
+function getRedirectedHash(civId) {
+  let redirected = 0;
+  for (const w of hashWars) {
+    if (w.attackerId === civId) {
+      const civ = gameState.civs[civId];
+      redirected += Math.floor(civ.hashPower * w.redirectPct / 100);
+    }
+  }
+  return redirected;
+}
+
+function getEffectiveHash(civId) {
+  const civ = gameState.civs[civId];
+  let effective = civ.hashPower;
+  // Subtract redirected hash (attacking)
+  effective -= getRedirectedHash(civId);
+  // Apply disruption from being attacked
+  for (const w of hashWars) {
+    if (w.defenderId === civId) {
+      const attacker = gameState.civs[w.attackerId];
+      const attackHash = Math.floor(attacker.hashPower * w.redirectPct / 100);
+      const disruptionRatio = Math.min(1, attackHash / Math.max(1, civ.hashPower));
+      const disruption = disruptionRatio * 0.3;
+      effective = Math.floor(effective * (1 - disruption));
+    }
+  }
+  return Math.max(0, effective);
+}
+
+function startHashWar(attackerId, defenderId, redirectPct) {
+  // Remove existing war between these two in same direction
+  hashWars = hashWars.filter(w => !(w.attackerId === attackerId && w.defenderId === defenderId));
+  hashWars.push({ attackerId, defenderId, redirectPct });
+  
+  const attacker = gameState.civs[attackerId];
+  const defender = gameState.civs[defenderId];
+  
+  if (attackerId === 0) {
+    showToast('⚔️ Hash War launched against ' + defender.name + '!', 'error');
+  } else if (defenderId === 0) {
+    showToast('⚠️ ' + attacker.name + ' has launched a Hash War against you!', 'error');
+  }
+  
+  addAILogEntry('⚔️ ' + attacker.name + ' attacks ' + defender.name + '!');
+  updateWarStatus();
+  updateHashWarButton();
+}
+
+function endHashWar(attackerId, defenderId) {
+  hashWars = hashWars.filter(w => !(w.attackerId === attackerId && w.defenderId === defenderId));
+  
+  const attacker = gameState.civs[attackerId];
+  const defender = gameState.civs[defenderId];
+  
+  if (attackerId === 0) {
+    showToast('🕊️ Hash War against ' + defender.name + ' ended', 'success');
+  } else if (defenderId === 0) {
+    showToast('🕊️ ' + attacker.name + ' has ended their Hash War against you', 'success');
+  }
+  
+  addAILogEntry('🕊️ ' + attacker.name + ' stops attacking ' + defender.name);
+  updateWarStatus();
+  updateHashWarButton();
+}
+
+function processHashWars() {
+  const toRemove = [];
+  
+  for (const war of hashWars) {
+    const attacker = gameState.civs[war.attackerId];
+    const defender = gameState.civs[war.defenderId];
+    
+    if (attacker.eliminated || defender.eliminated) {
+      toRemove.push(war);
+      continue;
+    }
+    
+    const attackHash = Math.floor(attacker.hashPower * war.redirectPct / 100);
+    if (attackHash <= 0) {
+      toRemove.push(war);
+      continue;
+    }
+    
+    // Calculate steal: 10% of what defender would have mined, proportional to success
+    const totalNetHash = getTotalNetworkHash();
+    const defenderMiningIncome = totalNetHash > 0 ? 
+      (gameState.blockReward / gameState.difficultyMultiplier) * (defender.hashPower / totalNetHash) : 0;
+    
+    const successRatio = Math.min(1, attackHash / Math.max(1, defender.hashPower));
+    const stolenSats = Math.round(defenderMiningIncome * 0.1 * successRatio * 100) / 100;
+    
+    if (stolenSats > 0) {
+      attacker.treasury += stolenSats;
+      defender.treasury -= stolenSats;
+      attacker.treasury = Math.round(attacker.treasury * 100) / 100;
+      defender.treasury = Math.round(defender.treasury * 100) / 100;
+    }
+    
+    // Check end conditions
+    if (attacker.treasury <= 0) {
+      toRemove.push(war);
+      if (war.attackerId === 0) showToast('⚔️ Hash War ended — you ran out of sats!', 'error');
+    }
+    if (defender.hashPower <= 0) {
+      toRemove.push(war);
+      addAILogEntry('💀 ' + defender.name + ' hash rate destroyed by ' + attacker.name);
+    }
+  }
+  
+  for (const war of toRemove) {
+    endHashWar(war.attackerId, war.defenderId);
+  }
+}
+
+function processAIHashWars() {
+  // AI civs consider launching hash wars
+  for (let i = 1; i <= 3; i++) {
+    const civ = gameState.civs[i];
+    if (civ.eliminated) continue;
+    
+    // Only The Miner (civ 1) is aggressive enough
+    if (i !== 1) continue;
+    
+    // Already in a hash war as attacker?
+    if (getHashWarsAttacking(i).length > 0) continue;
+    
+    // Need >5000 treasury and decent hash power
+    if (civ.treasury < 5000 || civ.hashPower < 10) continue;
+    
+    // Find weakest non-eliminated opponent
+    let weakest = null;
+    let weakestHash = Infinity;
+    for (const target of gameState.civs) {
+      if (target.id === i || target.eliminated) continue;
+      if (target.hashPower < weakestHash) {
+        weakestHash = target.hashPower;
+        weakest = target;
+      }
+    }
+    
+    if (!weakest) continue;
+    
+    // Only attack if we have >60% more hash
+    if (civ.hashPower > weakest.hashPower * 1.6) {
+      startHashWar(i, weakest.id, 40); // Redirect 40%
+    }
+  }
+  
+  // AI may stop hash wars if treasury drops too low
+  for (const war of [...hashWars]) {
+    if (war.attackerId === 0) continue; // Skip player wars
+    const attacker = gameState.civs[war.attackerId];
+    if (attacker.treasury < 1000) {
+      endHashWar(war.attackerId, war.defenderId);
+    }
+  }
+}
+
+function calculateHashWarHappiness(civId) {
+  let penalty = 0;
+  // -15 for each war (attacking or defending)
+  for (const w of hashWars) {
+    if (w.attackerId === civId || w.defenderId === civId) {
+      penalty += 15;
+    }
+  }
+  return penalty;
+}
+
+function updateHashWarButton() {
+  const player = gameState.civs[0];
+  const btn = document.getElementById('hashWarBtn');
+  btn.style.display = player.hashPower > 10 && !player.eliminated ? '' : 'none';
+}
+
+function updateWarStatus() {
+  const playerAtWar = hashWars.some(w => w.attackerId === 0 || w.defenderId === 0);
+  document.getElementById('hudWarStatus').style.display = playerAtWar ? '' : 'none';
+}
+
+function openHashWarPanel() {
+  hashWarOpen = true;
+  renderHashWarPanel();
+  document.getElementById('hashWarOverlay').classList.add('visible');
+}
+
+function closeHashWarPanel() {
+  hashWarOpen = false;
+  document.getElementById('hashWarOverlay').classList.remove('visible');
+}
+
+function renderHashWarPanel() {
+  const content = document.getElementById('hashWarContent');
+  const player = gameState.civs[0];
+  const totalHash = getTotalNetworkHash();
+  
+  let html = '';
+  html += '<div style="text-align:center;margin-bottom:12px;font-size:12px;color:#aaa">';
+  html += 'Your Hash Power: <strong style="color:#00A8FF">' + player.hashPower + ' H/s</strong>';
+  const redirected = getRedirectedHash(0);
+  if (redirected > 0) html += ' (Redirected: <span style="color:#ff4444">' + redirected + '</span>)';
+  html += '</div>';
+  
+  for (const civ of gameState.civs) {
+    if (civ.id === 0 || civ.eliminated) continue;
+    
+    const existingWar = getActiveHashWar(0, civ.id);
+    const beingAttacked = getActiveHashWar(civ.id, 0);
+    const sliderId = 'hwSlider_' + civ.id;
+    const labelId = 'hwLabel_' + civ.id;
+    const analysisId = 'hwAnalysis_' + civ.id;
+    
+    html += '<div class="hw-target">';
+    html += '<div class="hw-target-header">';
+    html += '<div class="hw-target-name"><span class="civ-swatch" style="background:' + civ.color + '"></span>' + civ.name;
+    if (existingWar) html += ' <span class="hw-active-indicator">⚔️ ATTACKING</span>';
+    if (beingAttacked) html += ' <span class="hw-active-indicator" style="background:rgba(255,200,0,0.2);color:#ffcc00">🛡️ ATTACKING YOU</span>';
+    html += '</div>';
+    html += '<div class="hw-target-hash">' + civ.hashPower + ' H/s</div>';
+    html += '</div>';
+    
+    if (existingWar) {
+      // Show current war status + stop button
+      const attackHash = Math.floor(player.hashPower * existingWar.redirectPct / 100);
+      const successRatio = Math.min(1, attackHash / Math.max(1, civ.hashPower));
+      const disruption = Math.round(successRatio * 30);
+      const defMiningIncome = totalHash > 0 ? (gameState.blockReward / gameState.difficultyMultiplier) * (civ.hashPower / totalHash) : 0;
+      const stealing = Math.round(defMiningIncome * 0.1 * successRatio * 100) / 100;
+      
+      html += '<div class="hw-analysis">';
+      html += '<div>Redirecting: <strong>' + existingWar.redirectPct + '%</strong> (' + attackHash + ' H/s)</div>';
+      html += '<div>Disruption: <span class="positive">-' + disruption + '% enemy hash</span></div>';
+      html += '<div>Stealing: <span class="positive">+' + stealing + ' sats/turn</span></div>';
+      html += '</div>';
+      html += '<button class="hw-stop-btn" onclick="endHashWar(0,' + civ.id + ');renderHashWarPanel()">🕊️ End Hash War</button>';
+    } else {
+      // Show attack interface
+      const currentPct = 40;
+      html += '<div class="hw-slider-row">';
+      html += '<span style="font-size:11px;color:#888">Redirect:</span>';
+      html += '<input type="range" id="' + sliderId + '" min="10" max="100" step="5" value="' + currentPct + '" oninput="updateHWAnalysis(' + civ.id + ')">';
+      html += '<span class="hw-slider-label" id="' + labelId + '">' + currentPct + '%</span>';
+      html += '</div>';
+      
+      html += '<div class="hw-analysis" id="' + analysisId + '"></div>';
+      
+      html += '<button class="hw-attack-btn" onclick="launchHashWarFromUI(' + civ.id + ')">⚔️ Attack</button>';
+    }
+    
+    html += '</div>';
+  }
+  
+  content.innerHTML = html;
+  
+  // Initialize analysis for non-active wars
+  for (const civ of gameState.civs) {
+    if (civ.id === 0 || civ.eliminated) continue;
+    if (!getActiveHashWar(0, civ.id)) {
+      updateHWAnalysis(civ.id);
+    }
+  }
+}
+
+function updateHWAnalysis(targetId) {
+  const slider = document.getElementById('hwSlider_' + targetId);
+  const label = document.getElementById('hwLabel_' + targetId);
+  const analysis = document.getElementById('hwAnalysis_' + targetId);
+  if (!slider || !analysis) return;
+  
+  const pct = parseInt(slider.value);
+  label.textContent = pct + '%';
+  
+  const player = gameState.civs[0];
+  const target = gameState.civs[targetId];
+  const totalHash = getTotalNetworkHash();
+  
+  const attackHash = Math.floor(player.hashPower * pct / 100);
+  const remainingHash = player.hashPower - attackHash;
+  const lostIncome = totalHash > 0 ? Math.round((gameState.blockReward / gameState.difficultyMultiplier) * (attackHash / totalHash) * 100) / 100 : 0;
+  
+  const successRatio = Math.min(1, attackHash / Math.max(1, target.hashPower));
+  const successPct = Math.round(successRatio * 100);
+  const disruption = Math.round(successRatio * 30);
+  const defMiningIncome = totalHash > 0 ? (gameState.blockReward / gameState.difficultyMultiplier) * (target.hashPower / totalHash) : 0;
+  const stealing = Math.round(defMiningIncome * 0.1 * successRatio * 100) / 100;
+  
+  let html = '';
+  html += '<div>Redirecting: <strong>' + attackHash + ' H/s</strong> (' + pct + '% of your hash)</div>';
+  html += '<div>Remaining mining: <strong>' + remainingHash + ' H/s</strong></div>';
+  html += '<div class="negative">Lost mining income: ~' + lostIncome + ' sats/turn</div>';
+  html += '<div>Target defense: ' + target.hashPower + ' H/s</div>';
+  html += '<div class="' + (successPct > 50 ? 'positive' : 'negative') + '">Success: ' + successPct + '%</div>';
+  html += '<div class="positive">Enemy disruption: -' + disruption + '% hash effectiveness</div>';
+  html += '<div class="positive">Steal: ~' + stealing + ' sats/turn</div>';
+  html += '<div class="neutral">⚠ Happiness: -15 while at war</div>';
+  
+  analysis.innerHTML = html;
+}
+
+function launchHashWarFromUI(targetId) {
+  const slider = document.getElementById('hwSlider_' + targetId);
+  if (!slider) return;
+  const pct = parseInt(slider.value);
+  startHashWar(0, targetId, pct);
+  renderHashWarPanel();
+}
+
+// Check startup for saved game
+function checkStartupSave() {
+  try {
+    const raw = localStorage.getItem('btcCivSave');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (!data || !data.turn) return;
+    
+    const dialog = document.getElementById('loadDialog');
+    document.getElementById('loadDialogText').textContent = 
+      'Saved game found (Turn ' + data.turn + ', ' + 
+      Math.round(data.civs[0].treasury).toLocaleString() + '₿). Continue?';
+    dialog.classList.add('visible');
+  } catch (e) { /* no valid save */ }
+}
+
+
 // ============================================================
 // Init
 // ============================================================
@@ -6877,12 +7966,67 @@ initCivilizations();
 initCamera();
 updateHUD();
 
+// Init fog of war
+initVisibility();
+recalculateVisibility();
+
+// Set fog toggle initial state
+document.getElementById('settFogToggle').checked = fogOfWarEnabled;
+
+// Settings panel event listeners
+document.getElementById('settingsBtn').addEventListener('click', toggleSettings);
+document.getElementById('settClose').addEventListener('click', closeSettings);
+document.getElementById('settingsOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('settingsOverlay')) closeSettings();
+});
+document.getElementById('settSaveGame').addEventListener('click', () => { saveGame(); closeSettings(); });
+document.getElementById('settLoadGame').addEventListener('click', () => { if (loadGame()) closeSettings(); });
+document.getElementById('settExportSave').addEventListener('click', () => { exportSave(); });
+document.getElementById('settImportSave').addEventListener('click', () => { importSave(); });
+document.getElementById('settFogToggle').addEventListener('change', e => {
+  fogOfWarEnabled = e.target.checked;
+  localStorage.setItem('btcCivFogOfWar', fogOfWarEnabled.toString());
+  if (fogOfWarEnabled) {
+    initVisibility();
+    recalculateVisibility();
+  }
+  showToast(fogOfWarEnabled ? '🌫️ Fog of War enabled' : '☀️ Fog of War disabled', 'success');
+});
+document.getElementById('importFileInput').addEventListener('change', handleImportFile);
+
+// Save button (top bar)
+document.getElementById('saveBtn').addEventListener('click', () => { saveGame(); });
+
+// Hash War panel
+document.getElementById('hashWarBtn').addEventListener('click', openHashWarPanel);
+document.getElementById('hashWarClose').addEventListener('click', closeHashWarPanel);
+document.getElementById('hashWarOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('hashWarOverlay')) closeHashWarPanel();
+});
+
+// Load dialog
+document.getElementById('loadDialogContinue').addEventListener('click', () => {
+  document.getElementById('loadDialog').classList.remove('visible');
+  loadGame();
+});
+document.getElementById('loadDialogNew').addEventListener('click', () => {
+  document.getElementById('loadDialog').classList.remove('visible');
+  // Just continue with new game (already initialized)
+});
+
+// Update hash war button
+updateHashWarButton();
+updateWarStatus();
+
 // Auto-focus canvas and re-focus on click
 canvas.focus();
 canvas.addEventListener('click', () => canvas.focus());
 
-// Show tutorial on first load
-if (!localStorage.getItem('btcCivTutorialSeen')) {
+// Check for saved game on startup
+checkStartupSave();
+
+// Show tutorial on first load (only if no save dialog)
+if (!localStorage.getItem('btcCivTutorialSeen') && !localStorage.getItem('btcCivSave')) {
   setTimeout(openTutorial, 300);
 }
 
