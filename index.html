@@ -926,6 +926,108 @@
     color: #ff6644;
     margin-top: 2px;
   }
+
+  /* Victory Panel (V key) */
+  #victoryPanel {
+    position: fixed;
+    top: 60px; right: 300px;
+    width: 380px;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    background: rgba(12,12,20,0.96);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 110;
+    backdrop-filter: blur(14px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+  #victoryPanel.hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
+  #victoryPanel h3 {
+    font-size: 14px;
+    color: #F7931A;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(247,147,26,0.2);
+    padding-bottom: 8px;
+    text-align: center;
+  }
+  .victory-type {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .victory-type:last-child { border-bottom: none; }
+  .victory-type-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 600; color: #ddd; margin-bottom: 4px;
+  }
+  .victory-type-header .vt-icon { font-size: 16px; }
+  .victory-type-header .vt-leader { font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .victory-progress-bar {
+    height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; margin-top: 4px;
+  }
+  .victory-progress-fill {
+    height: 100%; border-radius: 4px; transition: width 0.3s;
+  }
+  .victory-detail { font-size: 11px; color: #888; margin-top: 3px; }
+
+  /* Victory/Defeat Overlay */
+  #victoryOverlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.5s ease; pointer-events: none;
+  }
+  #victoryOverlay.visible { opacity: 1; pointer-events: auto; }
+  #victoryCard {
+    background: linear-gradient(145deg, rgba(20,20,32,0.98) 0%, rgba(12,12,22,0.98) 100%);
+    border: 2px solid rgba(247,147,26,0.7);
+    border-radius: 20px;
+    padding: 40px 48px;
+    max-width: 520px; width: 90vw;
+    text-align: center;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 40px rgba(247,147,26,0.2);
+  }
+  #victoryCard h1 {
+    font-size: 48px; font-weight: 900; letter-spacing: 4px; margin-bottom: 12px;
+  }
+  #victoryCard .victory-type-label {
+    font-size: 18px; color: #ddd; margin-bottom: 20px;
+  }
+  #victoryCard .victory-stats {
+    text-align: left; font-size: 14px; color: #aaa; margin: 16px 0;
+  }
+  #victoryCard .victory-stats div { padding: 4px 0; }
+  #victoryCard .play-again-btn {
+    background: linear-gradient(135deg, #F7931A 0%, #e07800 100%);
+    color: #fff; font-size: 16px; font-weight: 700; border: none; border-radius: 10px;
+    padding: 14px 36px; cursor: pointer; letter-spacing: 1px; margin-top: 20px;
+    box-shadow: 0 4px 20px rgba(247,147,26,0.35);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  #victoryCard .play-again-btn:hover { transform: scale(1.05); box-shadow: 0 6px 28px rgba(247,147,26,0.5); }
+
+  /* AI Activity Log */
+  #aiLog {
+    position: fixed; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    max-width: 600px; width: 80vw;
+    font-size: 11px; color: #777;
+    text-align: center; z-index: 90;
+    pointer-events: none;
+    max-height: 48px; overflow: hidden;
+  }
+  #aiLog .ai-log-entry {
+    padding: 1px 0;
+    animation: aiLogFade 4s ease forwards;
+  }
+  @keyframes aiLogFade { 0% { opacity: 0.8; } 80% { opacity: 0.6; } 100% { opacity: 0; } }
+
+  /* Difficulty indicator */
+  .hud-val.difficulty { color: #ff8844; }
 </style>
 </head>
 <body>
@@ -971,7 +1073,12 @@
   <button id="newMapBtn" style="background:linear-gradient(135deg,#444 0%,#333 100%);color:#e0e0e0;font-size:12px;font-weight:600;border:1px solid rgba(247,147,26,0.4);border-radius:6px;padding:4px 12px;cursor:pointer;white-space:nowrap;letter-spacing:0.5px;transition:background 0.15s;">🗺 New Map</button>
   <button id="helpBtn" class="hud-btn" title="Tutorial / Help (?)" style="font-size:14px;padding:2px 10px;margin-left:2px;">?</button>
   <button id="techTreeBtn" class="hud-btn" title="Tech Tree (T)">🔬 Research</button>
+  <button id="victoryBtn" class="hud-btn" title="Victory Progress (V)">🏆 Victory</button>
   <div id="hudResearch"></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item">
+    📊 <span class="hud-val difficulty" id="hudDifficulty">1.0×</span>
+  </div>
   <div class="hud-sep"></div>
   <div class="coords" id="hoverCoords">—</div>
 </div>
@@ -1046,8 +1153,24 @@
   </div>
 </div>
 
+<div id="victoryPanel" class="hidden">
+  <h3>🏆 Victory Progress</h3>
+  <div id="victoryPanelContent"></div>
+</div>
+
+<div id="victoryOverlay">
+  <div id="victoryCard">
+    <h1 id="victoryTitle" style="color:#F7931A">VICTORY!</h1>
+    <div class="victory-type-label" id="victoryTypeLabel"></div>
+    <div class="victory-stats" id="victoryStats"></div>
+    <button class="play-again-btn" id="playAgainBtn">🗺 Play Again</button>
+  </div>
+</div>
+
+<div id="aiLog"></div>
+
 <div id="controls">
-  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>T</kbd> tech tree &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
+  <kbd>WASD</kbd> / <kbd>Arrows</kbd> pan &nbsp;·&nbsp; <kbd>Scroll</kbd> zoom &nbsp;·&nbsp; <kbd>Click</kbd> select &nbsp;·&nbsp; <kbd>Space</kbd> next turn &nbsp;·&nbsp; <kbd>B</kbd> build &nbsp;·&nbsp; <kbd>C</kbd> civs &nbsp;·&nbsp; <kbd>T</kbd> tech tree &nbsp;·&nbsp; <kbd>V</kbd> victory &nbsp;·&nbsp; <kbd>1-9</kbd> quick build
 </div>
 
 <script>
@@ -2411,9 +2534,47 @@ let gameState = {
     researchProgress: 0,
     researchTurnsNeeded: 0,
     pollutionCount: 0,
+    // AI & Victory tracking
+    hashDominanceTurns: 0,
+    culturalVictoryTurns: 0,
+    bankruptcyTurns: 0,
+    eliminated: false,
   })),
   civPanelVisible: false,
+  victoryPanelVisible: false,
+  gameOver: false,
+  // Difficulty adjustment
+  difficultyMultiplier: 1.0,
+  lastDifficultyHash: 0, // total hash at last adjustment
+  difficultyAdjustInterval: 100,
 };
+
+// ============================================================
+// AI Personality Definitions
+// ============================================================
+const AI_PERSONALITIES = {
+  1: { // The Hash Collective - The Miner
+    name: 'The Miner',
+    researchPriority: ['home_mining', 'mining_optimization', 'basic_solar', 'basic_wind', 'hydro_engineering', 'gas_extraction', 'advanced_mining', 'grid_management', 'coal_mining', 'mega_mining', 'asic_development', 'quantum_mining', 'nuclear_physics', 'fusion'],
+    buildPriority: ['solar_panel', 'solar_farm', 'wind_turbine', 'wind_farm', 'hydro_dam', 'geothermal_plant', 'gas_plant', 'coal_station', 'home_miner', 'mining_shed', 'mining_warehouse', 'mining_data_center', 'mining_mega_facility', 'house', 'farm'],
+    techCategories: ['mining', 'energy'],
+  },
+  2: { // Nakamoto Republic - The Trader
+    name: 'The Trader',
+    researchPriority: ['farming', 'trade', 'banking', 'lightning_network', 'diplomacy', 'networking', 'cryptography', 'construction', 'education', 'higher_education', 'network_sovereignty'],
+    buildPriority: ['market', 'lightning_tower', 'bank', 'embassy', 'node_relay', 'central_hub', 'solar_panel', 'solar_farm', 'home_miner', 'mining_shed', 'house', 'farm'],
+    techCategories: ['trade', 'civilization'],
+  },
+  3: { // Block Frontier - The Researcher
+    name: 'The Researcher',
+    researchPriority: ['farming', 'construction', 'education', 'higher_education', 'trade', 'banking', 'mining_optimization', 'advanced_mining', 'grid_management', 'nuclear_physics', 'satellite_tech', 'mega_mining', 'asic_development', 'quantum_mining', 'fusion', 'network_sovereignty'],
+    buildPriority: ['school', 'university', 'research_lab', 'solar_panel', 'solar_farm', 'home_miner', 'mining_shed', 'mining_warehouse', 'mining_data_center', 'house', 'farm'],
+    techCategories: ['education', 'advanced'],
+  },
+};
+
+// AI activity log
+let aiActivityLog = [];
 
 // ============================================================
 // Floating text animations (Phase 4)
@@ -2980,6 +3141,8 @@ function recalculateCivStats() {
 }
 
 function processTurn() {
+  if (gameState.gameOver) return;
+
   gameState.turn++;
 
   // Halving check
@@ -2987,9 +3150,18 @@ function processTurn() {
     gameState.blockReward = Math.max(1, Math.floor(gameState.blockReward / 2));
   }
 
+  // Difficulty adjustment every 100 turns
+  processDifficultyAdjustment();
+
+  // Process AI turns (build, research)
+  for (let i = 1; i <= 3; i++) {
+    processAITurn(i);
+  }
+
   // Population growth/decline per civ
   const popChanges = {};
   for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
     const prevPop = civ.population;
     const happiness = civ.happiness;
     let popChange = 0;
@@ -3021,22 +3193,27 @@ function processTurn() {
   // Calculate total network hash power
   let totalHash = 0;
   for (const civ of gameState.civs) {
-    totalHash += civ.hashPower;
+    if (!civ.eliminated) totalHash += civ.hashPower;
   }
 
   // Process research for all civs
   for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
     processResearch(civ.id);
     // AI auto-research
     if (!civ.isPlayer) aiAutoResearch(civ.id);
   }
 
+  // Effective block reward with difficulty
+  const effectiveReward = Math.max(1, Math.round(gameState.blockReward / gameState.difficultyMultiplier * 100) / 100);
+
   // Distribute block reward proportionally
   const earnings = [];
   for (const civ of gameState.civs) {
+    if (civ.eliminated) { earnings.push({ name: civ.name, color: civ.color, earned: 0, civId: civ.id }); continue; }
     let earned = 0;
     if (totalHash > 0 && civ.hashPower > 0) {
-      earned = Math.round(gameState.blockReward * (civ.hashPower / totalHash) * 100) / 100;
+      earned = Math.round(effectiveReward * (civ.hashPower / totalHash) * 100) / 100;
     }
 
     // Bank bonus: +10% sats income per bank
@@ -3104,6 +3281,10 @@ function processTurn() {
   showTurnSummaryPanel(earnings, totalHash, popChanges, events);
   updateHUD();
   updateCivPanel();
+  if (gameState.victoryPanelVisible) updateVictoryPanel();
+
+  // Check victory conditions
+  checkVictoryConditions();
 }
 
 function showTurnSummaryPanel(earnings, totalHash, popChanges, events) {
@@ -3205,12 +3386,20 @@ function updateHUD() {
   document.getElementById('hudCivColor').style.background = player.color;
 
   animateHudValue('hudSats', Math.round(player.treasury));
-  document.getElementById('hudHash').textContent = player.hashPower;
+  const totalHashHUD = getTotalNetworkHash();
+  const hashSharePct = totalHashHUD > 0 ? Math.round((player.hashPower / totalHashHUD) * 100) : 0;
+  document.getElementById('hudHash').textContent = `${player.hashPower} (${hashSharePct}%)`;
   document.getElementById('hudEnergy').textContent = `${player.energyProduced - player.energyConsumed}/${player.energyProduced}`;
   document.getElementById('hudPop').textContent = `${player.workersUsed}/${player.population}`;
   document.getElementById('hudPopIdle').textContent = player.idleWorkers > 0 ? `(${player.idleWorkers} idle)` : '';
   document.getElementById('hudHappiness').textContent = player.happiness;
   document.getElementById('hudHappyEmoji').textContent = getHappinessEmoji(player.happiness);
+
+  // Building count
+  document.getElementById('hudBuildings').textContent = gameState.buildings.filter(b => b.owner === 0).length;
+
+  // Difficulty
+  document.getElementById('hudDifficulty').textContent = `${gameState.difficultyMultiplier.toFixed(1)}×`;
 
   // Research progress
   const researchEl = document.getElementById('hudResearch');
@@ -3229,23 +3418,34 @@ function updateHUD() {
 function updateCivPanel() {
   const content = document.getElementById('civPanelContent');
   const hasSatellite = gameState.buildings.some(b => b.owner === 0 && b.active && b.type === 'satellite_array');
+  const totalHash = getTotalNetworkHash();
   let html = '';
   for (const civ of gameState.civs) {
     const netEnergy = civ.energyProduced - civ.energyConsumed;
     const showDetails = civ.isPlayer || hasSatellite;
+    const hashPct = totalHash > 0 ? Math.round((civ.hashPower / totalHash) * 100) : 0;
+    const eliminated = civ.eliminated;
+    const personality = AI_PERSONALITIES[civ.id];
+    const researchInfo = civ.currentResearch ? TECH_TREE[civ.currentResearch]?.name : 'None';
+
     html += `
-      <div class="civ-entry">
-        <div class="civ-name"><span class="civ-swatch" style="background:${civ.color}"></span>${civ.name}${civ.isPlayer ? ' (You)' : ' (AI)'}</div>
+      <div class="civ-entry" ${eliminated ? 'style="opacity:0.4"' : ''}>
+        <div class="civ-name">
+          <span class="civ-swatch" style="background:${eliminated ? '#666' : civ.color}"></span>
+          ${civ.name}${civ.isPlayer ? ' (You)' : ` (AI${personality ? ' · ' + personality.name : ''})`}
+          ${eliminated ? ' <span style="color:#ff4444;font-size:10px">ELIMINATED</span>' : ''}
+        </div>
         <div class="civ-stats">
-          ${showDetails ? `
+          ${eliminated ? '<span style="color:#666">Bankrupt</span>' : showDetails ? `
             <span>₿ ${civ.treasury.toLocaleString()}</span>
-            <span>⛏ ${civ.hashPower} H/s</span>
+            <span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>
             <span>👥 ${civ.population}/${civ.maxPopulation}</span>
             <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
             <span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>
             ${civ.pollutionCount > 0 ? `<span>☁️ ${civ.pollutionCount}</span>` : ''}
+            <span>🔬 ${researchInfo}</span>
           ` : `
-            <span>⛏ ${civ.hashPower} H/s</span>
+            <span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>
             <span style="color:#666">🔒 Build Satellite Array to see more</span>
           `}
         </div>
@@ -3522,7 +3722,7 @@ function drawBuilding(building) {
 
   const z = camera.zoom;
   const civ = gameState.civs[building.owner];
-  const color = civ.color;
+  const color = civ.eliminated ? '#666666' : civ.color;
 
   ctx.save();
 
@@ -4818,7 +5018,7 @@ function render() {
     for (let x = 0; x < MAP_W; x++) {
       drawTile(x, y);
 
-      // Territory tint (only in build mode)
+      // Territory tint (only in build mode for player)
       if (territory && territory.has(y * MAP_W + x)) {
         const { x: sx, y: sy } = tileToScreen(x, y);
         const w = HALF_W * camera.zoom;
@@ -4831,6 +5031,33 @@ function render() {
         ctx.closePath();
         ctx.fillStyle = 'rgba(247,147,26,0.06)';
         ctx.fill();
+      }
+
+      // AI territory tint (subtle)
+      if (!territory && camera.zoom > 0.45) {
+        for (let ci = 1; ci <= 3; ci++) {
+          const aiCiv = gameState.civs[ci];
+          if (aiCiv.eliminated) continue;
+          // Quick proximity check — only tint tiles near AI buildings
+          let nearAI = false;
+          for (const b of gameState.buildings) {
+            if (b.owner !== ci) continue;
+            if (Math.abs(b.x - x) + Math.abs(b.y - y) <= 3) { nearAI = true; break; }
+          }
+          if (nearAI) {
+            const { x: sx, y: sy } = tileToScreen(x, y);
+            const w = HALF_W * camera.zoom;
+            const h = HALF_H * camera.zoom;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy - h);
+            ctx.lineTo(sx + w, sy);
+            ctx.lineTo(sx, sy + h);
+            ctx.lineTo(sx - w, sy);
+            ctx.closePath();
+            ctx.fillStyle = aiCiv.color + '08';
+            ctx.fill();
+          }
+        }
       }
 
       // Build mode hover: green/red highlight
@@ -5632,6 +5859,11 @@ window.addEventListener('keydown', e => {
     toggleTechTree();
   }
 
+  // V = toggle victory panel
+  if (e.key.toLowerCase() === 'v' && !e.repeat) {
+    toggleVictoryPanel();
+  }
+
   // Number keys 1-9 for quick-selecting building types
   if (e.key >= '1' && e.key <= '9' && !e.repeat) {
     const allTypes = BUILD_MENU_CATEGORIES.flatMap(c => c.types);
@@ -5686,6 +5918,12 @@ function regenerateMap() {
   gameState.turn = 0;
   gameState.blockReward = 50;
   gameState.buildings = [];
+  gameState.gameOver = false;
+  gameState.difficultyMultiplier = 1.0;
+  gameState.lastDifficultyHash = 0;
+  gameState.victoryPanelVisible = false;
+  _lastVictoryWarnings = {};
+  aiActivityLog = [];
   gameState.civs = CIVILIZATIONS.map(c => ({
     ...c,
     treasury: 1000,
@@ -5704,8 +5942,16 @@ function regenerateMap() {
     researchProgress: 0,
     researchTurnsNeeded: 0,
     pollutionCount: 0,
+    hashDominanceTurns: 0,
+    culturalVictoryTurns: 0,
+    bankruptcyTurns: 0,
+    eliminated: false,
   }));
   gameState.civPanelVisible = false;
+  document.getElementById('hudDifficulty').textContent = '1.0×';
+  document.getElementById('victoryOverlay').classList.remove('visible');
+  document.getElementById('victoryPanel').classList.add('hidden');
+  document.getElementById('aiLog').innerHTML = '';
 
   selectedTile = null;
   hoveredTile = null;
@@ -6003,14 +6249,53 @@ document.getElementById('techTreeOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('techTreeOverlay')) closeTechTree();
 });
 
+// Victory button
+document.getElementById('victoryBtn').addEventListener('click', toggleVictoryPanel);
+
+// Play Again button
+document.getElementById('playAgainBtn').addEventListener('click', () => {
+  document.getElementById('victoryOverlay').classList.remove('visible');
+  regenerateMap();
+});
+
 // ============================================================
-// AI Research (simple auto-research for AI civs)
+// AI System — Full AI Opponents
 // ============================================================
+
+function addAILogEntry(text) {
+  aiActivityLog.push({ text, time: Date.now() });
+  if (aiActivityLog.length > 10) aiActivityLog.shift();
+  renderAILog();
+}
+
+function renderAILog() {
+  const el = document.getElementById('aiLog');
+  el.innerHTML = aiActivityLog.slice(-3).map(e =>
+    `<div class="ai-log-entry">${e.text}</div>`
+  ).join('');
+}
+
+// AI Research — personality-driven
 function aiAutoResearch(civId) {
   const civ = gameState.civs[civId];
-  if (civ.currentResearch) return; // Already researching
+  if (civ.currentResearch || civ.eliminated) return;
 
-  // Find available techs, pick cheapest affordable one
+  const personality = AI_PERSONALITIES[civId];
+  if (!personality) return;
+
+  // Try priority list first
+  for (const techId of personality.researchPriority) {
+    if (TECH_TREE[techId] && isTechAvailable(civId, techId) && civ.treasury >= TECH_TREE[techId].cost) {
+      civ.treasury -= TECH_TREE[techId].cost;
+      civ.currentResearch = techId;
+      civ.researchProgress = 0;
+      civ.researchTurnsNeeded = getResearchTurns(civId, techId);
+      addAILogEntry(`${civ.name} researching ${TECH_TREE[techId].name}`);
+      return;
+    }
+  }
+
+  // Fallback: cheapest available
   const available = [];
   for (const [techId, tech] of Object.entries(TECH_TREE)) {
     if (isTechAvailable(civId, techId) && civ.treasury >= tech.cost) {
@@ -6018,15 +6303,568 @@ function aiAutoResearch(civId) {
     }
   }
   if (available.length === 0) return;
-
-  // Prioritize by tier (lowest first), then cost
   available.sort((a, b) => a.tier - b.tier || a.cost - b.cost);
   const pick = available[0];
-
   civ.treasury -= pick.cost;
   civ.currentResearch = pick.id;
   civ.researchProgress = 0;
   civ.researchTurnsNeeded = getResearchTurns(civId, pick.id);
+  addAILogEntry(`${civ.name} researching ${pick.name}`);
+}
+
+// AI Territory: tiles within 5 of any AI civ building
+function getAITerritory(civId) {
+  const territory = new Set();
+  const BASE_RANGE = 5;
+  for (const b of gameState.buildings) {
+    if (b.owner !== civId) continue;
+    const bt = BUILDING_TYPES[b.type];
+    const range = BASE_RANGE + (bt.territoryBonus || 0);
+    for (let dy = -range; dy <= range; dy++) {
+      for (let dx = -range; dx <= range; dx++) {
+        const nx = b.x + dx, ny = b.y + dy;
+        if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+          if (Math.abs(dx) + Math.abs(dy) <= range) {
+            territory.add(ny * MAP_W + nx);
+          }
+        }
+      }
+    }
+  }
+  return territory;
+}
+
+// AI tile validation (same rules as player)
+function isTileValidForAI(tx, ty, typeKey, civId) {
+  if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H) return false;
+  const t = map.terrain[ty][tx];
+  const bt = BUILDING_TYPES[typeKey];
+  const validTerrain = bt.validTerrain || DEFAULT_BUILDABLE;
+  if (!validTerrain.includes(t)) return false;
+  if (tileHasBuilding(tx, ty)) return false;
+  if (bt.requiresTech && !hasTech(civId, bt.requiresTech)) return false;
+  if (bt.requiresBuilding) {
+    const hasPre = gameState.buildings.some(b => b.owner === civId && b.type === bt.requiresBuilding && b.active);
+    if (!hasPre) return false;
+  }
+  if (bt.requiresDeposit && !hasDepositNearby(tx, ty, DEPOSITS[bt.requiresDeposit].name, 3)) return false;
+  return true;
+}
+
+// Find best tile for AI to place a building
+function findAIBuildTile(civId, typeKey) {
+  const civBuildings = gameState.buildings.filter(b => b.owner === civId);
+  if (civBuildings.length === 0) return null;
+
+  const citadel = civBuildings.find(b => b.type === 'citadel');
+  const cx = citadel ? citadel.x : civBuildings[0].x;
+  const cy = citadel ? citadel.y : civBuildings[0].y;
+
+  // Collect candidate tiles within 5 of existing buildings
+  const candidates = new Set();
+  for (const b of civBuildings) {
+    for (let dy = -5; dy <= 5; dy++) {
+      for (let dx = -5; dx <= 5; dx++) {
+        if (Math.abs(dx) + Math.abs(dy) > 5) continue;
+        const nx = b.x + dx, ny = b.y + dy;
+        if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+          candidates.add(ny * MAP_W + nx);
+        }
+      }
+    }
+  }
+
+  let bestTile = null, bestScore = -Infinity;
+
+  for (const key of candidates) {
+    const tx = key % MAP_W;
+    const ty = (key - tx) / MAP_W;
+
+    if (!isTileValidForAI(tx, ty, typeKey, civId)) continue;
+
+    // Score: prefer closer to citadel, terrain bonuses
+    const dist = Math.abs(tx - cx) + Math.abs(ty - cy);
+    let score = 100 - dist * 2;
+
+    // Terrain bonuses for energy buildings
+    const terrain = map.terrain[ty][tx];
+    if (typeKey.includes('solar') && terrain === TERRAIN.DESERT.id) score += 20;
+    if (typeKey.includes('wind') && terrain === TERRAIN.HILLS.id) score += 15;
+    if (typeKey === 'hydro_dam' && (terrain === TERRAIN.MAJOR_RIVER.id)) score += 25;
+    if (typeKey === 'geothermal_plant' && terrain === TERRAIN.VOLCANIC.id) score += 20;
+
+    // Resource potential
+    const res = map.resourceData[ty][tx];
+    if (typeKey.includes('solar')) score += res.solar * 0.1;
+    if (typeKey.includes('wind')) score += res.wind * 0.1;
+
+    // Some randomness for variety
+    score += Math.random() * 5;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestTile = { x: tx, y: ty };
+    }
+  }
+
+  return bestTile;
+}
+
+// Count AI buildings by type
+function countAIBuildings(civId, type) {
+  return gameState.buildings.filter(b => b.owner === civId && b.type === type).length;
+}
+
+// Process a full AI turn
+function processAITurn(civId) {
+  const civ = gameState.civs[civId];
+  if (civ.eliminated || gameState.gameOver) return;
+
+  const personality = AI_PERSONALITIES[civId];
+  if (!personality) return;
+
+  // 1. Research (handled by aiAutoResearch in processTurn)
+
+  // 2. Building — AI budget is 30% of treasury, minimum reserve of 200
+  const budget = Math.floor((civ.treasury - 200) * 0.3);
+  if (budget <= 0) return;
+
+  let spent = 0;
+  let buildingsPlaced = 0;
+  const maxBuilds = 2; // AI places 0-2 buildings per turn
+
+  // Check if AI needs houses/farms for balance
+  const totalBuildings = gameState.buildings.filter(b => b.owner === civId && b.type !== 'citadel').length;
+  const houseCount = countAIBuildings(civId, 'house');
+  const farmCount = countAIBuildings(civId, 'farm');
+  const otherCount = totalBuildings - houseCount - farmCount;
+
+  // Need roughly 1 house + 1 farm per 3-4 other buildings
+  const needHouse = houseCount < Math.ceil(otherCount / 3) || civ.population >= civ.maxPopulation;
+  const needFarm = farmCount < Math.ceil(otherCount / 3) || civ.foodProduced < civ.population;
+
+  // Build priority list for this turn
+  let buildList = [];
+  if (needHouse && civ.treasury >= BUILDING_TYPES.house.cost + 200) {
+    buildList.push('house');
+  }
+  if (needFarm && civ.treasury >= BUILDING_TYPES.farm.cost + 200) {
+    buildList.push('farm');
+  }
+
+  // Add personality priorities
+  for (const typeKey of personality.buildPriority) {
+    if (!buildList.includes(typeKey)) buildList.push(typeKey);
+  }
+
+  for (const typeKey of buildList) {
+    if (buildingsPlaced >= maxBuilds) break;
+    const bt = BUILDING_TYPES[typeKey];
+    if (!bt || bt.cost === 0) continue;
+    if (bt.cost > budget - spent + 200) continue; // Can't afford within budget
+    if (civ.treasury - spent < bt.cost + 200) continue; // Keep reserve
+    if (!isBuildingUnlocked(civId, typeKey)) continue;
+
+    // Check building prerequisite
+    if (bt.requiresBuilding) {
+      const hasPre = gameState.buildings.some(b => b.owner === civId && b.type === bt.requiresBuilding && b.active);
+      if (!hasPre) continue;
+    }
+
+    const tile = findAIBuildTile(civId, typeKey);
+    if (!tile) continue;
+
+    // Place building
+    gameState.buildings.push({ type: typeKey, owner: civId, x: tile.x, y: tile.y, active: true });
+    civ.treasury -= bt.cost;
+    civ.treasury = Math.round(civ.treasury * 100) / 100;
+    spent += bt.cost;
+    buildingsPlaced++;
+    invalidateTerritory();
+    addAILogEntry(`${civ.name} built ${bt.name}`);
+  }
+}
+
+// ============================================================
+// Victory Conditions System
+// ============================================================
+function getTotalNetworkHash() {
+  let total = 0;
+  for (const civ of gameState.civs) {
+    if (!civ.eliminated) total += civ.hashPower;
+  }
+  return total;
+}
+
+function getHashShare(civId) {
+  const total = getTotalNetworkHash();
+  if (total === 0) return 0;
+  return gameState.civs[civId].hashPower / total;
+}
+
+function getCitadelPosition(civId) {
+  const citadel = gameState.buildings.find(b => b.owner === civId && b.type === 'citadel');
+  return citadel ? { x: citadel.x, y: citadel.y } : null;
+}
+
+function checkLightningNetworkVictory(civId) {
+  // Check if civ has lightning towers within 10 tiles of every other non-eliminated civ's citadel
+  const ltBuildings = gameState.buildings.filter(b => b.owner === civId && b.type === 'lightning_tower' && b.active);
+  if (ltBuildings.length === 0) return false;
+
+  for (const otherCiv of gameState.civs) {
+    if (otherCiv.id === civId || otherCiv.eliminated) continue;
+    const citadel = getCitadelPosition(otherCiv.id);
+    if (!citadel) continue;
+
+    let connected = false;
+    for (const lt of ltBuildings) {
+      const dist = Math.abs(lt.x - citadel.x) + Math.abs(lt.y - citadel.y);
+      if (dist <= 10) { connected = true; break; }
+    }
+    if (!connected) return false;
+  }
+  return true;
+}
+
+function getNetworkVictoryProgress(civId) {
+  const ltBuildings = gameState.buildings.filter(b => b.owner === civId && b.type === 'lightning_tower' && b.active);
+  if (ltBuildings.length === 0) return 0;
+
+  let connected = 0;
+  let totalOthers = 0;
+  for (const otherCiv of gameState.civs) {
+    if (otherCiv.id === civId || otherCiv.eliminated) continue;
+    totalOthers++;
+    const citadel = getCitadelPosition(otherCiv.id);
+    if (!citadel) continue;
+    for (const lt of ltBuildings) {
+      const dist = Math.abs(lt.x - citadel.x) + Math.abs(lt.y - citadel.y);
+      if (dist <= 10) { connected++; break; }
+    }
+  }
+  return totalOthers > 0 ? connected / totalOthers : 0;
+}
+
+function getAliveCivCount() {
+  return gameState.civs.filter(c => !c.eliminated).length;
+}
+
+function checkVictoryConditions() {
+  if (gameState.gameOver) return;
+
+  const totalHash = getTotalNetworkHash();
+
+  for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
+
+    // Update hash dominance counter
+    const hashShare = totalHash > 0 ? civ.hashPower / totalHash : 0;
+    if (hashShare >= 0.51) {
+      civ.hashDominanceTurns++;
+    } else {
+      civ.hashDominanceTurns = 0;
+    }
+
+    // Update cultural victory counter
+    if (civ.happiness >= 80 && civ.population >= 20) {
+      civ.culturalVictoryTurns++;
+    } else {
+      civ.culturalVictoryTurns = 0;
+    }
+
+    // Update bankruptcy counter
+    if (civ.treasury < 0) {
+      civ.bankruptcyTurns++;
+    } else {
+      civ.bankruptcyTurns = 0;
+    }
+
+    // Check bankruptcy elimination
+    if (civ.bankruptcyTurns >= 5) {
+      eliminateCiv(civ.id);
+      continue;
+    }
+
+    // --- Victory checks ---
+
+    // 1. Hash Dominance: 51%+ for 10 turns
+    if (civ.hashDominanceTurns >= 10) {
+      triggerVictory(civ.id, 'hash', `Controlled 51%+ of the network hash rate for 10 consecutive turns`);
+      return;
+    }
+
+    // 2. Economic Victory: 100,000 sats
+    if (civ.treasury >= 100000) {
+      triggerVictory(civ.id, 'economic', `Accumulated 100,000 sats in treasury`);
+      return;
+    }
+
+    // 3. Network Victory: Lightning Towers connecting all civs
+    if (checkLightningNetworkVictory(civ.id)) {
+      triggerVictory(civ.id, 'network', `Built Lightning Network connections to all other civilizations`);
+      return;
+    }
+
+    // 4. Cultural Victory: happiness>80 + pop>20 for 20 turns
+    if (civ.culturalVictoryTurns >= 20) {
+      triggerVictory(civ.id, 'cultural', `Maintained high happiness and population for 20 consecutive turns`);
+      return;
+    }
+
+    // 5. Survival Victory: last one standing
+    if (getAliveCivCount() === 1 && !civ.eliminated) {
+      triggerVictory(civ.id, 'survival', `Last civilization standing after all others went bankrupt`);
+      return;
+    }
+  }
+
+  // Near-victory warnings
+  checkNearVictoryWarnings();
+}
+
+function eliminateCiv(civId) {
+  const civ = gameState.civs[civId];
+  civ.eliminated = true;
+
+  // Grey out their buildings
+  for (const b of gameState.buildings) {
+    if (b.owner === civId) b.active = false;
+  }
+
+  if (civId === 0) {
+    // Player eliminated
+    triggerDefeat('bankruptcy', `Your treasury was negative for 5 consecutive turns`);
+  } else {
+    showToast(`💀 ${civ.name} has gone bankrupt and been eliminated!`, 'error');
+    addAILogEntry(`💀 ${civ.name} eliminated (bankruptcy)`);
+  }
+}
+
+function triggerVictory(civId, type, description) {
+  gameState.gameOver = true;
+  const civ = gameState.civs[civId];
+  const isPlayer = civId === 0;
+
+  const overlay = document.getElementById('victoryOverlay');
+  const title = document.getElementById('victoryTitle');
+  const typeLabel = document.getElementById('victoryTypeLabel');
+  const stats = document.getElementById('victoryStats');
+
+  const typeNames = {
+    hash: '⛏ Hash Dominance Victory',
+    economic: '💰 Economic Victory',
+    network: '⚡ Network Victory',
+    cultural: '🎭 Cultural Victory',
+    survival: '🛡 Survival Victory',
+  };
+
+  if (isPlayer) {
+    title.textContent = 'VICTORY!';
+    title.style.color = '#F7931A';
+  } else {
+    title.textContent = 'DEFEAT';
+    title.style.color = '#ff4444';
+  }
+
+  typeLabel.innerHTML = `${typeNames[type] || type}<br><span style="font-size:14px;color:#999">${isPlayer ? 'You' : civ.name} ${description}</span>`;
+
+  const player = gameState.civs[0];
+  stats.innerHTML = `
+    <div>📅 Turns played: <strong>${gameState.turn}</strong></div>
+    <div>💰 Treasury: <strong>${Math.round(player.treasury).toLocaleString()}₿</strong></div>
+    <div>⛏ Hash Rate: <strong>${player.hashPower} H/s</strong></div>
+    <div>👥 Population: <strong>${player.population}</strong></div>
+    <div>🏗 Buildings: <strong>${gameState.buildings.filter(b => b.owner === 0).length}</strong></div>
+    <div>🔬 Techs: <strong>${player.researched.size}</strong></div>
+    ${!isPlayer ? `<div style="margin-top:8px;color:${civ.color}">Winner: <strong>${civ.name}</strong></div>` : ''}
+  `;
+
+  overlay.classList.add('visible');
+}
+
+function triggerDefeat(type, description) {
+  gameState.gameOver = true;
+  const overlay = document.getElementById('victoryOverlay');
+  const title = document.getElementById('victoryTitle');
+  const typeLabel = document.getElementById('victoryTypeLabel');
+  const stats = document.getElementById('victoryStats');
+
+  title.textContent = type === 'bankruptcy' ? 'BANKRUPTCY' : 'DEFEAT';
+  title.style.color = '#ff4444';
+  typeLabel.innerHTML = `<span style="color:#ff6644">${description}</span>`;
+
+  const player = gameState.civs[0];
+  stats.innerHTML = `
+    <div>📅 Turns played: <strong>${gameState.turn}</strong></div>
+    <div>💰 Treasury: <strong>${Math.round(player.treasury).toLocaleString()}₿</strong></div>
+    <div>⛏ Hash Rate: <strong>${player.hashPower} H/s</strong></div>
+    <div>👥 Population: <strong>${player.population}</strong></div>
+  `;
+
+  overlay.classList.add('visible');
+}
+
+let _lastVictoryWarnings = {};
+function checkNearVictoryWarnings() {
+  const totalHash = getTotalNetworkHash();
+  const now = gameState.turn;
+
+  for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
+    const isPlayer = civ.id === 0;
+    const key = civ.id;
+
+    // Hash dominance warning at 75% (7/10 turns)
+    if (civ.hashDominanceTurns >= 7 && _lastVictoryWarnings[`hash_${key}`] !== now) {
+      _lastVictoryWarnings[`hash_${key}`] = now;
+      const hashPct = Math.round(getHashShare(civ.id) * 100);
+      if (isPlayer) {
+        showToast(`🏆 You're ${10 - civ.hashDominanceTurns} turns from Hash Dominance!`, 'success');
+      } else {
+        showToast(`⚠️ ${civ.name} is approaching Hash Dominance! (${hashPct}% hash rate)`, 'error');
+      }
+    }
+
+    // Economic warning at 75k
+    if (civ.treasury >= 75000 && civ.treasury < 100000 && _lastVictoryWarnings[`econ_${key}`] !== now) {
+      _lastVictoryWarnings[`econ_${key}`] = now;
+      if (isPlayer) {
+        showToast(`🏆 You're approaching Economic Victory! (${Math.round(civ.treasury).toLocaleString()}₿)`, 'success');
+      } else {
+        showToast(`⚠️ ${civ.name} is approaching Economic Victory!`, 'error');
+      }
+    }
+
+    // Cultural warning at 75% (15/20 turns)
+    if (civ.culturalVictoryTurns >= 15 && _lastVictoryWarnings[`cult_${key}`] !== now) {
+      _lastVictoryWarnings[`cult_${key}`] = now;
+      if (isPlayer) {
+        showToast(`🏆 You're ${20 - civ.culturalVictoryTurns} turns from Cultural Victory!`, 'success');
+      } else {
+        showToast(`⚠️ ${civ.name} is approaching Cultural Victory!`, 'error');
+      }
+    }
+  }
+}
+
+// ============================================================
+// Victory Panel UI
+// ============================================================
+function toggleVictoryPanel() {
+  gameState.victoryPanelVisible = !gameState.victoryPanelVisible;
+  document.getElementById('victoryPanel').classList.toggle('hidden', !gameState.victoryPanelVisible);
+  if (gameState.victoryPanelVisible) updateVictoryPanel();
+}
+
+function updateVictoryPanel() {
+  const content = document.getElementById('victoryPanelContent');
+  const totalHash = getTotalNetworkHash();
+  let html = '';
+
+  const victories = [
+    {
+      name: 'Hash Dominance', icon: '⛏', target: '51%+ hash for 10 turns',
+      getProgress: (civ) => {
+        const share = getHashShare(civ.id);
+        const turnProg = share >= 0.51 ? civ.hashDominanceTurns / 10 : share / 0.51 * 0.5;
+        return Math.min(1, turnProg);
+      },
+      getDetail: (civ) => {
+        const share = Math.round(getHashShare(civ.id) * 100);
+        return `${share}% hash | ${civ.hashDominanceTurns}/10 turns`;
+      },
+    },
+    {
+      name: 'Economic Victory', icon: '💰', target: '100,000 sats',
+      getProgress: (civ) => Math.min(1, civ.treasury / 100000),
+      getDetail: (civ) => `${Math.round(civ.treasury).toLocaleString()} / 100,000₿`,
+    },
+    {
+      name: 'Network Victory', icon: '⚡', target: 'Lightning Towers near all civs',
+      getProgress: (civ) => getNetworkVictoryProgress(civ.id),
+      getDetail: (civ) => {
+        const p = getNetworkVictoryProgress(civ.id);
+        return `${Math.round(p * 100)}% connected`;
+      },
+    },
+    {
+      name: 'Cultural Victory', icon: '🎭', target: 'Happiness 80+ & Pop 20+ for 20 turns',
+      getProgress: (civ) => {
+        if (civ.happiness >= 80 && civ.population >= 20) return civ.culturalVictoryTurns / 20;
+        const hProg = Math.min(1, civ.happiness / 80);
+        const pProg = Math.min(1, civ.population / 20);
+        return (hProg + pProg) / 2 * 0.5;
+      },
+      getDetail: (civ) => `😊 ${civ.happiness}/80 | 👥 ${civ.population}/20 | ${civ.culturalVictoryTurns}/20 turns`,
+    },
+    {
+      name: 'Survival', icon: '🛡', target: 'Last civilization standing',
+      getProgress: () => {
+        const eliminated = gameState.civs.filter(c => c.eliminated).length;
+        return eliminated / 3;
+      },
+      getDetail: () => {
+        const alive = getAliveCivCount();
+        return `${4 - alive}/3 eliminated`;
+      },
+    },
+  ];
+
+  for (const v of victories) {
+    // Find leader
+    let bestCiv = null, bestProg = -1;
+    for (const civ of gameState.civs) {
+      if (civ.eliminated) continue;
+      const p = v.getProgress(civ);
+      if (p > bestProg) { bestProg = p; bestCiv = civ; }
+    }
+
+    const playerProg = v.getProgress(gameState.civs[0]);
+    const playerPct = Math.round(playerProg * 100);
+    const isPlayerLeading = bestCiv && bestCiv.id === 0;
+    const barColor = isPlayerLeading ? '#44dd66' : '#ff4444';
+    const leaderStyle = isPlayerLeading ? 'background:rgba(68,221,102,0.2);color:#44dd66' : `background:rgba(255,68,68,0.2);color:#ff4444`;
+
+    html += `<div class="victory-type">
+      <div class="victory-type-header">
+        <span><span class="vt-icon">${v.icon}</span> ${v.name}</span>
+        <span class="vt-leader" style="${leaderStyle}">${bestCiv ? (isPlayerLeading ? 'You lead' : bestCiv.name) : '—'}</span>
+      </div>
+      <div class="victory-progress-bar"><div class="victory-progress-fill" style="width:${playerPct}%;background:${barColor}"></div></div>
+      <div class="victory-detail">${v.getDetail(gameState.civs[0])} · Target: ${v.target}</div>
+    </div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+// ============================================================
+// Difficulty Adjustment
+// ============================================================
+function processDifficultyAdjustment() {
+  if (gameState.turn % gameState.difficultyAdjustInterval !== 0 || gameState.turn === 0) return;
+
+  const currentTotalHash = getTotalNetworkHash();
+  const lastHash = gameState.lastDifficultyHash;
+
+  if (lastHash > 0) {
+    const ratio = currentTotalHash / lastHash;
+    let adjustment;
+    if (ratio > 1) {
+      // Hash increased — difficulty goes up 10-20%
+      adjustment = 1 + (0.1 + Math.min(0.1, (ratio - 1) * 0.5));
+    } else {
+      // Hash decreased — difficulty goes down 10-20%
+      adjustment = 1 - (0.1 + Math.min(0.1, (1 - ratio) * 0.5));
+    }
+    gameState.difficultyMultiplier = Math.round(gameState.difficultyMultiplier * adjustment * 100) / 100;
+    gameState.difficultyMultiplier = Math.max(0.25, gameState.difficultyMultiplier); // Floor
+  }
+
+  gameState.lastDifficultyHash = currentTotalHash;
+  showToast(`📊 Difficulty Adjustment! New difficulty: ${gameState.difficultyMultiplier.toFixed(2)}×`, 'success');
+  document.getElementById('hudDifficulty').textContent = `${gameState.difficultyMultiplier.toFixed(1)}×`;
 }
 
 // ============================================================
