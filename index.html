@@ -63,7 +63,7 @@
     font-family: 'Courier New', monospace;
     font-size: 13px;
   }
-  .hud-item .hud-val.sats { color: #F7931A; }
+  .hud-item .hud-val.sats { color: #F7931A; font-size: 15px; }
   .hud-item .hud-val.hash { color: #00A8FF; }
   .hud-item .hud-val.energy { color: #44dd66; }
   .hud-item .hud-val.pop { color: #cc88ff; }
@@ -1774,10 +1774,208 @@
     border: 1px solid rgba(255,255,255,0.15);
   }
 
+  /* Loading Screen */
+  #loadingScreen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #0a0a0f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.8s ease-out;
+  }
+  #loadingScreen.fade-out { opacity: 0; pointer-events: none; }
+  #loadingScreen .title {
+    font-size: 48px;
+    font-weight: 700;
+    color: #F7931A;
+    letter-spacing: 4px;
+    text-shadow: 0 0 40px rgba(247,147,26,0.4), 0 0 80px rgba(247,147,26,0.2);
+    animation: loadPulse 2s ease-in-out infinite;
+  }
+  @keyframes loadPulse {
+    0%, 100% { text-shadow: 0 0 40px rgba(247,147,26,0.4), 0 0 80px rgba(247,147,26,0.2); }
+    50% { text-shadow: 0 0 60px rgba(247,147,26,0.6), 0 0 120px rgba(247,147,26,0.3); }
+  }
+  #loadingScreen .subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-top: 12px;
+    letter-spacing: 2px;
+  }
+  #loadingScreen .load-bar {
+    width: 200px;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    margin-top: 32px;
+    overflow: hidden;
+  }
+  #loadingScreen .load-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #F7931A, #ffcc00);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  #loadingScreen .version {
+    font-size: 11px;
+    color: #333;
+    margin-top: 20px;
+  }
+
+  /* Day/Night Overlay */
+  #dayNightOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 50;
+    transition: background-color 1.5s ease;
+  }
+
+  /* Keyboard Shortcuts Overlay */
+  #shortcutOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    backdrop-filter: blur(4px);
+  }
+  #shortcutOverlay.visible { display: flex; }
+  #shortcutCard {
+    background: rgba(20,20,30,0.95);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 12px;
+    padding: 24px 32px;
+    max-width: 520px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  #shortcutCard h2 {
+    color: #F7931A;
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  .sc-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #ccc;
+  }
+  .sc-row kbd {
+    background: rgba(247,147,26,0.15);
+    border: 1px solid rgba(247,147,26,0.3);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #F7931A;
+    font-family: monospace;
+    font-size: 12px;
+    min-width: 24px;
+    text-align: center;
+  }
+  .sc-section { color: #666; font-size: 11px; margin: 10px 0 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Mute button */
+  #muteBtn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    color: #aaa;
+    font-size: 14px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  #muteBtn:hover { border-color: rgba(247,147,26,0.4); color: #F7931A; }
+
+  /* Day/Night HUD indicator */
+  #hudDayNight {
+    font-size: 12px;
+    white-space: nowrap;
+    transition: color 0.5s;
+  }
+
+  /* Treasury pulse glow */
+  @keyframes treasuryGlow {
+    0% { text-shadow: none; }
+    50% { text-shadow: 0 0 8px rgba(247,147,26,0.6), 0 0 16px rgba(247,147,26,0.3); }
+    100% { text-shadow: none; }
+  }
+  .hud-val.sats.glowing { animation: treasuryGlow 1s ease-out; }
+
+  /* Fuel bar styling */
+  .fuel-bar-container {
+    display: inline-block;
+    width: 60px;
+    height: 6px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 3px;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .fuel-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* Volume slider in settings */
+  .settings-volume {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+  }
+  .settings-volume label { color: #aaa; font-size: 13px; min-width: 80px; }
+  .settings-volume input[type=range] {
+    flex: 1;
+    accent-color: #F7931A;
+    height: 4px;
+  }
+  .settings-volume .vol-val { color: #F7931A; font-size: 12px; min-width: 32px; text-align: right; }
 </style>
 </head>
 <body>
+
+<!-- Loading Screen -->
+<div id="loadingScreen">
+  <div class="title">₿ITCOIN CIVILIZATIONS</div>
+  <div class="subtitle">GENERATING WORLD</div>
+  <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
+  <div class="version">v2.0</div>
+</div>
+
 <canvas id="gameCanvas" tabindex="0"></canvas>
+
+<!-- Day/Night Overlay -->
+<div id="dayNightOverlay"></div>
+
+<!-- Keyboard Shortcuts Overlay -->
+<div id="shortcutOverlay">
+  <div id="shortcutCard">
+    <h2>⌨️ KEYBOARD SHORTCUTS</h2>
+    <div class="sc-section">Navigation</div>
+    <div class="sc-row"><kbd>WASD</kbd> / <kbd>Arrows</kbd> Pan camera</div>
+    <div class="sc-row"><kbd>Scroll</kbd> Zoom in/out</div>
+    <div class="sc-row"><kbd>Space</kbd> Next Turn</div>
+    <div class="sc-section">Menus</div>
+    <div class="sc-row"><kbd>B</kbd> Build Menu &nbsp; <kbd>T</kbd> Tech Tree &nbsp; <kbd>C</kbd> Civilizations</div>
+    <div class="sc-row"><kbd>P</kbd> Diplomacy &nbsp; <kbd>V</kbd> Victory &nbsp; <kbd>U</kbd> Units</div>
+    <div class="sc-row"><kbd>H</kbd> Hash War &nbsp; <kbd>?</kbd> This Help</div>
+    <div class="sc-section">Units</div>
+    <div class="sc-row"><kbd>M</kbd> Move &nbsp; <kbd>A</kbd> Attack &nbsp; <kbd>F</kbd> Fortify &nbsp; <kbd>E</kbd> Auto-explore</div>
+    <div class="sc-row"><kbd>X</kbd> Dismiss &nbsp; <kbd>Esc</kbd> Deselect / Cancel</div>
+    <div style="text-align:center;margin-top:16px;color:#666;font-size:11px">Press <kbd>?</kbd> or click anywhere to close</div>
+  </div>
+</div>
 
 <div id="topBar">
   <div class="logo">₿ITCOIN <span>CIVILIZATIONS</span></div>
@@ -1831,9 +2029,12 @@
   </div>
   <button id="hashWarBtn" class="hud-btn" title="Hash War (H)" style="display:none">⚔️ Hash War</button>
   <span id="hudWarStatus" style="display:none" class="hud-war-indicator">⚔️ AT WAR</span>
+  <button id="muteBtn" title="Toggle Sound">🔊</button>
   <button id="saveBtn" class="hud-btn" title="Save Game">💾</button>
   <button id="settingsBtn" class="hud-btn" title="Settings (Esc)">⚙️</button>
   <div id="hudResearch"></div>
+  <div class="hud-sep"></div>
+  <div class="hud-item" id="hudDayNight">☀️ Day</div>
   <div class="hud-sep"></div>
   <div class="hud-item">
     📊 <span class="hud-val difficulty" id="hudDifficulty">1.0×</span>
@@ -1966,6 +2167,12 @@
     <div class="settings-toggle">
       <label>🌫️ Fog of War</label>
       <input type="checkbox" id="settFogToggle" checked>
+    </div>
+    <hr class="settings-divider">
+    <div class="settings-volume">
+      <label>🔊 Volume</label>
+      <input type="range" id="settVolume" min="0" max="100" value="30">
+      <span class="vol-val" id="settVolumeVal">30%</span>
     </div>
     <hr class="settings-divider">
     <button class="settings-btn" id="settClose" style="text-align:center;color:#888">← Back to Game</button>
@@ -2300,6 +2507,7 @@ function processResearch(civId) {
     civ.researchTurnsNeeded = 0;
 
     if (civId === 0) {
+      SFX.researchComplete();
       showToast(`🎓 Research complete: ${tech.name}!`, 'success');
       if (tech.unlocks.length > 0) {
         const names = tech.unlocks.map(b => BUILDING_TYPES[b]?.name || b).join(', ');
@@ -4394,6 +4602,9 @@ function placeWorkerBuilding(tx, ty) {
   player.treasury -= bt.cost;
   player.treasury = Math.round(player.treasury * 100) / 100;
   const building = { type: typeKey, owner: 0, x: tx, y: ty, active: true, scale: 0.01 };
+  initBuildingFuel(building);
+  SFX.buildingPlaced();
+  addConstructionAnim(tx, ty);
   gameState.buildings.push(building);
 
   selectedUnit.builtThisTurn = true;
@@ -4670,6 +4881,9 @@ function moveUnit(unit, targetX, targetY) {
     unit.movesLeft = Math.max(0, unit.movesLeft - cost);
   }
 
+  // Audio feedback
+  if (unit.owner === 0) SFX.unitMove();
+
   // Dust effect at destination
   addDustParticles(targetX, targetY);
 
@@ -4727,6 +4941,7 @@ function getUnitAnimationPos(unit) {
 // Combat System
 // ============================================================
 function resolveCombat(attacker, defender) {
+  SFX.combat();
   const aDef = UNIT_TYPES[attacker.type];
   const dDef = UNIT_TYPES[defender.type];
 
@@ -5431,6 +5646,9 @@ function getActualEnergyOutput(b) {
   const bt = BUILDING_TYPES[b.type];
   let energyOut = bt.energyOutput;
   if (energyOut > 0 && b.x >= 0 && b.y >= 0) {
+    // Fuel depletion check — depleted buildings produce nothing
+    if (b._fuelDepleted) return 0;
+
     const tileTerrain = map.terrain[b.y][b.x];
     const tileQuad = getQuadrantName(b.x, b.y);
     if (b.type === 'solar_panel' && tileTerrain === TERRAIN.DESERT.id) energyOut = 10;
@@ -5442,6 +5660,15 @@ function getActualEnergyOutput(b) {
     else if (b.type === 'geothermal_plant' && tileTerrain === TERRAIN.VOLCANIC.id) energyOut = 15;
     // Fusion tech: all energy buildings produce 2x
     if (hasTech(b.owner, 'fusion')) energyOut *= 2;
+
+    // Day/Night cycle affects solar and wind
+    const dn = getCurrentDayNight();
+    if (isSolarBuilding(b.type)) {
+      energyOut = Math.floor(energyOut * dn.solarMult);
+    }
+    if (isWindBuilding(b.type)) {
+      energyOut = Math.floor(energyOut * dn.windMult);
+    }
   }
   return energyOut;
 }
@@ -5544,11 +5771,26 @@ function recalculateCivStats() {
 function processTurn() {
   if (gameState.gameOver) return;
 
+  const prevTimeOfDay = getTimeOfDayV2(gameState.turn);
   gameState.turn++;
+  const newTimeOfDay = getTimeOfDayV2(gameState.turn);
+
+  // Day/Night transition audio + overlay update
+  if (newTimeOfDay !== prevTimeOfDay) {
+    if (newTimeOfDay === 'night') SFX.nightTransition();
+    updateDayNightOverlay();
+  }
+
+  // Process fuel depletion
+  processFuelDepletion();
+
+  // Turn advance sound
+  SFX.turnAdvance();
 
   // Halving check
   if (gameState.turn > 0 && gameState.turn % gameState.halvingInterval === 0) {
     gameState.blockReward = Math.max(1, Math.floor(gameState.blockReward / 2));
+    SFX.halving();
   }
 
   // Difficulty adjustment every 100 turns
@@ -5666,6 +5908,14 @@ function processTurn() {
   // Floating text effects for player's miners
   const playerEarned = earnings[0]?.earned || 0;
   if (playerEarned > 0) {
+    SFX.blockMined();
+    // Treasury pulse glow
+    const satsEl = document.getElementById('hudSats');
+    satsEl.classList.remove('glowing');
+    void satsEl.offsetWidth; // reflow
+    satsEl.classList.add('glowing');
+    setTimeout(() => satsEl.classList.remove('glowing'), 1000);
+
     // Find player miners for floating text
     const playerMiners = gameState.buildings.filter(b => b.owner === 0 && BUILDING_TYPES[b.type].hashPower > 0);
     if (playerMiners.length > 0) {
@@ -5844,6 +6094,9 @@ function updateHUD() {
   } else {
     researchEl.textContent = '';
   }
+
+  // Day/Night indicator
+  updateDayNightOverlay();
 
   // Diplomacy HUD
   updateDiplomacyHUD();
@@ -6036,6 +6289,29 @@ function drawTile(x, y) {
   ctx.lineWidth = 0.5;
   ctx.stroke();
 
+  // Terrain transition blending — subtle gradient at borders
+  if (camera.zoom > 0.4) {
+    const dirs = [[0,-1,0,-h,0],[0,1,0,h,0],[1,0,w,0,0],[-1,0,-w,0,0]];
+    for (const [dx, dy, ox, oy] of dirs) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+        const nt = map.terrain[ny][nx];
+        if (nt !== t) {
+          const nDef = TERRAIN_BY_ID[nt];
+          ctx.beginPath();
+          ctx.moveTo(screenX + ox * 0.6, screenY + oy * 0.6 - h * 0.3);
+          ctx.lineTo(screenX + ox * 0.8, screenY + oy * 0.8);
+          ctx.lineTo(screenX + ox * 0.6, screenY + oy * 0.6 + h * 0.3);
+          ctx.closePath();
+          ctx.fillStyle = nDef.color;
+          ctx.globalAlpha = 0.12;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
+  }
+
   // Highlight
   if (isSelected) {
     ctx.beginPath();
@@ -6075,15 +6351,16 @@ function drawTile(x, y) {
     ctx.fill();
     ctx.globalAlpha = 1;
   } else if (t === TERRAIN.FOREST.id) {
-    // Varied tree sizes for organic feel
+    // Varied tree sizes for organic feel + subtle sway
     const treeSeed = noise_simple(x * 3.7, y * 5.1);
+    const sway = Math.sin(Date.now() * 0.001 + x * 2.7 + y * 3.1) * 1.5 * dSize;
     for (let i = -1; i <= 1; i++) {
       const sizeVar = 0.7 + noise_simple(x * 11.3 + i, y * 9.7 + i) * 0.6;
-      const tx2 = screenX + i * 5 * dSize;
+      const tx2 = screenX + i * 5 * dSize + sway * (i === 0 ? 1 : 0.6);
       const ty2 = screenY - 1 * dSize + Math.abs(i) * 2 * dSize;
       ctx.beginPath();
       ctx.moveTo(tx2 - 2.5 * dSize * sizeVar, ty2 + 2 * dSize);
-      ctx.lineTo(tx2, ty2 - 3 * dSize * sizeVar);
+      ctx.lineTo(tx2 + sway * 0.3, ty2 - 3 * dSize * sizeVar);
       ctx.lineTo(tx2 + 2.5 * dSize * sizeVar, ty2 + 2 * dSize);
       ctx.closePath();
       const shade = Math.floor(treeSeed * 15);
@@ -6146,11 +6423,23 @@ function drawTile(x, y) {
       ctx.stroke();
     }
   } else if (t === TERRAIN.COAST.id || t === TERRAIN.DEEP_WATER.id) {
-    const phase = Date.now() * 0.001 + x + y * 1.3;
-    ctx.beginPath();
-    ctx.arc(screenX + Math.sin(phase) * 3 * dSize, screenY + Math.cos(phase) * 1.5 * dSize, 2 * dSize, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(100,170,255,0.15)';
-    ctx.fill();
+    // Gentle wave patterns using sine waves
+    const now = Date.now();
+    const waveAlpha = t === TERRAIN.DEEP_WATER.id ? 0.12 : 0.18;
+    for (let wi = 0; wi < 3; wi++) {
+      const phase = now * 0.0008 + x * 1.5 + y * 0.8 + wi * 2.1;
+      const waveX = Math.sin(phase) * 4 * dSize;
+      const waveY = Math.cos(phase * 0.7 + wi) * 1.5 * dSize;
+      ctx.beginPath();
+      ctx.moveTo(screenX - 6 * dSize + waveX, screenY + waveY + wi * 2 * dSize - 2 * dSize);
+      ctx.quadraticCurveTo(
+        screenX + waveX * 0.5, screenY + waveY - 1.5 * dSize + wi * 2 * dSize - 2 * dSize,
+        screenX + 6 * dSize + waveX, screenY + waveY + wi * 2 * dSize - 2 * dSize
+      );
+      ctx.strokeStyle = `rgba(140,200,255,${waveAlpha * (1 - wi * 0.25)})`;
+      ctx.lineWidth = (1.5 - wi * 0.3) * dSize;
+      ctx.stroke();
+    }
   }
 
   // Resource deposit markers (only in visible tiles)
@@ -7466,7 +7755,7 @@ function drawCentralHub(sx, sy, z, color) {
 // ============================================================
 // Main render
 // ============================================================
-function render() {
+function render(dt) {
   ctx.fillStyle = '#080810';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -7755,6 +8044,16 @@ function render() {
   // Render dust particles
   renderDustParticles();
 
+  // Night effects (window glows, star reflections)
+  renderNightEffects();
+
+  // Construction scaffolding animations
+  renderConstructionAnims();
+
+  // Population dots walking between buildings
+  spawnPopulationDots();
+  renderPopulationDots(dt || 16);
+
   // Trade route lines on main map
   drawTradeRoutesOnMap(ctx, performance.now());
 
@@ -7762,6 +8061,9 @@ function render() {
   const nowPerf = performance.now();
   renderFloatingTexts(nowPerf);
   renderParticles(nowPerf);
+
+  // Render fuel bars on gas/coal buildings
+  renderFuelBars();
 }
 
 // ============================================================
@@ -8046,6 +8348,24 @@ function updateInfoPanel() {
     if (bt.researchSpeedBonus) html += `<div class="bi-stat">🔬 Research speed: <strong>-${Math.round(bt.researchSpeedBonus*100)}%</strong></div>`;
     if (bt.territoryBonus) html += `<div class="bi-stat">📡 Territory: <strong>+${bt.territoryBonus} tiles</strong></div>`;
     if (bt.pollution) html += `<div class="bi-stat" style="color:#ff6644">☁️ Produces pollution</div>`;
+    // Fuel info for gas/coal buildings
+    const fuelCfg = FUEL_CONFIG[building.type];
+    if (fuelCfg && building.fuel !== undefined) {
+      const fuelPct = building.fuel / building.maxFuel;
+      const turnsLeft = building.fuel > 0 ? Math.ceil(building.fuel / fuelCfg.fuelPerTurn) : 0;
+      const fuelColor = fuelPct > 0.5 ? '#44bb44' : fuelPct > 0.2 ? '#ddaa22' : '#dd3333';
+      html += `<div class="bi-stat">⛽ Fuel: <strong style="color:${fuelColor}">${building.fuel}/${building.maxFuel}</strong> (${turnsLeft} turns remaining)</div>`;
+      html += `<div style="background:rgba(0,0,0,0.3);border-radius:3px;height:6px;margin:4px 0;overflow:hidden"><div style="height:100%;width:${fuelPct*100}%;background:${fuelColor};border-radius:3px;transition:width 0.3s"></div></div>`;
+      if (building.fuel <= 0) html += `<div class="bi-stat" style="color:#ff4444;font-weight:bold">⛽ DEPLETED — No energy production!</div>`;
+    }
+    // Day/Night solar/wind info
+    const dn = getCurrentDayNight();
+    if (isSolarBuilding(building.type) && dn.solarMult < 1) {
+      html += `<div class="bi-stat" style="color:${dn.hudColor}">☀️ ${dn.label.slice(2)} penalty: ${Math.round(dn.solarMult*100)}% output</div>`;
+    }
+    if (isWindBuilding(building.type) && dn.windMult > 1) {
+      html += `<div class="bi-stat" style="color:#88ccff">🌙 Night wind bonus: +${Math.round((dn.windMult-1)*100)}% output</div>`;
+    }
     html += `<div class="bi-stat" style="color:#888;font-style:italic;margin-top:4px">${bt.description}</div>`;
     html += `</div>`;
   }
@@ -8316,7 +8636,13 @@ function placePlayerBuilding(tx, ty, typeKey) {
   player.treasury = Math.round(player.treasury * 100) / 100;
 
   // Place building with animation
-  gameState.buildings.push({ type: typeKey, owner: 0, x: tx, y: ty, active: true, _placeTime: Date.now() });
+  const newBuilding = { type: typeKey, owner: 0, x: tx, y: ty, active: true, _placeTime: Date.now() };
+  initBuildingFuel(newBuilding);
+  gameState.buildings.push(newBuilding);
+
+  // Audio + visual feedback
+  SFX.buildingPlaced();
+  addConstructionAnim(tx, ty);
 
   // Placement particles
   addPlacementParticles(tx, ty);
@@ -8480,6 +8806,7 @@ canvas.addEventListener('mouseup', e => {
         if (isTileValidForBuilding(tile.x, tile.y, buildState.selectedType)) {
           placePlayerBuilding(tile.x, tile.y, buildState.selectedType);
         } else {
+          SFX.error();
           flashTile(tile.x, tile.y, 'rgba(255,68,68,0.5)');
         }
         isDragging = false;
@@ -8652,6 +8979,11 @@ window.addEventListener('keydown', e => {
     return;
   }
 
+  // Shortcut overlay
+  if (shortcutOverlayOpen) {
+    if (e.key === 'Escape' || e.key === '?') toggleShortcutOverlay();
+    return;
+  }
   // Settings overlay
   if (settingsOpen) {
     if (e.key === 'Escape') closeSettings();
@@ -8750,6 +9082,11 @@ window.addEventListener('keydown', e => {
     toggleUnitPanel();
   }
 
+  // ? = keyboard shortcuts overlay
+  if (e.key === '?' && !e.repeat) {
+    toggleShortcutOverlay();
+  }
+
   // Number keys 1-9 for quick-selecting building types
   if (e.key >= '1' && e.key <= '9' && !e.repeat) {
     const allTypes = BUILD_MENU_CATEGORIES.flatMap(c => c.types);
@@ -8781,7 +9118,7 @@ function gameLoop(time) {
   if (keys['a'] || keys['arrowleft']) camera.x -= speed;
   if (keys['d'] || keys['arrowright']) camera.x += speed;
 
-  render();
+  render(dt);
   renderMinimap();
   requestAnimationFrame(gameLoop);
 }
@@ -8878,6 +9215,12 @@ function regenerateMap() {
   updateInfoPanel();
   updateHashWarButton();
   updateWarStatus();
+  updateDayNightOverlay();
+  // Initialize fuel on starting buildings
+  for (const b of gameState.buildings) initBuildingFuel(b);
+  // Reset visual polish state
+  constructionAnims = [];
+  populationDots = [];
   renderMinimap();
 }
 
@@ -9395,7 +9738,9 @@ function processAITurn(civId) {
     if (!tile) continue;
 
     // Place building
-    gameState.buildings.push({ type: typeKey, owner: civId, x: tile.x, y: tile.y, active: true });
+    const aiBuilding = { type: typeKey, owner: civId, x: tile.x, y: tile.y, active: true };
+    initBuildingFuel(aiBuilding);
+    gameState.buildings.push(aiBuilding);
     civ.treasury -= bt.cost;
     civ.treasury = Math.round(civ.treasury * 100) / 100;
     spent += bt.cost;
@@ -9565,6 +9910,7 @@ function triggerVictory(civId, type, description) {
   gameState.gameOver = true;
   const civ = gameState.civs[civId];
   const isPlayer = civId === 0;
+  if (isPlayer) SFX.victory();
 
   const overlay = document.getElementById('victoryOverlay');
   const title = document.getElementById('victoryTitle');
@@ -9873,7 +10219,8 @@ function createSaveData() {
     difficultyMultiplier: gameState.difficultyMultiplier,
     lastDifficultyHash: gameState.lastDifficultyHash,
     buildings: gameState.buildings.map(b => ({
-      type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active
+      type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active,
+      fuel: b.fuel, maxFuel: b.maxFuel,
     })),
     units: gameState.units.map(u => ({
       id: u.id, type: u.type, owner: u.owner, x: u.x, y: u.y,
@@ -9945,9 +10292,14 @@ function loadGameFromData(data) {
     gameState.difficultyMultiplier = data.difficultyMultiplier || 1.0;
     gameState.lastDifficultyHash = data.lastDifficultyHash || 0;
     gameState.gameOver = data.gameOver || false;
-    gameState.buildings = data.buildings.map(b => ({
-      type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active
-    }));
+    gameState.buildings = data.buildings.map(b => {
+      const building = { type: b.type, owner: b.owner, x: b.x, y: b.y, active: b.active };
+      // Restore fuel data
+      if (b.fuel !== undefined) { building.fuel = b.fuel; building.maxFuel = b.maxFuel; }
+      else initBuildingFuel(building);
+      if (FUEL_CONFIG[b.type] && building.fuel <= 0) building._fuelDepleted = true;
+      return building;
+    });
 
     // Restore units
     gameState.units = (data.units || []).map(u => ({
@@ -10026,6 +10378,7 @@ function loadGameFromData(data) {
     updateHashWarButton();
     updateWarStatus();
 
+    updateDayNightOverlay();
     showToast('✅ Game loaded! (Turn ' + data.turn + ')', 'success');
     return true;
   } catch (e) {
@@ -10175,6 +10528,7 @@ function startHashWar(attackerId, defenderId, redirectPct) {
   const attacker = gameState.civs[attackerId];
   const defender = gameState.civs[defenderId];
   
+  SFX.hashWar();
   if (attackerId === 0) {
     showToast('⚔️ Hash War launched against ' + defender.name + '!', 'error');
   } else if (defenderId === 0) {
@@ -10875,6 +11229,7 @@ function showAITradeProposal(fromCiv, toCiv) {
   const rel = getDiploRelationship(fromCiv, toCiv);
   if (rel._lastProposalTurn && gameState.turn - rel._lastProposalTurn < 10) return;
   rel._lastProposalTurn = gameState.turn;
+  SFX.tradeProposal();
 
   const fromName = gameState.civs[fromCiv].name;
   const container = document.getElementById('toastContainer');
@@ -11259,18 +11614,503 @@ function drawTradeRoutesOnMap(ctx, now) {
 }
 
 // ============================================================
+// Day/Night Cycle System
+// ============================================================
+function getTimeOfDay(turn) {
+  const phase = turn % 4;
+  // phase 0 = Dawn, 1-2 = Day, 3 = Dusk, 0 next = Night is phase 3's NEXT
+  // Actually: 0=Dawn, 1=Day, 2=Dusk, 3=Night
+  if (phase === 0 && turn > 0) return 'dawn';
+  if (phase === 1 || phase === 2 || (phase === 0 && turn === 0)) return 'day';
+  if (phase === 3) return 'night';
+  return 'day';
+}
+// Better mapping: every 4 turns cycle: turn%4: 0=dawn, 1=day, 2=dusk, 3=night
+function getTimeOfDayV2(turn) {
+  const p = turn % 4;
+  if (p === 0) return turn === 0 ? 'day' : 'dawn';
+  if (p === 1) return 'day';
+  if (p === 2) return 'dusk';
+  return 'night';
+}
+
+const DAY_NIGHT_CONFIG = {
+  dawn:  { overlay: 'rgba(255,200,100,0.05)', solarMult: 0.5, windMult: 1.0,  label: '🌄 Dawn',  hudColor: '#ffcc88' },
+  day:   { overlay: 'rgba(0,0,0,0)',           solarMult: 1.0, windMult: 1.0,  label: '☀️ Day',   hudColor: '#ffdd44' },
+  dusk:  { overlay: 'rgba(255,140,0,0.06)',    solarMult: 0.7, windMult: 1.0,  label: '🌅 Dusk',  hudColor: '#ff9944' },
+  night: { overlay: 'rgba(10,10,40,0.2)',      solarMult: 0.0, windMult: 1.2,  label: '🌙 Night', hudColor: '#8888cc' },
+};
+
+function getCurrentDayNight() {
+  return DAY_NIGHT_CONFIG[getTimeOfDayV2(gameState.turn)] || DAY_NIGHT_CONFIG.day;
+}
+
+function isSolarBuilding(type) {
+  return type === 'solar_panel' || type === 'solar_farm';
+}
+function isWindBuilding(type) {
+  return type === 'wind_turbine' || type === 'wind_farm';
+}
+
+function updateDayNightOverlay() {
+  const dn = getCurrentDayNight();
+  document.getElementById('dayNightOverlay').style.backgroundColor = dn.overlay;
+  const hudEl = document.getElementById('hudDayNight');
+  hudEl.textContent = dn.label;
+  hudEl.style.color = dn.hudColor;
+}
+
+// ============================================================
+// Audio System (Web Audio API — no external files)
+// ============================================================
+let audioCtx = null;
+let audioMuted = false;
+let audioVolume = parseFloat(localStorage.getItem('btcCivVolume') || '0.3');
+let audioInitialized = false;
+
+function initAudio() {
+  if (audioInitialized) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    audioInitialized = true;
+  } catch(e) { /* browser doesn't support */ }
+}
+
+function ensureAudio() {
+  if (!audioCtx) initAudio();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playTone(freq, duration, type = 'sine', volumeMult = 1) {
+  if (!audioCtx || audioMuted) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(audioVolume * volumeMult * 0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration / 1000);
+}
+
+function playSweep(startFreq, endFreq, duration, type = 'sine', volumeMult = 1) {
+  if (!audioCtx || audioMuted) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+  osc.frequency.linearRampToValueAtTime(endFreq, audioCtx.currentTime + duration / 1000);
+  gain.gain.setValueAtTime(audioVolume * volumeMult * 0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration / 1000);
+}
+
+function playNoiseBurst(duration, volumeMult = 0.5) {
+  if (!audioCtx || audioMuted) return;
+  const bufferSize = audioCtx.sampleRate * (duration / 1000);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(audioVolume * volumeMult * 0.15, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration / 1000);
+  source.connect(gain);
+  gain.connect(audioCtx.destination);
+  source.start();
+}
+
+const SFX = {
+  buildingPlaced() {
+    ensureAudio();
+    playSweep(200, 400, 150);
+    setTimeout(() => playTone(800, 50, 'square', 0.3), 80);
+  },
+  turnAdvance() {
+    ensureAudio();
+    playTone(600, 60, 'sine', 0.4);
+  },
+  blockMined() {
+    ensureAudio();
+    playTone(800, 100, 'sine', 0.7);
+    setTimeout(() => playTone(1200, 100, 'sine', 0.7), 100);
+  },
+  researchComplete() {
+    ensureAudio();
+    playTone(523, 100); // C
+    setTimeout(() => playTone(659, 100), 100); // E
+    setTimeout(() => playTone(784, 100), 200); // G
+  },
+  hashWar() {
+    ensureAudio();
+    playTone(100, 200, 'sawtooth', 0.6);
+    setTimeout(() => playTone(300, 100, 'square', 0.3), 100);
+  },
+  unitMove() {
+    ensureAudio();
+    playNoiseBurst(50, 0.3);
+  },
+  combat() {
+    ensureAudio();
+    playNoiseBurst(100, 0.8);
+    playTone(80, 100, 'sawtooth', 0.5);
+  },
+  victory() {
+    ensureAudio();
+    playTone(523, 150);
+    setTimeout(() => playTone(659, 150), 150);
+    setTimeout(() => playTone(784, 150), 300);
+    setTimeout(() => playTone(1047, 200), 450);
+  },
+  uiClick() {
+    ensureAudio();
+    playTone(1000, 30, 'sine', 0.3);
+  },
+  error() {
+    ensureAudio();
+    playTone(150, 100, 'square', 0.5);
+  },
+  halving() {
+    ensureAudio();
+    playTone(80, 500, 'sine', 1.0);
+    setTimeout(() => playTone(60, 300, 'sine', 0.6), 200);
+  },
+  tradeProposal() {
+    ensureAudio();
+    playTone(600, 200, 'sine', 0.5);
+  },
+  nightTransition() {
+    ensureAudio();
+    playSweep(400, 200, 300, 'sine', 0.4);
+  },
+};
+
+// Audio init on first interaction
+document.addEventListener('click', () => ensureAudio(), { once: true });
+document.addEventListener('keydown', () => ensureAudio(), { once: true });
+
+// Mute button
+document.getElementById('muteBtn').addEventListener('click', () => {
+  audioMuted = !audioMuted;
+  document.getElementById('muteBtn').textContent = audioMuted ? '🔇' : '🔊';
+  localStorage.setItem('btcCivMuted', audioMuted ? '1' : '0');
+  SFX.uiClick();
+});
+// Restore mute state
+if (localStorage.getItem('btcCivMuted') === '1') {
+  audioMuted = true;
+  document.getElementById('muteBtn').textContent = '🔇';
+}
+
+// Volume slider
+document.getElementById('settVolume').value = Math.round(audioVolume * 100);
+document.getElementById('settVolumeVal').textContent = Math.round(audioVolume * 100) + '%';
+document.getElementById('settVolume').addEventListener('input', e => {
+  audioVolume = parseInt(e.target.value) / 100;
+  localStorage.setItem('btcCivVolume', audioVolume.toString());
+  document.getElementById('settVolumeVal').textContent = e.target.value + '%';
+});
+
+// ============================================================
+// Fuel Depletion System
+// ============================================================
+const FUEL_CONFIG = {
+  gas_plant:    { maxFuel: 100, fuelPerTurn: 2 },
+  coal_station: { maxFuel: 150, fuelPerTurn: 3 },
+};
+
+function initBuildingFuel(building) {
+  const cfg = FUEL_CONFIG[building.type];
+  if (cfg) {
+    building.fuel = cfg.maxFuel;
+    building.maxFuel = cfg.maxFuel;
+  }
+}
+
+function processFuelDepletion() {
+  for (const b of gameState.buildings) {
+    if (!b.active) continue;
+    const cfg = FUEL_CONFIG[b.type];
+    if (!cfg) continue;
+    if (b.fuel === undefined) { b.fuel = cfg.maxFuel; b.maxFuel = cfg.maxFuel; }
+    if (b.fuel <= 0) {
+      b.fuel = 0;
+      b._fuelDepleted = true;
+      continue;
+    }
+    b.fuel = Math.max(0, b.fuel - cfg.fuelPerTurn);
+    b._fuelDepleted = b.fuel <= 0;
+
+    // Warnings for player buildings
+    if (b.owner === 0) {
+      const pct = b.fuel / b.maxFuel;
+      const turnsLeft = Math.ceil(b.fuel / cfg.fuelPerTurn);
+      const bt = BUILDING_TYPES[b.type];
+      if (b.fuel === 0) {
+        showToast(`❌ ${bt.name} depleted! No energy production.`, 'error');
+      } else if (pct <= 0.2 && (b.fuel + cfg.fuelPerTurn) / b.maxFuel > 0.2) {
+        showToast(`⚠️ ${bt.name} running low on fuel! (${turnsLeft} turns left)`, 'error');
+      }
+    }
+  }
+}
+
+// ============================================================
+// Visual Polish: Construction animations, population dots, tree sway
+// ============================================================
+let constructionAnims = []; // {x, y, start, duration}
+let populationDots = [];    // {x, y, tx, ty, progress, speed}
+let lastPopDotSpawn = 0;
+
+function addConstructionAnim(x, y) {
+  constructionAnims.push({ x, y, start: Date.now(), duration: 1000 });
+}
+
+function renderConstructionAnims() {
+  const now = Date.now();
+  constructionAnims = constructionAnims.filter(a => now - a.start < a.duration);
+  for (const a of constructionAnims) {
+    const { x: sx, y: sy } = tileToScreen(a.x, a.y);
+    const z = camera.zoom;
+    const progress = (now - a.start) / a.duration;
+    const alpha = 1 - progress;
+
+    ctx.globalAlpha = alpha * 0.6;
+    ctx.strokeStyle = '#ffcc44';
+    ctx.lineWidth = 1.5 * z;
+
+    // Scaffolding lines rising up
+    const h = 15 * z * (1 - progress * 0.5);
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(sx + i * 6 * z, sy);
+      ctx.lineTo(sx + i * 6 * z, sy - h);
+      ctx.stroke();
+    }
+    // Cross braces
+    ctx.beginPath();
+    ctx.moveTo(sx - 6 * z, sy - h * 0.5);
+    ctx.lineTo(sx + 6 * z, sy - h * 0.5);
+    ctx.stroke();
+
+    ctx.globalAlpha = 1;
+  }
+}
+
+function spawnPopulationDots() {
+  const now = Date.now();
+  if (now - lastPopDotSpawn < 3000) return;
+  if (populationDots.length > 8) return;
+
+  const playerBuildings = gameState.buildings.filter(b => b.owner === 0);
+  if (playerBuildings.length < 2) return;
+
+  const from = playerBuildings[Math.floor(Math.random() * playerBuildings.length)];
+  let to = playerBuildings[Math.floor(Math.random() * playerBuildings.length)];
+  if (to === from && playerBuildings.length > 1) {
+    to = playerBuildings[(playerBuildings.indexOf(from) + 1) % playerBuildings.length];
+  }
+  if (Math.abs(from.x - to.x) + Math.abs(from.y - to.y) > 8) return;
+
+  populationDots.push({
+    fx: from.x, fy: from.y,
+    tx: to.x, ty: to.y,
+    progress: 0,
+    speed: 0.003 + Math.random() * 0.002
+  });
+  lastPopDotSpawn = now;
+}
+
+function renderPopulationDots(dt) {
+  if (camera.zoom < 0.5) return;
+  const z = camera.zoom;
+  populationDots = populationDots.filter(d => d.progress < 1);
+  for (const d of populationDots) {
+    d.progress += d.speed * dt;
+    const cx = d.fx + (d.tx - d.fx) * d.progress;
+    const cy = d.fy + (d.ty - d.fy) * d.progress;
+    const { x: sx, y: sy } = tileToScreen(cx, cy);
+    ctx.beginPath();
+    ctx.arc(sx, sy - 4 * z, 1.5 * z, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(220,200,150,0.6)';
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// Night rendering helpers
+// ============================================================
+function isNightTime() {
+  return getTimeOfDayV2(gameState.turn) === 'night';
+}
+function isDuskTime() {
+  return getTimeOfDayV2(gameState.turn) === 'dusk';
+}
+
+function renderNightEffects() {
+  if (!isNightTime() && !isDuskTime()) return;
+  const z = camera.zoom;
+  const isNight = isNightTime();
+
+  // Building window glows at night
+  if (isNight && z > 0.4) {
+    for (const b of gameState.buildings) {
+      const vis = getTileVisibility(b.x, b.y);
+      if (vis < 2 && b.owner !== 0) continue;
+      const { x: sx, y: sy } = tileToScreen(b.x, b.y);
+      const w = HALF_W * z;
+      if (sx + w < -20 || sx - w > canvas.width + 20) continue;
+
+      if (b.type === 'house' || b.type === 'school' || b.type === 'university' ||
+          b.type === 'bank' || b.type === 'market' || b.type === 'embassy') {
+        // Window glow
+        ctx.beginPath();
+        ctx.arc(sx, sy - 4 * z, 3 * z, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,200,80,0.4)';
+        ctx.fill();
+      } else if (b.type === 'home_miner' || b.type === 'mining_shed' || b.type === 'mining_warehouse' ||
+                 b.type === 'mining_data_center' || b.type === 'mining_mega_facility') {
+        // LED glow on miners — brighter at night
+        const pulse = 0.5 + Math.sin(Date.now() * 0.004 + b.x * 3) * 0.3;
+        ctx.beginPath();
+        ctx.arc(sx + 3 * z, sy - 5 * z, 2.5 * z, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(247,147,26,${pulse})`;
+        ctx.fill();
+      } else if (b.type === 'citadel') {
+        // Torch/fire glow
+        const flicker = 0.4 + Math.sin(Date.now() * 0.008 + b.x) * 0.2;
+        ctx.beginPath();
+        ctx.arc(sx, sy - 14 * z, 6 * z, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(sx, sy - 14 * z, 0, sx, sy - 14 * z, 6 * z);
+        grad.addColorStop(0, `rgba(255,150,50,${flicker})`);
+        grad.addColorStop(1, 'rgba(255,100,20,0)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+    }
+  }
+
+  // Stars on water tiles at night
+  if (isNight && z > 0.35) {
+    for (let y = 0; y < MAP_H; y++) {
+      for (let x = 0; x < MAP_W; x++) {
+        const t = map.terrain[y][x];
+        if (t !== TERRAIN.COAST.id && t !== TERRAIN.DEEP_WATER.id) continue;
+        const { x: sx, y: sy } = tileToScreen(x, y);
+        const w = HALF_W * z;
+        if (sx + w < 0 || sx - w > canvas.width || sy + HALF_H * z < 0 || sy - HALF_H * z > canvas.height) continue;
+        // Sparse star reflections
+        const starSeed = noise_simple(x * 11.7, y * 13.3);
+        if (starSeed > 0.85) {
+          const twinkle = 0.3 + Math.sin(Date.now() * 0.002 + x * 7 + y * 11) * 0.2;
+          ctx.beginPath();
+          ctx.arc(sx + (starSeed - 0.9) * 20 * z, sy + (starSeed - 0.85) * 10 * z, 0.8 * z, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(200,220,255,${twinkle})`;
+          ctx.fill();
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// Fuel Bar Rendering (on gas/coal buildings)
+// ============================================================
+function renderFuelBars() {
+  if (camera.zoom < 0.4) return;
+  const z = camera.zoom;
+  for (const b of gameState.buildings) {
+    const cfg = FUEL_CONFIG[b.type];
+    if (!cfg) continue;
+    if (b.fuel === undefined) continue;
+    const vis = getTileVisibility(b.x, b.y);
+    if (vis < 2 && b.owner !== 0) continue;
+
+    const { x: sx, y: sy } = tileToScreen(b.x, b.y);
+    const w = HALF_W * z;
+    if (sx + w < -20 || sx - w > canvas.width + 20) continue;
+
+    const barW = 20 * z;
+    const barH = 3 * z;
+    const barX = sx - barW / 2;
+    const barY = sy + 8 * z;
+    const pct = b.fuel / b.maxFuel;
+
+    // Background
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(barX - 0.5 * z, barY - 0.5 * z, barW + 1 * z, barH + 1 * z);
+
+    // Fill
+    const fuelColor = pct > 0.5 ? '#44bb44' : pct > 0.2 ? '#ddaa22' : '#dd3333';
+    ctx.fillStyle = fuelColor;
+    ctx.fillRect(barX, barY, barW * pct, barH);
+
+    // Depleted badge
+    if (b.fuel <= 0 && z > 0.5) {
+      ctx.font = `bold ${Math.round(8 * z)}px sans-serif`;
+      ctx.fillStyle = '#ff4444';
+      ctx.textAlign = 'center';
+      ctx.fillText('⛽ Depleted', sx, barY + barH + 8 * z);
+    }
+  }
+}
+
+// ============================================================
+// Shortcut overlay
+// ============================================================
+let shortcutOverlayOpen = false;
+function toggleShortcutOverlay() {
+  shortcutOverlayOpen = !shortcutOverlayOpen;
+  document.getElementById('shortcutOverlay').classList.toggle('visible', shortcutOverlayOpen);
+}
+document.getElementById('shortcutOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('shortcutOverlay') || e.target === document.getElementById('shortcutCard')) {
+    toggleShortcutOverlay();
+  }
+});
+
+// ============================================================
 // Init
 // ============================================================
+// Loading screen progress
+const loadBar = document.getElementById('loadBarFill');
+loadBar.style.width = '20%';
+
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+loadBar.style.width = '40%';
 buildLegend();
 initCivilizations();
+loadBar.style.width = '60%';
 initCamera();
 updateHUD();
+loadBar.style.width = '80%';
 
 // Init fog of war
 initVisibility();
 recalculateVisibility();
+loadBar.style.width = '100%';
+
+// Initialize day/night overlay
+updateDayNightOverlay();
+
+// Initialize fuel on existing buildings
+for (const b of gameState.buildings) {
+  initBuildingFuel(b);
+}
+
+// Fade out loading screen
+setTimeout(() => {
+  const ls = document.getElementById('loadingScreen');
+  ls.classList.add('fade-out');
+  setTimeout(() => ls.style.display = 'none', 800);
+}, 500);
 
 // Set fog toggle initial state
 document.getElementById('settFogToggle').checked = fogOfWarEnabled;
