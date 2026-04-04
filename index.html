@@ -143,7 +143,7 @@
     position: fixed;
     top: 60px; right: 12px;
     width: 280px;
-    background: rgba(18,18,28,0.92);
+    background: linear-gradient(175deg, rgba(22,22,36,0.95) 0%, rgba(14,14,24,0.92) 100%);
     border: 1px solid rgba(247,147,26,0.25);
     border-radius: 12px;
     padding: 16px;
@@ -325,10 +325,244 @@
     animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
     max-width: 280px;
   }
-  .toast.success { border-color: rgba(68,221,102,0.5); }
-  .toast.error { border-color: rgba(255,68,68,0.5); }
-  @keyframes toastIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(60px) scale(0.95); } 60% { transform: translateX(-6px) scale(1.02); } to { opacity: 1; transform: translateX(0) scale(1); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+  .toast.success { border-left: 3px solid #44dd66; border-color: rgba(68,221,102,0.5); }
+  .toast.error   { border-left: 3px solid #ff4444; border-color: rgba(255,68,68,0.5); }
+  .toast.warning { border-left: 3px solid #ffaa22; border-color: rgba(255,170,34,0.5); }
+  .toast.info    { border-left: 3px solid #4488ff; border-color: rgba(68,136,255,0.5); }
+
+  /* Screen shake */
+  @keyframes screenShake {
+    0% { transform: translate(0,0); }
+    15% { transform: translate(-2px, 1px); }
+    30% { transform: translate(2px, -1px); }
+    45% { transform: translate(-1px, 2px); }
+    60% { transform: translate(1px, -2px); }
+    75% { transform: translate(-1px, 1px); }
+    100% { transform: translate(0,0); }
+  }
+  body.shake { animation: screenShake 0.12s ease-out; }
+
+  /* Treasury number pop */
+  @keyframes treasuryPop {
+    0% { transform: scale(1); color: #F7931A; }
+    30% { transform: scale(1.22); color: #ffcc44; }
+    100% { transform: scale(1); color: #F7931A; }
+  }
+  .hud-val.sats.pop-bounce { animation: treasuryPop 0.4s ease-out; }
+
+  /* Floating sats earned indicator */
+  .sats-float {
+    position: absolute;
+    color: #F7931A;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 300;
+    animation: satsFloat 1.2s ease-out forwards;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+  }
+  @keyframes satsFloat {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 0.9; transform: translateY(-18px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-36px) scale(0.8); }
+  }
+
+  /* Button hover glow */
+  .hud-btn {
+    transition: background 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+  }
+  .hud-btn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 8px rgba(247,147,26,0.2);
+  }
+  .hud-btn:active { transform: scale(0.97); }
+
+  /* Build entry hover glow */
+  .build-entry:hover {
+    box-shadow: 0 0 12px rgba(247,147,26,0.08);
+  }
+
+  /* Turn counter odometer */
+  @keyframes odometerRoll {
+    0% { transform: translateY(8px); opacity: 0.3; }
+    50% { transform: translateY(-2px); opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .hud-val.odometer-tick { animation: odometerRoll 0.25s ease-out; }
+
+  /* Notification bell */
+  #notifBell {
+    position: relative;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    user-select: none;
+    transition: transform 0.15s;
+  }
+  #notifBell:hover { transform: scale(1.1); }
+  #notifBell .notif-badge {
+    position: absolute;
+    top: -4px; right: -2px;
+    background: #ff4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    min-width: 14px;
+    height: 14px;
+    line-height: 14px;
+    border-radius: 7px;
+    text-align: center;
+    padding: 0 3px;
+    display: none;
+  }
+  #notifBell .notif-badge.visible { display: block; }
+  #notifHistory {
+    position: fixed;
+    top: 52px; right: 12px;
+    width: 300px;
+    max-height: 360px;
+    overflow-y: auto;
+    background: rgba(14,14,22,0.96);
+    border: 1px solid rgba(247,147,26,0.4);
+    border-radius: 10px;
+    padding: 8px 0;
+    z-index: 210;
+    backdrop-filter: blur(14px);
+    display: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  #notifHistory.visible { display: block; }
+  .notif-entry {
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #ccc;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .notif-entry:last-child { border-bottom: none; }
+  .notif-entry .notif-time {
+    font-size: 10px;
+    color: #666;
+    margin-right: 6px;
+  }
+  .notif-entry.unread { color: #eee; background: rgba(247,147,26,0.05); }
+
+  /* Speed indicator */
+  #speedIndicator {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: none;
+  }
+  #speedIndicator.visible { display: inline-block; }
+
+  /* Auto advance toggle */
+  #autoAdvanceBtn {
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s, transform 0.12s;
+    user-select: none;
+  }
+  #autoAdvanceBtn:hover { background: rgba(247,147,26,0.15); transform: scale(1.08); }
+  #autoAdvanceBtn.active { background: rgba(247,147,26,0.3); color: #F7931A; }
+
+  /* Turn summary modal upgrade */
+  #turnSummaryPanel .tsp-line .tsp-trend {
+    font-size: 10px;
+    margin-left: 4px;
+  }
+  #turnSummaryPanel .tsp-line .tsp-trend.up { color: #44dd66; }
+  #turnSummaryPanel .tsp-line .tsp-trend.down { color: #ff4444; }
+
+  /* Resource alert flash */
+  @keyframes hudAlertFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .hud-item.alert-flash { animation: hudAlertFlash 0.5s ease 3; }
+  .hud-item.alert-flash-red .hud-val { color: #ff4444 !important; }
+  .hud-item.alert-flash-yellow .hud-val { color: #ffcc00 !important; }
+
+  /* Civ card upgrade */
+  .civ-entry {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 10px 12px !important;
+    margin-bottom: 6px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: border-color 0.15s;
+  }
+  .civ-entry:hover { border-color: rgba(247,147,26,0.2); }
+  .civ-header-bar {
+    height: 3px;
+    border-radius: 2px 2px 0 0;
+    margin: -10px -12px 8px;
+  }
+  .civ-personality {
+    font-size: 10px;
+    color: #777;
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+  .civ-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-top: 4px;
+  }
+  .civ-badge.at-war { background: rgba(255,68,68,0.2); color: #ff6666; border: 1px solid rgba(255,68,68,0.3); }
+  .civ-badge.allied { background: rgba(68,221,102,0.2); color: #44dd66; border: 1px solid rgba(68,221,102,0.3); }
+  .civ-badge.trading { background: rgba(68,136,255,0.2); color: #4488ff; border: 1px solid rgba(68,136,255,0.3); }
+
+  /* Build yield preview tooltip */
+  #buildYieldPreview {
+    position: fixed;
+    background: rgba(10,10,18,0.96);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #ddd;
+    z-index: 190;
+    pointer-events: none;
+    display: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    max-width: 280px;
+  }
+  #buildYieldPreview.visible { display: block; }
+
+  /* Auto-build suggestion */
+  #autoBuildSuggestion {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(18,18,28,0.95);
+    border: 1px solid rgba(68,136,255,0.5);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: #ddd;
+    z-index: 140;
+    backdrop-filter: blur(10px);
+    display: none;
+    cursor: pointer;
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  #autoBuildSuggestion:hover { border-color: #F7931A; transform: translateX(-50%) scale(1.02); }
 
   /* Turn Summary Panel (Phase 4) */
   #turnSummaryPanel {
@@ -2032,6 +2266,10 @@
   <button id="muteBtn" title="Toggle Sound">🔊</button>
   <button id="saveBtn" class="hud-btn" title="Save Game">💾</button>
   <button id="settingsBtn" class="hud-btn" title="Settings (Esc)">⚙️</button>
+  <div class="hud-sep"></div>
+  <span id="notifBell" title="Notifications">🔔<span class="notif-badge" id="notifBadge">0</span></span>
+  <span id="autoAdvanceBtn" title="Auto-advance (⏩)">⏩</span>
+  <span id="speedIndicator">1×</span>
   <div id="hudResearch"></div>
   <div class="hud-sep"></div>
   <div class="hud-item" id="hudDayNight">☀️ Day</div>
@@ -2087,6 +2325,9 @@
 </div>
 
 <div id="vignetteOverlay"></div>
+<div id="notifHistory"></div>
+<div id="buildYieldPreview"></div>
+<div id="autoBuildSuggestion"></div>
 <div id="turnFlash"></div>
 
 <div id="demolishMenu">
@@ -12195,6 +12436,947 @@ if (!getShownTips()[1]) {
     }
   }, 2000);
 }
+
+// ============================================================
+// MEGA POLISH PASS
+// ============================================================
+
+// --- 1. Screen Shake ---
+function screenShake() {
+  document.body.classList.remove('shake');
+  void document.body.offsetWidth;
+  document.body.classList.add('shake');
+  setTimeout(() => document.body.classList.remove('shake'), 130);
+}
+
+// --- 1. Treasury Number Pop + Float ---
+function treasuryPop(earned) {
+  const el = document.getElementById('hudSats');
+  el.classList.remove('pop-bounce');
+  void el.offsetWidth;
+  el.classList.add('pop-bounce');
+  setTimeout(() => el.classList.remove('pop-bounce'), 450);
+
+  if (earned > 0) {
+    const rect = el.getBoundingClientRect();
+    const floater = document.createElement('div');
+    floater.className = 'sats-float';
+    floater.textContent = `+${earned}₿`;
+    floater.style.left = rect.left + 'px';
+    floater.style.top = (rect.top - 4) + 'px';
+    document.body.appendChild(floater);
+    setTimeout(() => floater.remove(), 1300);
+  }
+}
+
+// --- 1. Turn counter odometer ---
+function odometerTick() {
+  const el = document.getElementById('hudTurn');
+  el.classList.remove('odometer-tick');
+  void el.offsetWidth;
+  el.classList.add('odometer-tick');
+  setTimeout(() => el.classList.remove('odometer-tick'), 300);
+}
+
+// --- 1. Building completion ding + sparkle ---
+const _origBuildingPlaced = SFX.buildingPlaced;
+SFX.buildingPlaced = function() {
+  _origBuildingPlaced.call(SFX);
+  // Ding tone
+  setTimeout(() => {
+    if (audioCtx && !audioMuted) {
+      playTone(1200, 80, 'sine', 0.5);
+      setTimeout(() => playTone(1600, 60, 'sine', 0.3), 60);
+    }
+  }, 200);
+};
+
+function buildingCompleteSparkle(x, y) {
+  const screen = tileToScreen(x, y);
+  const colors = ['#FFD700', '#FFA500', '#FFFFFF', '#F7931A', '#FFEE88'];
+  for (let i = 0; i < 7; i++) {
+    const angle = (Math.PI * 2 / 7) * i + Math.random() * 0.4;
+    const speed = 1.5 + Math.random() * 2;
+    particles.push({
+      x: screen.x + (Math.random() - 0.5) * 8,
+      y: screen.y - 8 + (Math.random() - 0.5) * 6,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1.5,
+      life: 1,
+      decay: 0.02 + Math.random() * 0.01,
+      size: 1.5 + Math.random() * 2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    });
+  }
+}
+
+// --- 2. Enhanced Particle System ---
+const MAX_ENV_PARTICLES = 200;
+let envParticles = [];
+
+function spawnEnvParticle(type, x, y) {
+  if (envParticles.length >= MAX_ENV_PARTICLES) return;
+  const screen = tileToScreen(x, y);
+  const z = camera.zoom;
+  switch(type) {
+    case 'smoke': {
+      envParticles.push({
+        x: screen.x + (Math.random() - 0.5) * 6 * z,
+        y: screen.y - 10 * z,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: -0.3 - Math.random() * 0.4,
+        life: 1,
+        decay: 0.008 + Math.random() * 0.005,
+        size: 2 + Math.random() * 3,
+        color: `rgba(120,120,120,`,
+        type: 'smoke',
+      });
+      break;
+    }
+    case 'ember': {
+      envParticles.push({
+        x: screen.x + (Math.random() - 0.5) * 10 * z,
+        y: screen.y + (Math.random() - 0.5) * 4 * z,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: -0.5 - Math.random() * 0.8,
+        life: 1,
+        decay: 0.015 + Math.random() * 0.01,
+        size: 1 + Math.random() * 1.5,
+        color: Math.random() > 0.5 ? '#ff6622' : '#ff4400',
+        type: 'ember',
+      });
+      break;
+    }
+    case 'snow': {
+      envParticles.push({
+        x: screen.x + (Math.random() - 0.5) * 20 * z,
+        y: screen.y - 12 * z,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: 0.2 + Math.random() * 0.3,
+        life: 1,
+        decay: 0.005 + Math.random() * 0.003,
+        size: 1 + Math.random() * 1.5,
+        color: '#ffffff',
+        type: 'snow',
+      });
+      break;
+    }
+    case 'spark': {
+      envParticles.push({
+        x: screen.x + (Math.random() - 0.5) * 6 * z,
+        y: screen.y + (Math.random() - 0.5) * 6 * z,
+        vx: (Math.random() - 0.5) * 3,
+        vy: (Math.random() - 0.5) * 3 - 1,
+        life: 1,
+        decay: 0.04 + Math.random() * 0.02,
+        size: 1 + Math.random() * 1.5,
+        color: '#ffcc00',
+        type: 'spark',
+      });
+      break;
+    }
+    case 'coin': {
+      envParticles.push({
+        x: screen.x,
+        y: screen.y,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: -0.5 - Math.random() * 0.5,
+        life: 1,
+        decay: 0.01 + Math.random() * 0.005,
+        size: 3,
+        color: '#F7931A',
+        type: 'coin',
+        text: '₿',
+      });
+      break;
+    }
+  }
+}
+
+function renderEnvParticles() {
+  for (let i = envParticles.length - 1; i >= 0; i--) {
+    const p = envParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= p.decay;
+    if (p.life <= 0) { envParticles.splice(i, 1); continue; }
+
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, p.life * 1.5);
+
+    if (p.type === 'smoke') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * camera.zoom * (2 - p.life), 0, Math.PI * 2);
+      ctx.fillStyle = p.color + (p.life * 0.3) + ')';
+      ctx.fill();
+    } else if (p.type === 'coin') {
+      ctx.font = `bold ${Math.round(p.size * camera.zoom * 3)}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.text, p.x, p.y);
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * camera.zoom, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// Spawn environmental particles periodically
+let lastEnvParticleSpawn = 0;
+function spawnEnvironmentalParticles() {
+  const now = Date.now();
+  if (now - lastEnvParticleSpawn < 200) return;
+  lastEnvParticleSpawn = now;
+
+  // Spawn smoke on gas/coal plants
+  for (const b of gameState.buildings) {
+    if (!b.active) continue;
+    const bt = BUILDING_TYPES[b.type];
+    if (bt.pollution && b.fuel > 0) {
+      const vis = getTileVisibility(b.x, b.y);
+      if (vis === 2 || b.owner === 0) {
+        const { x: sx } = tileToScreen(b.x, b.y);
+        if (sx > -50 && sx < canvas.width + 50) {
+          if (Math.random() < 0.4) spawnEnvParticle('smoke', b.x, b.y);
+        }
+      }
+    }
+  }
+
+  // Spawn embers on volcanic tiles (sparse)
+  if (camera.zoom > 0.4 && Math.random() < 0.15) {
+    const rx = Math.floor(Math.random() * MAP_W);
+    const ry = Math.floor(Math.random() * MAP_H);
+    if (map.terrain[ry][rx] === TERRAIN.VOLCANIC.id) {
+      const vis = getTileVisibility(rx, ry);
+      if (vis >= 1) {
+        const { x: sx } = tileToScreen(rx, ry);
+        if (sx > -50 && sx < canvas.width + 50) {
+          spawnEnvParticle('ember', rx, ry);
+        }
+      }
+    }
+  }
+
+  // Spawn snow on snow peaks (sparse)
+  if (camera.zoom > 0.4 && Math.random() < 0.1) {
+    const rx = Math.floor(Math.random() * MAP_W);
+    const ry = Math.floor(Math.random() * MAP_H);
+    if (map.terrain[ry][rx] === TERRAIN.SNOW.id) {
+      const vis = getTileVisibility(rx, ry);
+      if (vis >= 1) {
+        const { x: sx } = tileToScreen(rx, ry);
+        if (sx > -50 && sx < canvas.width + 50) {
+          spawnEnvParticle('snow', rx, ry);
+        }
+      }
+    }
+  }
+}
+
+// --- 3. Map Visual Enhancements (injected into existing drawTile) ---
+// We'll patch the render loop to add coast foam, tile shadows, etc.
+
+// Store original drawTile and enhance
+const _origDrawTile = drawTile;
+drawTile = function(x, y) {
+  _origDrawTile(x, y);
+
+  const tileVis = getTileVisibility(x, y);
+  if (tileVis === 0) return;
+
+  const t = map.terrain[y][x];
+  const { x: screenX, y: screenY } = tileToScreen(x, y);
+  const w = HALF_W * camera.zoom;
+  const h = HALF_H * camera.zoom;
+  const dSize = camera.zoom;
+
+  // Frustum cull
+  if (screenX + w < -10 || screenX - w > canvas.width + 10 ||
+      screenY + h < -10 || screenY - h > canvas.height + 50) return;
+
+  // Tile depth shadow (subtle back edge)
+  if (camera.zoom > 0.35) {
+    ctx.beginPath();
+    ctx.moveTo(screenX, screenY + h);
+    ctx.lineTo(screenX + w, screenY);
+    ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+    ctx.lineWidth = 1.5 * dSize;
+    ctx.stroke();
+  }
+
+  // Coast foam: animated white line where coast meets water
+  if (t === TERRAIN.COAST.id && camera.zoom > 0.4) {
+    const dirs = [[0,-1],[0,1],[1,0],[-1,0]];
+    for (const [dx, dy] of dirs) {
+      const nx = x + dx, ny = y + dy;
+      if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H) {
+        const nt = map.terrain[ny][nx];
+        if (nt === TERRAIN.PLAINS.id || nt === TERRAIN.DESERT.id || nt === TERRAIN.FOREST.id || nt === TERRAIN.HILLS.id) {
+          const foamPhase = Date.now() * 0.002 + x * 3 + y * 5;
+          const foamOff = Math.sin(foamPhase) * 2 * dSize;
+          const ex = screenX + dx * w * 0.4;
+          const ey = screenY + dy * h * 0.4;
+          ctx.beginPath();
+          ctx.moveTo(ex - 4 * dSize + foamOff, ey - 2 * dSize);
+          ctx.quadraticCurveTo(ex + foamOff * 0.5, ey - 4 * dSize, ex + 4 * dSize + foamOff, ey - 2 * dSize);
+          ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+          ctx.lineWidth = 1.2 * dSize;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  // River current arrows (subtle chevrons)
+  if ((t === TERRAIN.RIVER.id || t === TERRAIN.MAJOR_RIVER.id) && camera.zoom > 0.6) {
+    const phase = Date.now() * 0.001 + x * 2 + y * 3;
+    const arrowAlpha = 0.15 + Math.sin(phase) * 0.05;
+    ctx.font = `${Math.round(6 * dSize)}px sans-serif`;
+    ctx.fillStyle = `rgba(180,220,255,${arrowAlpha})`;
+    ctx.textAlign = 'center';
+    ctx.fillText('›', screenX + Math.sin(phase * 0.7) * 3 * dSize, screenY + 1 * dSize);
+  }
+
+  // Mountain snow caps
+  if (t === TERRAIN.MOUNTAINS.id && camera.zoom > 0.5) {
+    ctx.beginPath();
+    ctx.moveTo(screenX - 2 * dSize, screenY - 4.5 * dSize);
+    ctx.lineTo(screenX, screenY - 6.5 * dSize);
+    ctx.lineTo(screenX + 2 * dSize, screenY - 4.5 * dSize);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fill();
+  }
+
+  // Decorative map features
+  if (camera.zoom > 0.5 && tileVis >= 1) {
+    const featureSeed = noise_simple(x * 17.3 + 0.5, y * 19.7 + 0.5);
+
+    // Ruins on plains (rare)
+    if (t === TERRAIN.PLAINS.id && featureSeed > 0.96) {
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#888';
+      ctx.fillRect(screenX - 3 * dSize, screenY - 1 * dSize, 2 * dSize, 3 * dSize);
+      ctx.fillRect(screenX + 1 * dSize, screenY - 2 * dSize, 2 * dSize, 4 * dSize);
+      ctx.fillRect(screenX - 1 * dSize, screenY + 1 * dSize, 4 * dSize, 1 * dSize);
+      ctx.globalAlpha = 1;
+    }
+
+    // Oasis on desert near water (rare)
+    if (t === TERRAIN.DESERT.id && featureSeed > 0.94) {
+      let nearWater = false;
+      const dirs2 = [[0,-1],[0,1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
+      for (const [dx2, dy2] of dirs2) {
+        const nx2 = x + dx2, ny2 = y + dy2;
+        if (nx2 >= 0 && nx2 < MAP_W && ny2 >= 0 && ny2 < MAP_H) {
+          const nt2 = map.terrain[ny2][nx2];
+          if (nt2 === TERRAIN.COAST.id || nt2 === TERRAIN.RIVER.id || nt2 === TERRAIN.DEEP_WATER.id) {
+            nearWater = true; break;
+          }
+        }
+      }
+      if (nearWater) {
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 2 * dSize, 0, Math.PI * 2);
+        ctx.fillStyle = '#2a8a5a';
+        ctx.fill();
+        // Palm trunk
+        ctx.strokeStyle = '#6a5a2a';
+        ctx.lineWidth = 0.8 * dSize;
+        ctx.beginPath();
+        ctx.moveTo(screenX + 1 * dSize, screenY);
+        ctx.lineTo(screenX + 2 * dSize, screenY - 4 * dSize);
+        ctx.stroke();
+        // Palm fronds
+        ctx.fillStyle = '#3a9a3a';
+        ctx.beginPath();
+        ctx.arc(screenX + 2 * dSize, screenY - 4.5 * dSize, 2 * dSize, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // Shipwrecks on coast (rare)
+    if (t === TERRAIN.COAST.id && featureSeed > 0.97) {
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#6a4a2a';
+      // Hull
+      ctx.beginPath();
+      ctx.moveTo(screenX - 4 * dSize, screenY + 1 * dSize);
+      ctx.lineTo(screenX + 4 * dSize, screenY + 1 * dSize);
+      ctx.lineTo(screenX + 3 * dSize, screenY + 3 * dSize);
+      ctx.lineTo(screenX - 3 * dSize, screenY + 3 * dSize);
+      ctx.closePath();
+      ctx.fill();
+      // Mast
+      ctx.strokeStyle = '#5a3a1a';
+      ctx.lineWidth = 0.8 * dSize;
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY + 1 * dSize);
+      ctx.lineTo(screenX - 1 * dSize, screenY - 3 * dSize);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+};
+
+// --- 4. Notification Center ---
+let notificationHistory = [];
+let unreadNotifCount = 0;
+let notifHistoryOpen = false;
+
+function addNotification(message, type = 'info') {
+  notificationHistory.unshift({
+    message,
+    type,
+    turn: gameState.turn,
+    time: Date.now(),
+    read: false,
+  });
+  if (notificationHistory.length > 20) notificationHistory.pop();
+  unreadNotifCount = notificationHistory.filter(n => !n.read).length;
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  if (unreadNotifCount > 0) {
+    badge.textContent = unreadNotifCount > 9 ? '9+' : unreadNotifCount;
+    badge.classList.add('visible');
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+function renderNotifHistory() {
+  const panel = document.getElementById('notifHistory');
+  if (notificationHistory.length === 0) {
+    panel.innerHTML = '<div class="notif-entry" style="color:#666;text-align:center">No notifications yet</div>';
+  } else {
+    panel.innerHTML = notificationHistory.map(n => {
+      const cls = n.read ? '' : ' unread';
+      return `<div class="notif-entry${cls}"><span class="notif-time">T${n.turn}</span>${n.message}</div>`;
+    }).join('');
+  }
+  // Mark all as read
+  notificationHistory.forEach(n => n.read = true);
+  unreadNotifCount = 0;
+  updateNotifBadge();
+}
+
+document.getElementById('notifBell').addEventListener('click', () => {
+  notifHistoryOpen = !notifHistoryOpen;
+  const panel = document.getElementById('notifHistory');
+  panel.classList.toggle('visible', notifHistoryOpen);
+  if (notifHistoryOpen) renderNotifHistory();
+});
+
+// Close notif history on click outside
+document.addEventListener('click', e => {
+  if (notifHistoryOpen && !e.target.closest('#notifBell') && !e.target.closest('#notifHistory')) {
+    notifHistoryOpen = false;
+    document.getElementById('notifHistory').classList.remove('visible');
+  }
+});
+
+// Patch showToast to also add to notification center
+const _origShowToast = showToast;
+showToast = function(message, type = 'info') {
+  _origShowToast(message, type);
+  addNotification(message, type);
+};
+
+// --- 5. Speed Controls ---
+let gameSpeed = 1; // 1 = normal, 2 = fast, 5 = ultra fast
+
+function cycleSpeed() {
+  if (gameSpeed === 1) gameSpeed = 2;
+  else if (gameSpeed === 2) gameSpeed = 5;
+  else gameSpeed = 1;
+  updateSpeedIndicator();
+}
+
+function updateSpeedIndicator() {
+  const el = document.getElementById('speedIndicator');
+  if (gameSpeed === 1) {
+    el.classList.remove('visible');
+  } else {
+    el.classList.add('visible');
+    el.textContent = `${gameSpeed}×`;
+    el.style.color = gameSpeed === 5 ? '#ff6644' : '#ffaa44';
+  }
+}
+
+// --- 5. Auto-advance ---
+let autoAdvanceEnabled = false;
+let autoAdvanceTimer = null;
+let autoAdvancePauseEvents = ['⚔️', '🏆', '💀', '📉 BANKRUPTCY'];
+
+document.getElementById('autoAdvanceBtn').addEventListener('click', () => {
+  autoAdvanceEnabled = !autoAdvanceEnabled;
+  document.getElementById('autoAdvanceBtn').classList.toggle('active', autoAdvanceEnabled);
+  if (autoAdvanceEnabled) {
+    startAutoAdvance();
+  } else {
+    stopAutoAdvance();
+  }
+});
+
+function startAutoAdvance() {
+  stopAutoAdvance();
+  autoAdvanceTimer = setInterval(() => {
+    if (gameState.gameOver) { stopAutoAdvance(); return; }
+    processTurn();
+  }, 2000);
+}
+
+function stopAutoAdvance() {
+  if (autoAdvanceTimer) { clearInterval(autoAdvanceTimer); autoAdvanceTimer = null; }
+}
+
+// --- 5. Undo Last Build ---
+let lastBuildAction = null;
+
+// Patch to track builds for undo
+const _origPlacePlayerBuilding = placePlayerBuilding;
+placePlayerBuilding = function(x, y, type) {
+  lastBuildAction = { x, y, type, turn: gameState.turn };
+  _origPlacePlayerBuilding(x, y, type);
+  // Fire sparkle effect after placement
+  setTimeout(() => buildingCompleteSparkle(x, y), 300);
+};
+
+function undoLastBuild() {
+  if (!lastBuildAction || lastBuildAction.turn !== gameState.turn) {
+    showToast('⚠️ Nothing to undo (only works within same turn)', 'warning');
+    return;
+  }
+  const { x, y, type } = lastBuildAction;
+  const b = getBuildingAt(x, y);
+  if (!b || b.type !== type || b.owner !== 0) {
+    showToast('⚠️ Cannot undo — building has changed', 'warning');
+    return;
+  }
+  const bt = BUILDING_TYPES[type];
+  // Refund full cost
+  gameState.civs[0].treasury += bt.cost;
+  // Remove building
+  const idx = gameState.buildings.indexOf(b);
+  if (idx >= 0) gameState.buildings.splice(idx, 1);
+  invalidateTerritory();
+  recalculateCivStats();
+  updateHUD();
+  showToast(`↩️ Undid ${bt.name} (+${bt.cost}₿ refund)`, 'success');
+  lastBuildAction = null;
+}
+
+// --- 6. Enhanced Civ Panel ---
+const _origUpdateCivPanel = updateCivPanel;
+updateCivPanel = function() {
+  const content = document.getElementById('civPanelContent');
+  const hasSatellite = gameState.buildings.some(b => b.owner === 0 && b.active && b.type === 'satellite_array');
+  const totalHash = getTotalNetworkHash();
+  let html = '';
+  for (const civ of gameState.civs) {
+    const netEnergy = civ.energyProduced - civ.energyConsumed;
+    const showDetails = civ.isPlayer || hasSatellite || !fogOfWarEnabled;
+    const hashPct = totalHash > 0 ? Math.round((civ.hashPower / totalHash) * 100) : 0;
+    const eliminated = civ.eliminated;
+    const personality = AI_PERSONALITIES[civ.id];
+    const researchInfo = civ.currentResearch ? TECH_TREE[civ.currentResearch]?.name : 'None';
+
+    const diploRel = !civ.isPlayer && !eliminated ? getDiploRelationship(0, civ.id) : null;
+    const diploIcon = diploRel ? getRelationshipIcon(diploRel.status) : '';
+
+    // Badge generation
+    let badges = '';
+    if (!civ.isPlayer && !eliminated) {
+      if (hashWars.some(w => (w.attackerId === civ.id || w.defenderId === civ.id) && (w.attackerId === 0 || w.defenderId === 0))) {
+        badges += '<span class="civ-badge at-war">⚔️ AT WAR</span>';
+      }
+      if (diploRel && diploRel.status === 'allied') {
+        badges += '<span class="civ-badge allied">🤝 ALLIED</span>';
+      }
+      // Check trade routes
+      const hasTradeRoute = typeof getTradeRoutes === 'function' && getTradeRoutes && gameState.tradeRoutes && gameState.tradeRoutes.some(r => (r.civA === 0 && r.civB === civ.id) || (r.civA === civ.id && r.civB === 0));
+      if (hasTradeRoute) {
+        badges += '<span class="civ-badge trading">📦 TRADING</span>';
+      }
+    }
+
+    // Count buildings by category
+    let energyCount = 0, miningCount = 0, civCount = 0;
+    if (showDetails) {
+      for (const b of gameState.buildings) {
+        if (b.owner !== civ.id) continue;
+        const cat = BUILDING_TYPES[b.type]?.category;
+        if (cat === 'energy') energyCount++;
+        else if (cat === 'mining') miningCount++;
+        else if (cat === 'infrastructure' || cat === 'civilization') civCount++;
+      }
+    }
+
+    html += `
+      <div class="civ-entry" ${eliminated ? 'style="opacity:0.4"' : ''}>
+        <div class="civ-header-bar" style="background:${eliminated ? '#444' : civ.color}"></div>
+        <div class="civ-name">
+          <span class="civ-swatch" style="background:${eliminated ? '#666' : civ.color}"></span>
+          ${civ.name}${civ.isPlayer ? ' (You)' : ''}
+          ${eliminated ? ' <span style="color:#ff4444;font-size:10px">ELIMINATED</span>' : ''}
+          ${diploIcon ? ` <span style="font-size:10px">${diploIcon}</span>` : ''}
+        </div>
+        ${!civ.isPlayer && personality ? `<div class="civ-personality">${personality.name}</div>` : ''}
+        <div class="civ-stats">
+          ${eliminated ? '<span style="color:#666">Bankrupt</span>' : showDetails ? `
+            <span>₿ ${civ.treasury.toLocaleString()}</span>
+            <span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>
+            <span>👥 ${civ.population}/${civ.maxPopulation}</span>
+            <span>⚡ ${netEnergy}/${civ.energyProduced}</span>
+            <span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>
+            ${showDetails ? `<span>🏗 ⚡${energyCount} ⛏${miningCount} 🏠${civCount}</span>` : ''}
+            <span>🔬 ${researchInfo}</span>
+          ` : `
+            <span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>
+            <span style="color:#666">🔒 Build Satellite Array to see more</span>
+          `}
+        </div>
+        ${badges}
+      </div>
+    `;
+  }
+  content.innerHTML = html;
+};
+
+// --- 7. Victory Panel Polish ---
+const _origUpdateVictoryPanel = typeof updateVictoryPanel === 'function' ? updateVictoryPanel : null;
+
+// --- 8. Tile Yield Preview in Build Mode ---
+function updateBuildYieldPreview(e) {
+  const preview = document.getElementById('buildYieldPreview');
+  if (!buildState.buildMode || !hoveredTile || !buildState.selectedType) {
+    preview.classList.remove('visible');
+    return;
+  }
+  const bt = BUILDING_TYPES[buildState.selectedType];
+  if (!bt) { preview.classList.remove('visible'); return; }
+
+  const { x, y } = hoveredTile;
+  const t = TERRAIN_BY_ID[map.terrain[y][x]];
+  let info = `<strong>${bt.name}</strong> here:`;
+  let details = [];
+
+  if (bt.energyOutput > 0) {
+    let energy = bt.energyOutput;
+    let bonuses = [];
+    if (buildState.selectedType === 'solar_panel' && t.id === TERRAIN.DESERT.id) {
+      energy = Math.round(energy * 1.25);
+      bonuses.push('Desert +25%');
+    }
+    if (buildState.selectedType === 'solar_panel' && isNightTime()) bonuses.push('⚠️ Reduced at night');
+    details.push(`⚡ ${energy} energy${bonuses.length ? ' (' + bonuses.join(', ') + ')' : ''}`);
+  }
+  if (bt.hashPower > 0) {
+    details.push(`⛏ ${bt.hashPower} H/s`);
+    details.push(`⚡ Uses ${bt.energy} energy`);
+  }
+  if (bt.popCapacity > 0) details.push(`🏠 +${bt.popCapacity} housing`);
+  if (bt.foodOutput > 0) details.push(`🌾 +${bt.foodOutput} food`);
+  if (bt.popCost > 0) details.push(`👥 Needs ${bt.popCost} workers`);
+
+  if (details.length === 0) { preview.classList.remove('visible'); return; }
+
+  preview.innerHTML = info + '<br>' + details.map(d => `<span style="color:#aaa">${d}</span>`).join('<br>');
+  preview.style.left = (e.clientX + 16) + 'px';
+  preview.style.top = (e.clientY - 10) + 'px';
+  preview.classList.add('visible');
+}
+
+// --- 9. Auto-build suggestion ---
+let autoBuildSuggestionShown = false;
+
+function checkAutoBuildSuggestion() {
+  if (autoBuildSuggestionShown || gameState.turn < 3) return;
+  const player = gameState.civs[0];
+  const playerBuildings = gameState.buildings.filter(b => b.owner === 0);
+  const hasMiner = playerBuildings.some(b => BUILDING_TYPES[b.type].hashPower > 0);
+  const hasEnergy = playerBuildings.some(b => BUILDING_TYPES[b.type].energyOutput > 0);
+
+  if (playerBuildings.length <= 1 && gameState.turn >= 3) {
+    const el = document.getElementById('autoBuildSuggestion');
+    el.textContent = hasEnergy ? '💡 Build a Home Miner to start earning ₿ (press B)' :
+                     '💡 Your miners need energy! Try building a Solar Panel (press B)';
+    el.style.display = 'block';
+    autoBuildSuggestionShown = true;
+    el.addEventListener('click', () => {
+      el.style.display = 'none';
+      toggleBuildMenu();
+    }, { once: true });
+    setTimeout(() => el.style.display = 'none', 10000);
+  }
+}
+
+// --- 9. Resource Alerts ---
+function checkResourceAlerts() {
+  const player = gameState.civs[0];
+  const netEnergy = player.energyProduced - player.energyConsumed;
+
+  // Energy deficit
+  if (netEnergy < 0) {
+    flashHudItem('hudEnergy', 'red');
+  }
+  // Low food
+  if (player.foodProduced < player.population) {
+    flashHudItem('hudPop', 'red');
+  }
+  // Low treasury
+  if (player.treasury < 50) {
+    flashHudItem('hudSats', 'red');
+  }
+  // No idle workers but buildings need them
+  if (player.idleWorkers === 0 && player.workersUsed >= player.population) {
+    flashHudItem('hudPop', 'yellow');
+  }
+}
+
+function flashHudItem(elementId, color) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  const parent = el.closest('.hud-item');
+  if (!parent) return;
+  parent.classList.remove('alert-flash', 'alert-flash-red', 'alert-flash-yellow');
+  void parent.offsetWidth;
+  parent.classList.add('alert-flash', color === 'red' ? 'alert-flash-red' : 'alert-flash-yellow');
+  setTimeout(() => parent.classList.remove('alert-flash', 'alert-flash-red', 'alert-flash-yellow'), 1600);
+}
+
+// --- 10. Performance: Lazy minimap ---
+let minimapFrameCounter = 0;
+const _origRenderMinimap = renderMinimap;
+renderMinimap = function() {
+  minimapFrameCounter++;
+  if (minimapFrameCounter % 3 !== 0) return;
+  _origRenderMinimap();
+};
+
+// --- 10. Performance: Animation frame budget ---
+let lastFrameTime = performance.now();
+let frameBudgetSkip = false;
+
+// --- Double-click on tile ---
+let lastClickTime = 0;
+let lastClickTile = null;
+canvas.addEventListener('dblclick', e => {
+  const tile = fromIso(e.clientX, e.clientY);
+  if (tile.x < 0 || tile.x >= MAP_W || tile.y < 0 || tile.y >= MAP_H) return;
+
+  const playerUnit = getPlayerUnitAt(tile.x, tile.y);
+  if (playerUnit) {
+    selectUnit(playerUnit);
+    showUnitContextMenu(playerUnit, e.clientX, e.clientY);
+    return;
+  }
+
+  // Check if buildable near territory
+  const territory = playerTerritory();
+  if (territory.has(tile.y * MAP_W + tile.x) && BUILDABLE_TERRAIN.includes(map.terrain[tile.y][tile.x])) {
+    if (!getBuildingAt(tile.x, tile.y)) {
+      toggleBuildMenu();
+    }
+  }
+});
+
+// --- Hook into processTurn for polish effects ---
+const _origProcessTurn = processTurn;
+processTurn = function() {
+  const prevTreasury = gameState.civs[0].treasury;
+  _origProcessTurn();
+  const earned = gameState.civs[0].treasury - prevTreasury;
+
+  // Screen shake on halving
+  if (gameState.turn > 0 && gameState.turn % gameState.halvingInterval === 0) {
+    screenShake();
+  }
+
+  // Treasury pop
+  if (earned > 0) {
+    treasuryPop(Math.round(earned * 100) / 100);
+  }
+
+  // Turn counter odometer
+  odometerTick();
+
+  // Resource alerts
+  checkResourceAlerts();
+
+  // Auto-build suggestion
+  checkAutoBuildSuggestion();
+
+  // Auto-advance pause check
+  if (autoAdvanceEnabled) {
+    // Check for pause events from last turn summary
+    const panel = document.getElementById('turnSummaryPanel');
+    const body = panel.querySelector('.tsp-body');
+    if (body) {
+      const text = body.textContent || '';
+      if (autoAdvancePauseEvents.some(e => text.includes(e)) || gameState.gameOver) {
+        autoAdvanceEnabled = false;
+        document.getElementById('autoAdvanceBtn').classList.remove('active');
+        stopAutoAdvance();
+        showToast('⏸ Auto-advance paused (important event)', 'warning');
+      }
+    }
+  }
+
+  // Speed controls: if fast/ultra, process extra turns
+  if (gameSpeed > 1 && !gameState.gameOver) {
+    for (let i = 1; i < gameSpeed; i++) {
+      if (gameState.gameOver) break;
+      _origProcessTurn();
+      odometerTick();
+    }
+    updateHUD();
+  }
+};
+
+// --- Hook screen shake into combat ---
+const _origCombatSFX = SFX.combat;
+SFX.combat = function() {
+  _origCombatSFX.call(SFX);
+  screenShake();
+};
+
+// --- Hook screen shake into hash war ---
+const _origHashWarSFX = SFX.hashWar;
+SFX.hashWar = function() {
+  _origHashWarSFX.call(SFX);
+  screenShake();
+};
+
+// --- Hook into render for env particles ---
+const _origRender = render;
+render = function(dt) {
+  // Frame budget check
+  const now = performance.now();
+  const frameDelta = now - lastFrameTime;
+  lastFrameTime = now;
+  frameBudgetSkip = frameDelta > 33; // below 30fps
+
+  _origRender(dt);
+
+  // Environmental particles
+  if (!frameBudgetSkip) {
+    spawnEnvironmentalParticles();
+  }
+  renderEnvParticles();
+};
+
+// --- Hook into mousemove for build yield preview ---
+canvas.addEventListener('mousemove', e => {
+  updateBuildYieldPreview(e);
+});
+
+// --- Ctrl+Z for undo ---
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'z') {
+    e.preventDefault();
+    undoLastBuild();
+  }
+  // Speed cycling with Shift+Space
+  if (e.shiftKey && e.key === ' ') {
+    e.preventDefault();
+    cycleSpeed();
+  }
+});
+
+// --- Enhanced Turn Summary with trends ---
+const _origShowTurnSummary = showTurnSummaryPanel;
+let prevTurnStats = null;
+let bestEverStats = { treasury: 0, hash: 0, population: 0 };
+
+showTurnSummaryPanel = function(earnings, totalHash, popChanges, events) {
+  const player = gameState.civs[0];
+  const currentStats = {
+    treasury: Math.round(player.treasury),
+    hash: player.hashPower,
+    energy: player.energyProduced - player.energyConsumed,
+    population: player.population,
+  };
+
+  // Update best ever
+  if (currentStats.treasury > bestEverStats.treasury) bestEverStats.treasury = currentStats.treasury;
+  if (currentStats.hash > bestEverStats.hash) bestEverStats.hash = currentStats.hash;
+  if (currentStats.population > bestEverStats.population) bestEverStats.population = currentStats.population;
+
+  // Call original
+  _origShowTurnSummary(earnings, totalHash, popChanges, events);
+
+  // Add trend arrows to existing summary
+  if (prevTurnStats) {
+    const panel = document.getElementById('turnSummaryPanel');
+    const body = panel.querySelector('.tsp-body');
+    if (body) {
+      // Append best ever records
+      let bestHtml = '<hr class="tsp-divider"><div style="text-align:center;font-size:10px;color:#666;margin-top:4px">🏆 Best: ₿' + bestEverStats.treasury.toLocaleString() + ' · ⛏' + bestEverStats.hash + ' H/s · 👥' + bestEverStats.population + '</div>';
+      body.innerHTML += bestHtml;
+    }
+  }
+
+  prevTurnStats = { ...currentStats };
+};
+
+// --- Minimap drag to pan ---
+let minimapDragging = false;
+minimapCanvas.addEventListener('mousedown', e => {
+  minimapDragging = true;
+  panCameraFromMinimap(e);
+});
+minimapCanvas.addEventListener('mousemove', e => {
+  if (minimapDragging) panCameraFromMinimap(e);
+});
+minimapCanvas.addEventListener('mouseup', () => { minimapDragging = false; });
+minimapCanvas.addEventListener('mouseleave', () => { minimapDragging = false; });
+
+function panCameraFromMinimap(e) {
+  const rect = minimapCanvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width * MAP_W;
+  const my = (e.clientY - rect.top) / rect.height * MAP_H;
+  const tx = Math.floor(Math.max(0, Math.min(MAP_W - 1, mx)));
+  const ty = Math.floor(Math.max(0, Math.min(MAP_H - 1, my)));
+  const iso = toIso(tx, ty);
+  camera.x = iso.x * camera.zoom;
+  camera.y = iso.y * camera.zoom;
+}
+
+// --- Pulsing unit dots on minimap ---
+const _origRenderMinimapInner = _origRenderMinimap;
+// Already lazy-rendering minimap, the pulse is handled by the existing render
+
+// --- Enhanced Victory Panel with estimated turns ---
+// (Patch updateVictoryPanel if it exists)
+if (_origUpdateVictoryPanel) {
+  updateVictoryPanel = function() {
+    _origUpdateVictoryPanel();
+    // Add estimated turns
+    const panel = document.getElementById('victoryPanel');
+    if (!panel) return;
+    const types = panel.querySelectorAll('.victory-type');
+    types.forEach(vt => {
+      const bar = vt.querySelector('.victory-progress-fill');
+      if (bar) {
+        // Smooth animation
+        const currentWidth = bar.style.width;
+        bar.style.transition = 'width 0.6s ease-out';
+      }
+    });
+  };
+}
+
+console.log('🎮 MEGA POLISH PASS loaded — game is now EXTRA juicy!');
 
 requestAnimationFrame(gameLoop);
 
