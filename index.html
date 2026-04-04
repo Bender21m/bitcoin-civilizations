@@ -1536,6 +1536,244 @@
   /* Hidden file input */
   #importFileInput { display: none; }
 
+  /* ========== Diplomacy Panel ========== */
+  #diplomacyOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #diplomacyOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #diplomacyPanel {
+    background: linear-gradient(145deg, rgba(20,20,32,0.98) 0%, rgba(12,12,22,0.98) 100%);
+    border: 1px solid rgba(247,147,26,0.5);
+    border-radius: 16px;
+    padding: 24px 32px;
+    max-width: 600px;
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 60px rgba(0,0,0,0.7), 0 0 30px rgba(247,147,26,0.12);
+  }
+  #diplomacyPanel h2 {
+    color: #F7931A;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+  #diplomacyPanel .diplo-subtitle {
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .diplo-civ-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+  .diplo-civ-card:hover {
+    border-color: rgba(247,147,26,0.3);
+  }
+  .diplo-civ-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .diplo-civ-swatch {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .diplo-civ-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ddd;
+    flex: 1;
+  }
+  .diplo-relationship {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .diplo-rel-neutral { background: rgba(150,150,150,0.2); color: #aaa; }
+  .diplo-rel-trading { background: rgba(247,147,26,0.2); color: #F7931A; }
+  .diplo-rel-allied { background: rgba(68,221,102,0.2); color: #44dd66; }
+  .diplo-rel-at_war { background: rgba(255,68,68,0.2); color: #ff4444; }
+  .diplo-civ-stats {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .diplo-civ-stats span { white-space: nowrap; }
+  .diplo-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .diplo-btn {
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.15s;
+  }
+  .diplo-btn:hover { transform: scale(1.04); }
+  .diplo-btn:active { transform: scale(0.97); }
+  .diplo-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+  .diplo-btn-trade { background: linear-gradient(135deg, #F7931A 0%, #e07800 100%); color: #fff; }
+  .diplo-btn-alliance { background: linear-gradient(135deg, #44dd66 0%, #22aa44 100%); color: #fff; }
+  .diplo-btn-cancel { background: linear-gradient(135deg, #aa4444 0%, #882222 100%); color: #fff; }
+  .diplo-btn-intel { background: linear-gradient(135deg, #8888ff 0%, #6666cc 100%); color: #fff; }
+  .diplo-btn-pool { background: linear-gradient(135deg, #00A8FF 0%, #0066cc 100%); color: #fff; }
+  .diplo-btn-war { background: linear-gradient(135deg, #ff4444 0%, #cc2222 100%); color: #fff; }
+  .diplo-close-btn {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px 28px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    color: #aaa;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .diplo-close-btn:hover { background: rgba(255,255,255,0.12); color: #ddd; }
+  .diplo-mining-pool-info {
+    background: rgba(0,168,255,0.08);
+    border: 1px solid rgba(0,168,255,0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: #88ccff;
+  }
+  .diplo-trade-income {
+    font-size: 11px;
+    color: #F7931A;
+    margin-top: 4px;
+  }
+  /* War cost analysis modal */
+  #warCostOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  #warCostOverlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #warCostPanel {
+    background: linear-gradient(145deg, rgba(30,15,15,0.98) 0%, rgba(20,10,10,0.98) 100%);
+    border: 1px solid rgba(255,68,68,0.5);
+    border-radius: 14px;
+    padding: 24px 28px;
+    max-width: 420px;
+    width: 90vw;
+    font-family: 'Courier New', monospace;
+  }
+  #warCostPanel h3 {
+    color: #ff4444;
+    font-size: 15px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  #warCostPanel .cost-line {
+    font-size: 12px;
+    color: #ccc;
+    padding: 3px 0;
+  }
+  #warCostPanel .cost-divider {
+    border: none;
+    border-top: 1px solid rgba(255,68,68,0.2);
+    margin: 8px 0;
+  }
+  #warCostPanel .cost-warning {
+    font-size: 12px;
+    color: #ff8844;
+    text-align: center;
+    margin: 10px 0;
+    font-weight: 600;
+  }
+  .war-cost-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .war-cost-btns button {
+    padding: 8px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .war-cost-btns button:hover { transform: scale(1.04); }
+
+  /* AI trade proposal toast */
+  .toast.proposal {
+    border-color: rgba(247,147,26,0.6);
+    pointer-events: auto;
+    animation: toastIn 0.3s ease;
+    max-width: 320px;
+  }
+  .toast.proposal .proposal-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .toast.proposal .proposal-btns button {
+    padding: 5px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .toast.proposal .accept-btn {
+    background: #44dd66;
+    color: #000;
+  }
+  .toast.proposal .decline-btn {
+    background: rgba(255,255,255,0.1);
+    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
 </style>
 </head>
 <body>
@@ -1586,6 +1824,11 @@
   <button id="helpBtn" class="hud-btn" title="Tutorial / Help (?)" style="font-size:14px;padding:2px 10px;margin-left:2px;">?</button>
   <button id="techTreeBtn" class="hud-btn" title="Tech Tree (T)">🔬 Research</button>
   <button id="victoryBtn" class="hud-btn" title="Victory Progress (V)">🏆 Victory</button>
+  <button id="diplomacyBtn" class="hud-btn" title="Diplomacy (P)">🤝 Diplomacy</button>
+  <div class="hud-item" id="hudDiploInfo" style="display:none">
+    <span id="hudTradeCount" style="color:#F7931A;font-size:11px"></span>
+    <span id="hudAllyCount" style="color:#44dd66;font-size:11px;margin-left:4px"></span>
+  </div>
   <button id="hashWarBtn" class="hud-btn" title="Hash War (H)" style="display:none">⚔️ Hash War</button>
   <span id="hudWarStatus" style="display:none" class="hud-war-indicator">⚔️ AT WAR</span>
   <button id="saveBtn" class="hud-btn" title="Save Game">💾</button>
@@ -1729,6 +1972,26 @@
   </div>
 </div>
 
+<div id="diplomacyOverlay">
+  <div id="diplomacyPanel">
+    <h2>🤝 DIPLOMACY</h2>
+    <div class="diplo-subtitle">Manage trade routes, alliances, and foreign relations</div>
+    <div id="diplomacyContent"></div>
+    <button class="diplo-close-btn" id="diplomacyClose">← Close (P/Esc)</button>
+  </div>
+</div>
+
+<div id="warCostOverlay">
+  <div id="warCostPanel">
+    <h3>⚔️ COST OF WAR</h3>
+    <div id="warCostContent"></div>
+    <div class="war-cost-btns">
+      <button id="warCostConfirm" style="background:linear-gradient(135deg,#ff4444,#cc2222);color:#fff">⚔️ Declare War</button>
+      <button id="warCostCancel" style="background:rgba(255,255,255,0.08);color:#aaa;border:1px solid rgba(255,255,255,0.15)">← Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div id="hashWarOverlay">
   <div id="hashWarPanel">
     <h2>⚔️ HASH WARS</h2>
@@ -1856,12 +2119,12 @@ const BUILDING_TYPES = {
   mining_data_center: { name: 'Mining Data Center', energy: 45, hashPower: 40, popCapacity: 0, popCost: 5, foodOutput: 0, energyOutput: 0, cost: 1200, icon: '🖥️', description: 'High-performance miner: 40 H/s, uses 45⚡ + 5 workers', requiresTech: 'advanced_mining', category: 'mining' },
   mining_mega_facility: { name: 'Mining Mega Facility', energy: 100, hashPower: 100, popCapacity: 0, popCost: 10, foodOutput: 0, energyOutput: 0, cost: 3000, icon: '🏗️', description: 'Massive mining: 100 H/s, uses 100⚡ + 10 workers', requiresTech: 'mega_mining', category: 'mining' },
   // --- Civilization Buildings ---
-  market:           { name: 'Market',              energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏪', description: '+5 happiness. Enables trade (future)', happinessBonus: 5, requiresTech: 'trade', category: 'civilization' },
+  market:           { name: 'Market',              energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏪', description: '+5 happiness. Enables trade routes (P key)', happinessBonus: 5, requiresTech: 'trade', category: 'civilization' },
   school:           { name: 'School',              energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 300, icon: '🏫', description: '+3 happiness, -10% research time', happinessBonus: 3, researchSpeedBonus: 0.10, requiresTech: 'education', category: 'civilization' },
   university:       { name: 'University',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 800, icon: '🎓', description: '+5 happiness, -25% research time. Requires School built', happinessBonus: 5, researchSpeedBonus: 0.25, requiresTech: 'higher_education', requiresBuilding: 'school', category: 'civilization' },
   bank:             { name: 'Bank',                energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 500, icon: '🏦', description: '+10% sats income bonus', satsBonusPct: 0.10, requiresTech: 'banking', category: 'civilization' },
   lightning_tower:  { name: 'Lightning Tower',     energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 600, icon: '⚡', description: '+8 happiness, +2 sats/turn routing fees', happinessBonus: 8, satsPerTurn: 2, requiresTech: 'lightning_network', category: 'civilization' },
-  embassy:          { name: 'Embassy',             energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏛️', description: '+5 happiness. Enables diplomacy (future)', happinessBonus: 5, requiresTech: 'diplomacy', category: 'civilization' },
+  embassy:          { name: 'Embassy',             energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 400, icon: '🏛️', description: '+5 happiness. Enables alliances (P key)', happinessBonus: 5, requiresTech: 'diplomacy', category: 'civilization' },
   node_relay:       { name: 'Node Relay',          energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 350, icon: '📡', description: '+2 happiness, extends territory by 3 tiles', happinessBonus: 2, territoryBonus: 3, requiresTech: 'networking', category: 'civilization' },
   // --- Defense Buildings ---
   walls:            { name: 'Walls',               energy: 0,  hashPower: 0,  popCapacity: 0, popCost: 0, foodOutput: 0, energyOutput: 0,  cost: 200, icon: '🧱', description: 'Defensive walls (future combat)', requiresTech: 'construction', category: 'defense' },
@@ -3370,6 +3633,9 @@ function calculateHappiness(civId) {
 
   // Hash war happiness penalty
   happiness -= calculateHashWarHappiness(civId);
+
+  // Diplomacy happiness (trade routes, alliances, mining pools, penalties)
+  happiness += calculateDiplomacyHappiness(civId);
 
   return Math.max(0, Math.min(100, happiness));
 }
@@ -5292,6 +5558,9 @@ function processTurn() {
   processHashWars();
   processAIHashWars();
 
+  // Process Diplomacy & Trade
+  processDiplomacy();
+
   // Process AI turns (build, research)
   for (let i = 1; i <= 3; i++) {
     processAITurn(i);
@@ -5470,6 +5739,10 @@ function showTurnSummaryPanel(earnings, totalHash, popChanges, events) {
     const total = player.researchTurnsNeeded || getResearchTurns(0, player.currentResearch);
     html += `<div class="tsp-line"><span class="tsp-label">🔬 Research</span><span class="tsp-value" style="color:#cc88ff">${tech.name} (${player.researchProgress}/${total})</span></div>`;
   }
+  const tradeIncome = getTotalTradeIncome(0);
+  if (tradeIncome > 0) {
+    html += `<div class="tsp-line"><span class="tsp-label">🤝 Trade Income</span><span class="tsp-value" style="color:#FFD700">+${tradeIncome} sats</span></div>`;
+  }
   const unitUpkeep = getUnitUpkeep(0);
   const unitCount = getUnitsOfOwner(0).length;
   if (unitCount > 0) {
@@ -5571,6 +5844,9 @@ function updateHUD() {
   } else {
     researchEl.textContent = '';
   }
+
+  // Diplomacy HUD
+  updateDiplomacyHUD();
 }
 
 // ============================================================
@@ -5589,12 +5865,15 @@ function updateCivPanel() {
     const personality = AI_PERSONALITIES[civ.id];
     const researchInfo = civ.currentResearch ? TECH_TREE[civ.currentResearch]?.name : 'None';
 
+    const diploRel = !civ.isPlayer && !eliminated ? getDiploRelationship(0, civ.id) : null;
+    const diploIcon = diploRel ? getRelationshipIcon(diploRel.status) : '';
     html += `
       <div class="civ-entry" ${eliminated ? 'style="opacity:0.4"' : ''}>
         <div class="civ-name">
           <span class="civ-swatch" style="background:${eliminated ? '#666' : civ.color}"></span>
           ${civ.name}${civ.isPlayer ? ' (You)' : ` (AI${personality ? ' · ' + personality.name : ''})`}
           ${eliminated ? ' <span style="color:#ff4444;font-size:10px">ELIMINATED</span>' : ''}
+          ${diploIcon ? ` <span style="font-size:10px">${diploIcon}</span>` : ''}
         </div>
         <div class="civ-stats">
           ${eliminated ? '<span style="color:#666">Bankrupt</span>' : showDetails ? `
@@ -7476,6 +7755,9 @@ function render() {
   // Render dust particles
   renderDustParticles();
 
+  // Trade route lines on main map
+  drawTradeRoutesOnMap(ctx, performance.now());
+
   // Render floating texts and particles on top
   const nowPerf = performance.now();
   renderFloatingTexts(nowPerf);
@@ -7574,6 +7856,9 @@ function renderMinimap() {
       }
     }
   }
+
+  // Trade route lines on minimap
+  drawTradeRoutesOnMinimap();
 
   // Quadrant lines
   const qHalfX = mw / 2, qHalfY = mh / 2;
@@ -8372,6 +8657,16 @@ window.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeSettings();
     return;
   }
+  // Diplomacy overlay
+  if (diplomacyOpen) {
+    if (e.key === 'Escape' || e.key.toLowerCase() === 'p') closeDiplomacyPanel();
+    return;
+  }
+  // War cost overlay
+  if (warCostTarget !== null) {
+    if (e.key === 'Escape') closeWarCostPanel();
+    return;
+  }
   // Hash war overlay
   if (hashWarOpen) {
     if (e.key === 'Escape') closeHashWarPanel();
@@ -8443,6 +8738,11 @@ window.addEventListener('keydown', e => {
   // H = hash war panel
   if (e.key.toLowerCase() === 'h' && !e.repeat) {
     if (gameState.civs[0].hashPower > 10) openHashWarPanel();
+  }
+
+  // P = diplomacy panel
+  if (e.key.toLowerCase() === 'p' && !e.repeat) {
+    toggleDiplomacyPanel();
   }
 
   // U = toggle unit panel
@@ -8555,6 +8855,7 @@ function regenerateMap() {
   floatingTexts = [];
   particles = [];
   hashWars = [];
+  diplomacyRelationships = {};
   hideUnitActionBar();
   hideUnitContextMenu();
   hideWorkerBuildMenu();
@@ -9602,6 +9903,7 @@ function createSaveData() {
     })),
     visibility: fogOfWarEnabled ? visibility : null,
     hashWars: hashWars,
+    diplomacyRelationships: diplomacyRelationships,
     settings: {
       fogOfWar: fogOfWarEnabled
     },
@@ -9696,6 +9998,9 @@ function loadGameFromData(data) {
 
     // Restore hash wars
     hashWars = data.hashWars || [];
+
+    // Restore diplomacy
+    diplomacyRelationships = data.diplomacyRelationships || {};
 
     // Reset UI state
     selectedTile = null;
@@ -9842,6 +10147,11 @@ function getRedirectedHash(civId) {
 function getEffectiveHash(civId) {
   const civ = gameState.civs[civId];
   let effective = civ.hashPower;
+  // Mining pool: pool members share rewards as a unit, gaining efficiency
+  // +15% hash bonus for being in a mining pool (coordination bonus)
+  if (getMiningPoolPartners(civId).length > 0) {
+    effective = Math.floor(effective * 1.15);
+  }
   // Subtract redirected hash (attacking)
   effective -= getRedirectedHash(civId);
   // Apply disruption from being attacked
@@ -9957,11 +10267,15 @@ function processAIHashWars() {
     // Need >5000 treasury and decent hash power
     if (civ.treasury < 5000 || civ.hashPower < 10) continue;
     
-    // Find weakest non-eliminated opponent
+    // Find weakest non-eliminated, non-allied opponent
     let weakest = null;
     let weakestHash = Infinity;
     for (const target of gameState.civs) {
       if (target.id === i || target.eliminated) continue;
+      // Don't attack allies or trading partners (for The Trader)
+      const rel = getDiploRelationship(i, target.id);
+      if (rel.status === 'allied') continue;
+      if (i === 2 && (rel.status === 'trading')) continue; // Trader never attacks trade partners
       if (target.hashPower < weakestHash) {
         weakestHash = target.hashPower;
         weakest = target;
@@ -9972,6 +10286,14 @@ function processAIHashWars() {
     
     // Only attack if we have >60% more hash
     if (civ.hashPower > weakest.hashPower * 1.6) {
+      // Break trade/alliance first
+      const warRel = getDiploRelationship(i, weakest.id);
+      if (warRel.status === 'trading') {
+        warRel.happinessPenalty = 10;
+        warRel.penaltyTurns = 5;
+      }
+      warRel.status = 'at_war';
+      warRel.miningPool = false;
       startHashWar(i, weakest.id, 40); // Redirect 40%
     }
   }
@@ -10153,6 +10475,790 @@ function checkStartupSave() {
 
 
 // ============================================================
+// Diplomacy & Trade Route System
+// ============================================================
+
+// Diplomacy state
+let diplomacyOpen = false;
+let warCostTarget = null; // civId for war cost analysis
+let diplomacyRelationships = {}; // key: "0-1", value: { status, tradeTurn, allianceTurn, miningPool, happinessPenalty, penaltyTurns }
+let tradeRouteAnimPhase = 0; // for animated trade route visuals
+
+function getDiploKey(a, b) {
+  return Math.min(a, b) + '-' + Math.max(a, b);
+}
+
+function getDiploRelationship(civA, civB) {
+  const key = getDiploKey(civA, civB);
+  if (!diplomacyRelationships[key]) {
+    diplomacyRelationships[key] = {
+      status: 'neutral', // neutral, trading, allied, at_war
+      tradeTurn: 0,
+      allianceTurn: 0,
+      miningPool: false,
+      happinessPenalty: 0, // temporary penalty from breaking agreements
+      penaltyTurns: 0,
+    };
+  }
+  return diplomacyRelationships[key];
+}
+
+function setDiploStatus(civA, civB, status) {
+  const rel = getDiploRelationship(civA, civB);
+  rel.status = status;
+  if (status === 'trading') rel.tradeTurn = gameState.turn;
+  if (status === 'allied') rel.allianceTurn = gameState.turn;
+}
+
+function getTradeRouteCount(civId) {
+  let count = 0;
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    const rel = getDiploRelationship(civId, civ.id);
+    if (rel.status === 'trading' || rel.status === 'allied') count++;
+  }
+  return count;
+}
+
+function getAllianceCount(civId) {
+  let count = 0;
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    const rel = getDiploRelationship(civId, civ.id);
+    if (rel.status === 'allied') count++;
+  }
+  return count;
+}
+
+function hasBuilding(civId, buildingType) {
+  return gameState.buildings.some(b => b.owner === civId && b.type === buildingType && b.active);
+}
+
+function getTradeIncome(civA, civB) {
+  const rel = getDiploRelationship(civA, civB);
+  if (rel.status !== 'trading' && rel.status !== 'allied') return 0;
+  let income = 3; // base trade income
+  // Lightning Tower bonus: if both have lightning towers, double
+  if (hasBuilding(civA, 'lightning_tower') && hasBuilding(civB, 'lightning_tower')) {
+    income = 6;
+  }
+  return income;
+}
+
+function getTotalTradeIncome(civId) {
+  let total = 0;
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    total += getTradeIncome(civId, civ.id);
+  }
+  return total;
+}
+
+// Calculate diplomacy happiness for a civ
+function calculateDiplomacyHappiness(civId) {
+  let bonus = 0;
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    const rel = getDiploRelationship(civId, civ.id);
+    if (rel.status === 'trading') bonus += 5;
+    if (rel.status === 'allied') bonus += 10; // 5 for trade aspect + 5 for alliance
+    if (rel.miningPool) bonus += 3;
+  }
+  // Subtract temporary penalties
+  for (const key in diplomacyRelationships) {
+    const parts = key.split('-');
+    if (parseInt(parts[0]) === civId || parseInt(parts[1]) === civId) {
+      const rel = diplomacyRelationships[key];
+      if (rel.penaltyTurns > 0) bonus -= rel.happinessPenalty;
+    }
+  }
+  return bonus;
+}
+
+// Get effective hash for mining pool calculations
+function getMiningPoolHash(civId) {
+  let pooledHash = 0;
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    const rel = getDiploRelationship(civId, civ.id);
+    if (rel.status === 'allied' && rel.miningPool) {
+      pooledHash += civ.hashPower;
+    }
+  }
+  return pooledHash;
+}
+
+function getMiningPoolPartners(civId) {
+  const partners = [];
+  for (const civ of gameState.civs) {
+    if (civ.id === civId || civ.eliminated) continue;
+    const rel = getDiploRelationship(civId, civ.id);
+    if (rel.status === 'allied' && rel.miningPool) {
+      partners.push(civ);
+    }
+  }
+  return partners;
+}
+
+// Propose trade route
+function proposeTrade(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel.status !== 'neutral') return false;
+  if (!hasBuilding(fromCiv, 'market') || !hasBuilding(toCiv, 'market')) return false;
+
+  setDiploStatus(fromCiv, toCiv, 'trading');
+  const fromName = gameState.civs[fromCiv].name;
+  const toName = gameState.civs[toCiv].name;
+  addAILogEntry(`📜 Trade agreement: ${fromName} ↔ ${toName}`);
+
+  if (fromCiv === 0 || toCiv === 0) {
+    const otherName = fromCiv === 0 ? toName : fromName;
+    showToast(`📜 Trade route established with ${otherName}! (+3-6 sats/turn)`, 'success');
+  }
+  return true;
+}
+
+// Cancel trade route
+function cancelTrade(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel.status !== 'trading') return false;
+  rel.status = 'neutral';
+  rel.happinessPenalty = 10;
+  rel.penaltyTurns = 5;
+  rel.miningPool = false;
+
+  const fromName = gameState.civs[fromCiv].name;
+  const toName = gameState.civs[toCiv].name;
+  addAILogEntry(`❌ Trade agreement broken: ${fromName} ↔ ${toName}`);
+
+  if (fromCiv === 0 || toCiv === 0) {
+    showToast(`❌ Trade route with ${fromCiv === 0 ? toName : fromName} cancelled! (-10 happiness for 5 turns)`, 'error');
+  }
+  return true;
+}
+
+// Propose alliance
+function proposeAlliance(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel.status !== 'trading') return false;
+  if (!hasBuilding(fromCiv, 'embassy') || !hasBuilding(toCiv, 'embassy')) return false;
+
+  setDiploStatus(fromCiv, toCiv, 'allied');
+  const fromName = gameState.civs[fromCiv].name;
+  const toName = gameState.civs[toCiv].name;
+  addAILogEntry(`🏛 Alliance formed: ${fromName} ↔ ${toName}`);
+
+  if (fromCiv === 0 || toCiv === 0) {
+    const otherName = fromCiv === 0 ? toName : fromName;
+    showToast(`🏛 Alliance formed with ${otherName}! (+5 happiness, shared intel)`, 'success');
+  }
+  return true;
+}
+
+// Break alliance
+function breakAlliance(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel.status !== 'allied') return false;
+  rel.status = 'neutral';
+  rel.happinessPenalty = 20;
+  rel.penaltyTurns = 5;
+  rel.miningPool = false;
+
+  const fromName = gameState.civs[fromCiv].name;
+  const toName = gameState.civs[toCiv].name;
+  addAILogEntry(`💔 Alliance broken: ${fromName} ↔ ${toName}`);
+
+  if (fromCiv === 0 || toCiv === 0) {
+    showToast(`💔 Alliance with ${fromCiv === 0 ? toName : fromName} broken! (-20 happiness for 5 turns)`, 'error');
+  }
+  return true;
+}
+
+// Toggle mining pool
+function toggleMiningPool(civA, civB) {
+  const rel = getDiploRelationship(civA, civB);
+  if (rel.status !== 'allied') return false;
+  rel.miningPool = !rel.miningPool;
+  const aName = gameState.civs[civA].name;
+  const bName = gameState.civs[civB].name;
+
+  if (rel.miningPool) {
+    addAILogEntry(`⛏ Mining Pool formed: ${aName} ↔ ${bName}`);
+    if (civA === 0 || civB === 0) {
+      showToast(`⛏ Mining Pool active with ${civA === 0 ? bName : aName}! Combined hash power sharing.`, 'success');
+    }
+  } else {
+    addAILogEntry(`⛏ Mining Pool dissolved: ${aName} ↔ ${bName}`);
+    if (civA === 0 || civB === 0) {
+      showToast(`⛏ Mining Pool with ${civA === 0 ? bName : aName} dissolved.`, 'info');
+    }
+  }
+  return true;
+}
+
+// Share intel (reveal ally's visible tiles)
+function shareIntel(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel.status !== 'allied') return;
+
+  // Reveal all tiles visible to the ally
+  const allyCitadel = getCitadelPosition(toCiv);
+  if (!allyCitadel) return;
+
+  const range = 15; // reveal tiles around ally citadel
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const tx = allyCitadel.x + dx;
+      const ty = allyCitadel.y + dy;
+      if (tx < 0 || ty < 0 || tx >= MAP_W || ty >= MAP_H) continue;
+      if (visibility[ty] && visibility[ty][tx] < 2) {
+        visibility[ty][tx] = Math.max(visibility[ty][tx], 1); // at least explored
+      }
+    }
+  }
+
+  // Also reveal ally building locations
+  for (const b of gameState.buildings) {
+    if (b.owner === toCiv && visibility[b.y] && visibility[b.y][b.x] < 2) {
+      visibility[b.y][b.x] = 2;
+    }
+  }
+
+  if (fromCiv === 0) {
+    showToast(`🔭 Intel shared! ${gameState.civs[toCiv].name}'s territory revealed.`, 'success');
+  }
+}
+
+// Declare war (with trade route breaking)
+function declareWarOnTrader(attackerCiv, defenderCiv, redirectPct) {
+  const rel = getDiploRelationship(attackerCiv, defenderCiv);
+  
+  // Break trade/alliance first
+  if (rel.status === 'trading') {
+    rel.happinessPenalty = 10;
+    rel.penaltyTurns = 5;
+  } else if (rel.status === 'allied') {
+    rel.happinessPenalty = 20;
+    rel.penaltyTurns = 5;
+  }
+  rel.status = 'at_war';
+  rel.miningPool = false;
+
+  startHashWar(attackerCiv, defenderCiv, redirectPct || 30);
+}
+
+// Process diplomacy each turn
+function processDiplomacy() {
+  // Decay happiness penalties
+  for (const key in diplomacyRelationships) {
+    const rel = diplomacyRelationships[key];
+    if (rel.penaltyTurns > 0) {
+      rel.penaltyTurns--;
+      if (rel.penaltyTurns <= 0) {
+        rel.happinessPenalty = 0;
+      }
+    }
+  }
+
+  // Sync at_war status with hash wars
+  for (const war of hashWars) {
+    const rel = getDiploRelationship(war.attackerId, war.defenderId);
+    if (rel.status !== 'at_war') {
+      rel.status = 'at_war';
+    }
+  }
+
+  // Clean up at_war status if no active hash war
+  for (const key in diplomacyRelationships) {
+    const rel = diplomacyRelationships[key];
+    if (rel.status !== 'at_war') continue;
+    const parts = key.split('-').map(Number);
+    const hasWar = hashWars.some(w =>
+      (w.attackerId === parts[0] && w.defenderId === parts[1]) ||
+      (w.attackerId === parts[1] && w.defenderId === parts[0])
+    );
+    if (!hasWar) {
+      rel.status = 'neutral';
+    }
+  }
+
+  // Process trade income
+  for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
+    const tradeIncome = getTotalTradeIncome(civ.id);
+    if (tradeIncome > 0) {
+      civ.treasury += tradeIncome;
+      civ.treasury = Math.round(civ.treasury * 100) / 100;
+      if (civ.isPlayer && tradeIncome > 0) {
+        // floating text on citadel
+        const citadel = getCitadelPosition(0);
+        if (citadel && tradeIncome >= 1) {
+          addFloatingText(citadel.x, citadel.y, `+${tradeIncome}₿ trade`, '#FFD700');
+        }
+      }
+    }
+  }
+
+  // AI diplomacy decisions
+  processAIDiplomacy();
+}
+
+// AI Diplomacy behavior
+function processAIDiplomacy() {
+  for (let i = 1; i <= 3; i++) {
+    const civ = gameState.civs[i];
+    if (civ.eliminated) continue;
+
+    for (const other of gameState.civs) {
+      if (other.id === i || other.eliminated) continue;
+      const rel = getDiploRelationship(i, other.id);
+
+      // The Trader (civ 2): Always proposes trade, proposes alliances, never declares war
+      if (i === 2) {
+        if (rel.status === 'neutral' && hasBuilding(i, 'market') && hasBuilding(other.id, 'market')) {
+          // Propose trade to player via toast
+          if (other.id === 0) {
+            showAITradeProposal(i, other.id);
+          } else {
+            proposeTrade(i, other.id);
+          }
+        }
+        if (rel.status === 'trading' && hasBuilding(i, 'embassy') && hasBuilding(other.id, 'embassy')) {
+          if (other.id === 0) {
+            showAIAllianceProposal(i, other.id);
+          } else {
+            proposeAlliance(i, other.id);
+          }
+        }
+      }
+
+      // The Miner (civ 1): Accepts trade, neutral on alliances, may break for hash dominance
+      if (i === 1) {
+        if (rel.status === 'neutral' && hasBuilding(i, 'market') && hasBuilding(other.id, 'market') && Math.random() < 0.3) {
+          if (other.id === 0) {
+            showAITradeProposal(i, other.id);
+          } else {
+            proposeTrade(i, other.id);
+          }
+        }
+      }
+
+      // The Researcher (civ 3): Trades with anyone, allies only with leading civ
+      if (i === 3) {
+        if (rel.status === 'neutral' && hasBuilding(i, 'market') && hasBuilding(other.id, 'market') && Math.random() < 0.5) {
+          if (other.id === 0) {
+            showAITradeProposal(i, other.id);
+          } else {
+            proposeTrade(i, other.id);
+          }
+        }
+        if (rel.status === 'trading' && hasBuilding(i, 'embassy') && hasBuilding(other.id, 'embassy')) {
+          // Only ally with the leading civ (most treasury)
+          const leading = gameState.civs.filter(c => !c.eliminated && c.id !== i)
+            .sort((a, b) => b.treasury - a.treasury)[0];
+          if (leading && leading.id === other.id) {
+            if (other.id === 0) {
+              showAIAllianceProposal(i, other.id);
+            } else {
+              proposeAlliance(i, other.id);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Show AI trade proposal as interactive toast
+function showAITradeProposal(fromCiv, toCiv) {
+  // Don't spam proposals — only once every 10 turns
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel._lastProposalTurn && gameState.turn - rel._lastProposalTurn < 10) return;
+  rel._lastProposalTurn = gameState.turn;
+
+  const fromName = gameState.civs[fromCiv].name;
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast proposal';
+  toast.innerHTML = `
+    <div>📜 <strong>${fromName}</strong> proposes a Trade Agreement!</div>
+    <div class="proposal-btns">
+      <button class="accept-btn" onclick="acceptTradeProposal(${fromCiv},${toCiv});this.closest('.toast').remove()">✅ Accept</button>
+      <button class="decline-btn" onclick="this.closest('.toast').remove()">❌ Decline</button>
+    </div>
+  `;
+  container.appendChild(toast);
+  // Don't auto-remove — player must interact
+}
+
+function showAIAllianceProposal(fromCiv, toCiv) {
+  const rel = getDiploRelationship(fromCiv, toCiv);
+  if (rel._lastAllianceProposalTurn && gameState.turn - rel._lastAllianceProposalTurn < 15) return;
+  rel._lastAllianceProposalTurn = gameState.turn;
+
+  const fromName = gameState.civs[fromCiv].name;
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast proposal';
+  toast.innerHTML = `
+    <div>🏛 <strong>${fromName}</strong> proposes an Alliance!</div>
+    <div style="font-size:10px;color:#888;margin-top:2px">+5 happiness, shared fog of war, mutual defense</div>
+    <div class="proposal-btns">
+      <button class="accept-btn" onclick="acceptAllianceProposal(${fromCiv},${toCiv});this.closest('.toast').remove()">✅ Accept</button>
+      <button class="decline-btn" onclick="this.closest('.toast').remove()">❌ Decline</button>
+    </div>
+  `;
+  container.appendChild(toast);
+}
+
+function acceptTradeProposal(fromCiv, toCiv) {
+  proposeTrade(fromCiv, toCiv);
+}
+
+function acceptAllianceProposal(fromCiv, toCiv) {
+  proposeAlliance(fromCiv, toCiv);
+}
+
+// War cost analysis
+function showWarCostAnalysis(targetCivId) {
+  warCostTarget = targetCivId;
+  const target = gameState.civs[targetCivId];
+  const player = gameState.civs[0];
+  const rel = getDiploRelationship(0, targetCivId);
+  const tradeIncome = getTradeIncome(0, targetCivId);
+
+  let html = '';
+  html += `<div class="cost-line">Breaking trade with <strong style="color:${target.color}">${target.name}</strong>:</div>`;
+  html += `<hr class="cost-divider">`;
+
+  if (tradeIncome > 0) {
+    html += `<div class="cost-line" style="color:#ff6644">Lost trade income: <strong>${tradeIncome} sats/turn</strong></div>`;
+  }
+  if (rel.status === 'allied') {
+    html += `<div class="cost-line" style="color:#ff6644">Lost alliance bonus: <strong>-5 happiness</strong></div>`;
+  }
+  html += `<div class="cost-line" style="color:#ff6644">Happiness penalty: <strong>-${rel.status === 'allied' ? 20 : 10} for 5 turns</strong></div>`;
+  html += `<div class="cost-line" style="color:#ff6644">War unhappiness: <strong>-15 while at war</strong></div>`;
+
+  const prodLoss = Math.round((player.happiness > 40 && player.happiness - 25 < 40) ? player.hashPower * 0.2 : 0);
+  if (prodLoss > 0) {
+    html += `<div class="cost-line" style="color:#ff6644">Production loss from unhappiness: <strong>~${prodLoss} H/s</strong></div>`;
+  }
+
+  html += `<hr class="cost-divider">`;
+  html += `<div class="cost-line" style="color:#44dd66">vs. Continuing trade:</div>`;
+  if (tradeIncome > 0) {
+    html += `<div class="cost-line" style="color:#44dd66">Income: ${tradeIncome} sats/turn × ~20 turns = <strong>${tradeIncome * 20} sats</strong></div>`;
+  }
+  html += `<hr class="cost-divider">`;
+  if (tradeIncome > 0) {
+    html += `<div class="cost-warning">⚠ Cost of war greatly exceeds trade benefits.</div>`;
+  } else {
+    html += `<div class="cost-warning">⚠ War will impose heavy happiness penalties.</div>`;
+  }
+
+  document.getElementById('warCostContent').innerHTML = html;
+  document.getElementById('warCostOverlay').classList.add('visible');
+}
+
+function confirmWarFromCostPanel() {
+  if (warCostTarget !== null) {
+    declareWarOnTrader(0, warCostTarget, 30);
+    warCostTarget = null;
+    document.getElementById('warCostOverlay').classList.remove('visible');
+    if (diplomacyOpen) renderDiplomacyPanel();
+    updateHUD();
+  }
+}
+
+function closeWarCostPanel() {
+  warCostTarget = null;
+  document.getElementById('warCostOverlay').classList.remove('visible');
+}
+
+// Diplomacy Panel UI
+function openDiplomacyPanel() {
+  diplomacyOpen = true;
+  renderDiplomacyPanel();
+  document.getElementById('diplomacyOverlay').classList.add('visible');
+}
+
+function closeDiplomacyPanel() {
+  diplomacyOpen = false;
+  document.getElementById('diplomacyOverlay').classList.remove('visible');
+}
+
+function toggleDiplomacyPanel() {
+  if (diplomacyOpen) closeDiplomacyPanel();
+  else openDiplomacyPanel();
+}
+
+function getRelationshipIcon(status) {
+  switch (status) {
+    case 'neutral': return '⚪';
+    case 'trading': return '🤝';
+    case 'allied': return '🏛';
+    case 'at_war': return '⚔️';
+    default: return '⚪';
+  }
+}
+
+function renderDiplomacyPanel() {
+  const content = document.getElementById('diplomacyContent');
+  const player = gameState.civs[0];
+  const hasSatellite = gameState.buildings.some(b => b.owner === 0 && b.active && b.type === 'satellite_array');
+  const totalHash = getTotalNetworkHash();
+  const playerHasMarket = hasBuilding(0, 'market');
+  const playerHasEmbassy = hasBuilding(0, 'embassy');
+
+  let html = '';
+
+  // Summary bar
+  const tradeCount = getTradeRouteCount(0);
+  const allyCount = getAllianceCount(0);
+  const totalTradeInc = getTotalTradeIncome(0);
+  html += `<div style="display:flex;gap:16px;justify-content:center;margin-bottom:14px;font-size:12px;color:#aaa">`;
+  html += `<span>🤝 ${tradeCount} trade${tradeCount !== 1 ? 's' : ''}</span>`;
+  html += `<span>🏛 ${allyCount} all${allyCount !== 1 ? 'ies' : 'y'}</span>`;
+  html += `<span style="color:#F7931A">+${totalTradeInc} sats/turn</span>`;
+  html += `</div>`;
+
+  for (const civ of gameState.civs) {
+    if (civ.id === 0) continue; // skip player
+    if (civ.eliminated) {
+      html += `<div class="diplo-civ-card" style="opacity:0.4">
+        <div class="diplo-civ-header">
+          <div class="diplo-civ-swatch" style="background:#666"></div>
+          <span class="diplo-civ-name">${civ.name}</span>
+          <span class="diplo-relationship" style="color:#ff4444">ELIMINATED</span>
+        </div>
+      </div>`;
+      continue;
+    }
+
+    const rel = getDiploRelationship(0, civ.id);
+    const relClass = 'diplo-rel-' + rel.status;
+    const relLabel = rel.status === 'at_war' ? 'AT WAR' : rel.status.toUpperCase();
+    const showDetails = hasSatellite || !fogOfWarEnabled;
+    const hashPct = totalHash > 0 ? Math.round((civ.hashPower / totalHash) * 100) : 0;
+    const tradeInc = getTradeIncome(0, civ.id);
+    const personality = AI_PERSONALITIES[civ.id];
+    const otherHasMarket = hasBuilding(civ.id, 'market');
+    const otherHasEmbassy = hasBuilding(civ.id, 'embassy');
+
+    html += `<div class="diplo-civ-card">`;
+    html += `<div class="diplo-civ-header">`;
+    html += `<div class="diplo-civ-swatch" style="background:${civ.color}"></div>`;
+    html += `<span class="diplo-civ-name">${civ.name} ${personality ? '(' + personality.name + ')' : ''}</span>`;
+    html += `<span class="diplo-relationship ${relClass}">${getRelationshipIcon(rel.status)} ${relLabel}</span>`;
+    html += `</div>`;
+
+    // Stats
+    html += `<div class="diplo-civ-stats">`;
+    if (showDetails) {
+      html += `<span>₿ ${Math.round(civ.treasury).toLocaleString()}</span>`;
+      html += `<span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>`;
+      html += `<span>👥 ${civ.population}</span>`;
+      html += `<span>${getHappinessEmoji(civ.happiness)} ${civ.happiness}</span>`;
+    } else {
+      html += `<span>⛏ ${civ.hashPower} H/s (${hashPct}%)</span>`;
+      html += `<span style="color:#666">🔒 Limited intel</span>`;
+    }
+    html += `</div>`;
+
+    // Trade income display
+    if (tradeInc > 0) {
+      html += `<div class="diplo-trade-income">Trade income: +${tradeInc} sats/turn</div>`;
+    }
+
+    // Mining pool info
+    if (rel.status === 'allied' && rel.miningPool) {
+      const combinedHash = player.hashPower + civ.hashPower;
+      const playerShare = player.hashPower > 0 ? Math.round((player.hashPower / combinedHash) * 100) : 0;
+      html += `<div class="diplo-mining-pool-info">
+        ⛏ Mining Pool Active — Combined: ${combinedHash} H/s
+        (You: ${playerShare}% · ${civ.name}: ${100 - playerShare}%)
+      </div>`;
+    }
+
+    // Actions
+    html += `<div class="diplo-actions">`;
+
+    if (rel.status === 'neutral') {
+      const canTrade = playerHasMarket && otherHasMarket;
+      html += `<button class="diplo-btn diplo-btn-trade" ${canTrade ? `onclick="proposeTrade(0,${civ.id});renderDiplomacyPanel();updateHUD()"` : 'disabled'} title="${canTrade ? '' : 'Both civs need a Market'}">🤝 Propose Trade</button>`;
+      const canAlly = playerHasEmbassy && otherHasEmbassy;
+      html += `<button class="diplo-btn diplo-btn-alliance" disabled title="Must be trading first">🏛 Propose Alliance</button>`;
+      html += `<button class="diplo-btn diplo-btn-war" onclick="showWarCostAnalysis(${civ.id})">⚔️ Declare Hash War</button>`;
+    } else if (rel.status === 'trading') {
+      const canAlly = playerHasEmbassy && otherHasEmbassy;
+      html += `<button class="diplo-btn diplo-btn-alliance" ${canAlly ? `onclick="proposeAlliance(0,${civ.id});renderDiplomacyPanel();updateHUD()"` : 'disabled'} title="${canAlly ? '' : 'Both civs need an Embassy'}">🏛 Propose Alliance</button>`;
+      html += `<button class="diplo-btn diplo-btn-cancel" onclick="cancelTrade(0,${civ.id});renderDiplomacyPanel();updateHUD()">❌ Cancel Trade</button>`;
+      html += `<button class="diplo-btn diplo-btn-war" onclick="showWarCostAnalysis(${civ.id})">⚔️ Declare Hash War</button>`;
+    } else if (rel.status === 'allied') {
+      html += `<button class="diplo-btn diplo-btn-intel" onclick="shareIntel(0,${civ.id});renderDiplomacyPanel()">🔭 Share Intel</button>`;
+      html += `<button class="diplo-btn diplo-btn-pool" onclick="toggleMiningPool(0,${civ.id});renderDiplomacyPanel();updateHUD()">${rel.miningPool ? '⛏ Dissolve Pool' : '⛏ Mining Pool'}</button>`;
+      html += `<button class="diplo-btn diplo-btn-cancel" onclick="breakAlliance(0,${civ.id});renderDiplomacyPanel();updateHUD()">💔 Break Alliance</button>`;
+    } else if (rel.status === 'at_war') {
+      html += `<span style="color:#ff4444;font-size:12px">Currently at war — use Hash War panel to manage</span>`;
+    }
+
+    html += `</div>`;
+    html += `</div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+// Update diplomacy HUD info
+function updateDiplomacyHUD() {
+  const tradeCount = getTradeRouteCount(0);
+  const allyCount = getAllianceCount(0);
+  const diploInfo = document.getElementById('hudDiploInfo');
+
+  if (tradeCount > 0 || allyCount > 0) {
+    diploInfo.style.display = '';
+    document.getElementById('hudTradeCount').textContent = tradeCount > 0 ? `🤝 ${tradeCount} trade${tradeCount > 1 ? 's' : ''}` : '';
+    document.getElementById('hudAllyCount').textContent = allyCount > 0 ? `🏛 ${allyCount} all${allyCount > 1 ? 'ies' : 'y'}` : '';
+  } else {
+    diploInfo.style.display = 'none';
+  }
+}
+
+// Draw trade routes on minimap
+function drawTradeRoutesOnMinimap() {
+  const mw = minimapCanvas.width;
+  const mh = minimapCanvas.height;
+  const tileW = mw / MAP_W;
+  const tileH = mh / MAP_H;
+  const phase = Date.now() * 0.002;
+
+  for (const civ of gameState.civs) {
+    if (civ.id === 0 || civ.eliminated) continue;
+    const rel = getDiploRelationship(0, civ.id);
+    if (rel.status !== 'trading' && rel.status !== 'allied') continue;
+
+    const playerCitadel = getCitadelPosition(0);
+    const otherCitadel = getCitadelPosition(civ.id);
+    if (!playerCitadel || !otherCitadel) continue;
+
+    const ax = playerCitadel.x * tileW + tileW / 2;
+    const ay = playerCitadel.y * tileH + tileH / 2;
+    const dx = otherCitadel.x * tileW + tileW / 2;
+    const dy = otherCitadel.y * tileH + tileH / 2;
+
+    // Golden dotted line
+    minimapCtx.strokeStyle = rel.status === 'allied' ? 'rgba(68,221,102,0.7)' : 'rgba(255,215,0,0.7)';
+    minimapCtx.lineWidth = 1.2;
+    minimapCtx.setLineDash([3, 3]);
+    minimapCtx.lineDashOffset = -phase * 3;
+    minimapCtx.beginPath();
+    minimapCtx.moveTo(ax, ay);
+    minimapCtx.lineTo(dx, dy);
+    minimapCtx.stroke();
+    minimapCtx.setLineDash([]);
+
+    // Small animated dot flowing along the trade route
+    const t = (Math.sin(phase + civ.id) * 0.5 + 0.5);
+    const dotX = ax + (dx - ax) * t;
+    const dotY = ay + (dy - ay) * t;
+    minimapCtx.fillStyle = '#FFD700';
+    minimapCtx.beginPath();
+    minimapCtx.arc(dotX, dotY, 1.5, 0, Math.PI * 2);
+    minimapCtx.fill();
+  }
+
+  // Also draw AI-to-AI trade routes if visible
+  for (let i = 1; i <= 3; i++) {
+    for (let j = i + 1; j <= 3; j++) {
+      if (gameState.civs[i].eliminated || gameState.civs[j].eliminated) continue;
+      const rel = getDiploRelationship(i, j);
+      if (rel.status !== 'trading' && rel.status !== 'allied') continue;
+
+      const c1 = getCitadelPosition(i);
+      const c2 = getCitadelPosition(j);
+      if (!c1 || !c2) continue;
+
+      const x1 = c1.x * tileW + tileW / 2;
+      const y1 = c1.y * tileH + tileH / 2;
+      const x2 = c2.x * tileW + tileW / 2;
+      const y2 = c2.y * tileH + tileH / 2;
+
+      minimapCtx.strokeStyle = 'rgba(255,215,0,0.3)';
+      minimapCtx.lineWidth = 0.8;
+      minimapCtx.setLineDash([2, 2]);
+      minimapCtx.lineDashOffset = -phase * 2;
+      minimapCtx.beginPath();
+      minimapCtx.moveTo(x1, y1);
+      minimapCtx.lineTo(x2, y2);
+      minimapCtx.stroke();
+      minimapCtx.setLineDash([]);
+    }
+  }
+}
+
+// Draw trade routes on main map (canvas) — called from render()
+function drawTradeRoutesOnMap(ctx, now) {
+  const phase = now * 0.001;
+
+  for (const civ of gameState.civs) {
+    if (civ.eliminated) continue;
+    for (const other of gameState.civs) {
+      if (other.id <= civ.id || other.eliminated) continue;
+      const rel = getDiploRelationship(civ.id, other.id);
+      if (rel.status !== 'trading' && rel.status !== 'allied') continue;
+
+      // Only draw if player is involved or can see both citadels
+      if (civ.id !== 0 && other.id !== 0) {
+        const c1 = getCitadelPosition(civ.id);
+        const c2 = getCitadelPosition(other.id);
+        if (!c1 || !c2) continue;
+        if (fogOfWarEnabled && getTileVisibility(c1.x, c1.y) < 2 && getTileVisibility(c2.x, c2.y) < 2) continue;
+      }
+
+      const c1 = getCitadelPosition(civ.id);
+      const c2 = getCitadelPosition(other.id);
+      if (!c1 || !c2) continue;
+
+      const iso1 = toIso(c1.x, c1.y);
+      const iso2 = toIso(c2.x, c2.y);
+      const sx1 = (iso1.x - camera.x / camera.zoom) * camera.zoom + canvas.width / 2;
+      const sy1 = (iso1.y - camera.y / camera.zoom) * camera.zoom + canvas.height / 2;
+      const sx2 = (iso2.x - camera.x / camera.zoom) * camera.zoom + canvas.width / 2;
+      const sy2 = (iso2.y - camera.y / camera.zoom) * camera.zoom + canvas.height / 2;
+
+      // Golden dotted line
+      const isAllied = rel.status === 'allied';
+      ctx.strokeStyle = isAllied ? 'rgba(68,221,102,0.35)' : 'rgba(255,215,0,0.3)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.lineDashOffset = -phase * 40;
+      ctx.beginPath();
+      ctx.moveTo(sx1, sy1);
+      ctx.lineTo(sx2, sy2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Animated coin icon flowing along route
+      const numCoins = 3;
+      for (let k = 0; k < numCoins; k++) {
+        const t = ((phase * 0.3 + k / numCoins) % 1);
+        const cx = sx1 + (sx2 - sx1) * t;
+        const cy = sy1 + (sy2 - sy1) * t;
+
+        ctx.save();
+        ctx.font = `${10 * camera.zoom}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.globalAlpha = 0.6 + Math.sin(phase * 3 + k) * 0.3;
+        ctx.fillText('₿', cx, cy);
+        ctx.restore();
+      }
+    }
+  }
+}
+
+// ============================================================
 // Init
 // ============================================================
 window.addEventListener('resize', resizeCanvas);
@@ -10192,6 +11298,20 @@ document.getElementById('importFileInput').addEventListener('change', handleImpo
 
 // Save button (top bar)
 document.getElementById('saveBtn').addEventListener('click', () => { saveGame(); });
+
+// Diplomacy panel
+document.getElementById('diplomacyBtn').addEventListener('click', toggleDiplomacyPanel);
+document.getElementById('diplomacyClose').addEventListener('click', closeDiplomacyPanel);
+document.getElementById('diplomacyOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('diplomacyOverlay')) closeDiplomacyPanel();
+});
+
+// War cost analysis panel
+document.getElementById('warCostConfirm').addEventListener('click', confirmWarFromCostPanel);
+document.getElementById('warCostCancel').addEventListener('click', closeWarCostPanel);
+document.getElementById('warCostOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('warCostOverlay')) closeWarCostPanel();
+});
 
 // Hash War panel
 document.getElementById('hashWarBtn').addEventListener('click', openHashWarPanel);
