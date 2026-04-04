@@ -4264,58 +4264,85 @@ function renderDustParticles() {
 function processAutoExplore(unit) {
   if (!unit.autoExplore || unit.type !== 'scout' || unit.movesLeft <= 0) return;
 
-  // Find nearest unexplored tile (fog of war hidden)
-  let bestTile = null;
-  let bestDist = Infinity;
-  const range = 20; // search radius
+  // Track last positions to avoid getting stuck (stored on unit)
+  if (!unit._exploreHistory) unit._exploreHistory = [];
 
-  for (let dy = -range; dy <= range; dy++) {
-    for (let dx = -range; dx <= range; dx++) {
-      const nx = unit.x + dx, ny = unit.y + dy;
-      if (nx < 0 || nx >= MAP_W || ny < 0 || ny >= MAP_H) continue;
-      const vis = getTileVisibility(nx, ny);
-      if (vis > 0) continue; // already explored
-      // Prefer tiles adjacent to explored areas
-      let adjExplored = false;
-      const dirs4 = [[0,-1],[1,0],[0,1],[-1,0]];
-      for (const [adx, ady] of dirs4) {
-        const ax = nx + adx, ay = ny + ady;
-        if (ax >= 0 && ax < MAP_W && ay >= 0 && ay < MAP_H && getTileVisibility(ax, ay) > 0) {
-          adjExplored = true;
-          break;
+  // Use all available moves this turn
+  while (unit.movesLeft > 0) {
+    const movRange = calculateMovementRange(unit);
+    if (!movRange || movRange.size <= 1) break; // stuck, only current tile
+
+    // Collect candidate targets: unexplored tiles we can see from reachable positions
+    let candidates = [];
+    for (const [key, cost] of movRange) {
+      if (key === `${unit.x},${unit.y}`) continue;
+      const [sx, sy] = key.split(',').map(Number);
+      if (getUnitAt(sx, sy)) continue; // don't step on other units
+
+      // Score this step: how many NEW hidden tiles would we reveal from here?
+      let hiddenNearby = 0;
+      const viewRange = 5; // scout view range
+      for (let dy = -viewRange; dy <= viewRange; dy++) {
+        for (let dx = -viewRange; dx <= viewRange; dx++) {
+          if (Math.abs(dx) + Math.abs(dy) > viewRange) continue;
+          const vx = sx + dx, vy = sy + dy;
+          if (vx >= 0 && vx < MAP_W && vy >= 0 && vy < MAP_H && getTileVisibility(vx, vy) === 0) {
+            hiddenNearby++;
+          }
         }
       }
-      const dist = Math.abs(dx) + Math.abs(dy);
-      const score = dist - (adjExplored ? 5 : 0); // prefer edge of explored
-      if (score < bestDist) {
-        bestDist = score;
-        bestTile = { x: nx, y: ny };
+
+      // Penalize recently visited tiles to prevent loops
+      let historyPenalty = 0;
+      for (const prev of unit._exploreHistory) {
+        if (prev.x === sx && prev.y === sy) historyPenalty += 20;
+      }
+
+      // Also prefer tiles further from citadel (explore outward)
+      const citadel = gameState.buildings.find(b => b.type === 'citadel' && b.owner === unit.owner);
+      const distFromHome = citadel ? Math.abs(sx - citadel.x) + Math.abs(sy - citadel.y) : 0;
+
+      const score = hiddenNearby * 3 + distFromHome * 0.5 - historyPenalty;
+      candidates.push({ x: sx, y: sy, cost, score, hiddenNearby });
+    }
+
+    // Sort by score descending
+    candidates.sort((a, b) => b.score - a.score);
+
+    // Pick the best candidate that actually reveals new tiles
+    let bestStep = candidates[0];
+    if (!bestStep || bestStep.score <= 0) {
+      // Nothing useful nearby — try to move toward the nearest hidden tile on the map
+      let nearestHidden = null, nearestDist = Infinity;
+      const searchRange = 40;
+      for (let dy = -searchRange; dy <= searchRange; dy += 2) {
+        for (let dx = -searchRange; dx <= searchRange; dx += 2) {
+          const nx = unit.x + dx, ny = unit.y + dy;
+          if (nx >= 0 && nx < MAP_W && ny >= 0 && ny < MAP_H && getTileVisibility(nx, ny) === 0) {
+            const d = Math.abs(dx) + Math.abs(dy);
+            if (d < nearestDist) { nearestDist = d; nearestHidden = { x: nx, y: ny }; }
+          }
+        }
+      }
+      if (nearestHidden) {
+        // Move toward it — pick the reachable step closest to target
+        let closestStep = null, closestDist = Infinity;
+        for (const c of candidates) {
+          const d = Math.abs(c.x - nearestHidden.x) + Math.abs(c.y - nearestHidden.y);
+          const histPen = unit._exploreHistory.some(p => p.x === c.x && p.y === c.y) ? 10 : 0;
+          if (d + histPen < closestDist) { closestDist = d + histPen; closestStep = c; }
+        }
+        bestStep = closestStep;
       }
     }
-  }
 
-  if (!bestTile) {
-    unit.autoExplore = false; // nothing left to explore
-    return;
-  }
-
-  // Move one step toward the target using the movement range
-  const movRange = calculateMovementRange(unit);
-  let bestStep = null;
-  let bestStepDist = Infinity;
-  for (const [key, cost] of movRange) {
-    if (key === `${unit.x},${unit.y}`) continue;
-    const [sx, sy] = key.split(',').map(Number);
-    // Don't step on friendly units
-    if (getUnitAt(sx, sy)) continue;
-    const d = Math.abs(sx - bestTile.x) + Math.abs(sy - bestTile.y);
-    if (d < bestStepDist) {
-      bestStepDist = d;
-      bestStep = { x: sx, y: sy, cost };
+    if (!bestStep) {
+      unit.autoExplore = false; // truly nothing left
+      showToast('🔭 Scout has nothing left to explore!', 'info');
+      break;
     }
-  }
 
-  if (bestStep) {
+    // Move
     startUnitAnimation(unit, unit.x, unit.y, bestStep.x, bestStep.y);
     if (bestStep.x > unit.x) unit.facing = 'right';
     else if (bestStep.x < unit.x) unit.facing = 'left';
@@ -4324,6 +4351,10 @@ function processAutoExplore(unit) {
     unit.movesLeft = Math.max(0, unit.movesLeft - bestStep.cost);
     addDustParticles(bestStep.x, bestStep.y);
     recalculateVisibility();
+
+    // Track history (keep last 10 positions)
+    unit._exploreHistory.push({ x: bestStep.x, y: bestStep.y });
+    if (unit._exploreHistory.length > 10) unit._exploreHistory.shift();
   }
 }
 
